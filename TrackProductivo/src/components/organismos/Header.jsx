@@ -1,18 +1,26 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Menu, CircleUserRound } from "lucide-react-native";
+import { useNavigation } from "@react-navigation/native";
+import { usePersonas } from "../../Context/ContextPersonas";
 
 const Header = ({ title, toggleMenu }) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.header}>
       <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-        <Icon name="bars" size={30} color="black" />
+        <Menu name="bars" size={30} color="#0d324c" />
       </TouchableOpacity>
-      {/* como vamos 
-       */}
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
         {title}
       </Text>
+      <TouchableOpacity
+          onPress={() => navigation.navigate("perfil")}
+        >
+          <View >
+            <CircleUserRound name="user" size={30} color="#0d324c"  />
+          </View>
+        </TouchableOpacity>
     </View>
   );
 };
@@ -30,7 +38,7 @@ const styles = StyleSheet.create({
     marginRight: 16, 
   },
   title: {
-    color: 'black',
+    color: '#0d324c',
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1, 

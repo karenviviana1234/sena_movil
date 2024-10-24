@@ -25,6 +25,8 @@
     "expo-document-picker": "^12.0.2",
     "expo-font": "^12.0.10",
     "link": "^2.1.1",
+    "lucide-react": "^0.453.0",
+    "lucide-react-native": "^0.453.0",
     "moment": "^2.30.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -21,7 +21,7 @@ const App = () => {
   return (
     <GlobalProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName='login'>
+        <Stack.Navigator initialRouteName='login' screenOptions={{ headerShown: false }}>
 {/*           <Stack.Screen name="landing_page" component={Landing_page} /> */}
           <Stack.Screen name="login" component={Login} />
           <Stack.Screen 

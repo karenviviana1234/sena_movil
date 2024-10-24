@@ -12,6 +12,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import { usePersonas } from "../../Context/ContextPersonas";
+import { House, X, FolderSearch2, LogOut, Users } from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -65,7 +66,7 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
         style={[styles.menu, { transform: [{ translateX: menuPosition }] }]}
       >
         <TouchableOpacity style={styles.closeIcon} onPress={toggleMenu}>
-          <Icon name="close" size={24} color="black" />
+          <X name="close" size={24} color="#0d324c" />
         </TouchableOpacity>
         <View style={styles.logoContainer}>
           <Image
@@ -81,10 +82,10 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
             onPress={() => navigation.navigate("principal")}
           >
             <View style={styles.menuItemContent}>
-              <Icon
+              <House
                 name="book"
                 size={20}
-                color="black"
+                color="#0d324c"
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Inicio</Text>
@@ -129,10 +130,10 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
             onPress={() => navigation.navigate("aprendices")}
           >
             <View style={styles.menuItemContent}>
-              <Icon
+              <Users
                 name="users"
                 size={20}
-                color="black"
+                color="#0d324c"
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Aprendices</Text>
@@ -143,10 +144,10 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
           <>
             <TouchableOpacity style={styles.menuItem}         onPress={() => navigation.navigate("seguimiento")} /* onPress={toggleSubMenu} */>
               <View style={styles.menuItemContent}>
-                <Icon
+                <FolderSearch2
                   name="dashboard"
                   size={20}
-                  color="black"
+                  color="#0d324c"
                   style={styles.menuIcon}
                 />
                 <Text style={styles.menuText}>Seguimientos</Text>
@@ -210,22 +211,14 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
             </View>
           </TouchableOpacity>
         )} */}
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => navigation.navigate("perfil")}
-        >
-          <View style={styles.menuItemContent}>
-            <Icon name="user" size={20} color="black" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Perfil</Text>
-          </View>
-        </TouchableOpacity>
+       
 
         <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
           <View style={styles.menuItemContent}>
-            <Icon
+            <LogOut
               name="sign-out"
               size={20}
-              color="black"
+              color="#0d324c"
               style={styles.menuIcon}
             />
             <Text style={styles.menuText}>Cerrar sesion</Text>
@@ -286,7 +279,7 @@ const styles = StyleSheet.create({
     marginRight: 10, // Espacio entre el ícono y el texto
   },
   menuText: {
-    color: "black",
+    color: "#0d324c",
     fontSize: 18, // Tamaño del texto
     paddingVertical: 10, // Ajusta el padding para que los elementos sean más compactos
     marginRight: 10,
