@@ -41,6 +41,7 @@ const Seguimientos = () => {
     const handleOpenModal = async (id_seguimiento, componentName) => {
         try {
             await AsyncStorage.setItem('idSeguimiento', id_seguimiento.toString());
+            setSelectedSeguimientoId(id_seguimiento); // Asignar explícitamente el ID de seguimiento
             const data = await getSeguimiento(id_seguimiento);
             setSelectedComponent(componentName);
             setSeguimientoData(data);
@@ -49,46 +50,70 @@ const Seguimientos = () => {
             setError(`Error al obtener el seguimiento: ${error.message}`);
         }
     };
+    
 
     const handleCloseModal = async () => {
         setModalVisible(false);
         setSelectedComponent(null);
         setSeguimientoData(null);
-        
-        // Limpiar el AsyncStorage del idSeguimiento al cerrar el modal
+        setSelectedSeguimientoId(null); // Limpiar el ID de seguimiento
         await AsyncStorage.removeItem('idSeguimiento');
-        
-        // Asegúrate de que el ID de seguimiento seleccionado se borre
-        setSelectedSeguimientoId(null);
     };
     
+    
 
-    const renderSeguimientoButtons = (item) => (
-        <View style={styles.buttonContainer}>
-            {["id_seguimiento1", "id_seguimiento2", "id_seguimiento3"].map((seguimientoKey, index) => (
-                <TouchableOpacity
-                    key={index}
-                    style={styles.button}
-                    onPress={() => handleOpenModal(item[seguimientoKey], `ComponentSeguimiento${index + 1}`)}
-                    accessible={true}
-                    accessibilityLabel={`Ver seguimiento ${index + 1} para ${item.nombres}`}
-                >
-                    <Text style={styles.buttonText}>{index + 1}</Text>
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
-
+    const renderSeguimientoButtons = (item) => {
+        const seguimientoFechas = [item.seguimiento1, item.seguimiento2, item.seguimiento3];
+        const estados = [item.estado1, item.estado2, item.estado3];
+    
+        const formatDate = (date) => {
+            if (!date) return "Sin fecha";
+            const formattedDate = new Date(date);
+            return `${formattedDate.getDate().toString().padStart(2, '0')}-${(formattedDate.getMonth() + 1).toString().padStart(2, '0')}-${formattedDate.getFullYear()}`;
+        };
+    
+        const getButtonBackgroundColor = (estado) => {
+            switch (estado) {
+                case "solicitud":
+                    return "#FFA000"; // Naranja
+                case "aprobado":
+                    return "#4CAF50"; // Verde
+                case "noaprobado":
+                    return "#F44336"; // Rojo
+                default:
+                    return "#BDBDBD"; // Color gris para estados no definidos
+            }
+        };
+    
+        return (
+            <View style={styles.buttonContainer}>
+                {["id_seguimiento1", "id_seguimiento2", "id_seguimiento3"].map((seguimientoKey, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        style={[styles.button, { backgroundColor: getButtonBackgroundColor(estados[index]) }]}
+                        onPress={() => handleOpenModal(item[seguimientoKey], `ComponentSeguimiento${index + 1}`)}
+                        accessible={true}
+                        accessibilityLabel={`Ver seguimiento ${index + 1} para ${item.nombres}`}
+                    >
+                        <Text style={styles.buttonText}>
+                            {formatDate(seguimientoFechas[index])}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+        );
+    };
+    
+    
+    
     const renderItem = ({ item }) => (
         <View style={styles.item}>
             <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-            <Text style={styles.itemText}>Razón Social: {item.razon_social}</Text>
+            <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
             <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
-            <Text style={styles.itemText}>Sigla: {item.sigla}</Text>
-            <Text style={styles.itemText}>Seguimiento 1: {item.seguimiento1}</Text>
-            <Text style={styles.itemText}>Seguimiento 2: {item.seguimiento2}</Text>
-            <Text style={styles.itemText}>Seguimiento 3: {item.seguimiento3}</Text>
-            <Text style={styles.itemText}>Porcentaje: {item.porcentaje}</Text>
+            <Text style={styles.itemText}>Programa: {item.sigla}</Text>
+            <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+            <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
             {renderSeguimientoButtons(item)}
         </View>
     );
@@ -130,7 +155,7 @@ const Seguimientos = () => {
                             Detalles del Seguimiento {selectedComponent?.slice(-1)}
                         </Text>
                         <Text>Nombre: {seguimientoData.nombres}</Text>
-                        <Text>Razón Social: {seguimientoData.razon_social}</Text>
+                        <Text>Empresa: {seguimientoData.razon_social}</Text>
                         <Text>Identificación: {seguimientoData.identificacion}</Text>
                         <Text>Sigla: {seguimientoData.sigla}</Text>
                     </View>
@@ -155,13 +180,13 @@ const Seguimientos = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         padding: 16,
+        backgroundColor: "#f6fbff",
+        height: "115%"
     },
     searchInput: {
         height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
+        backgroundColor: "#EDEDED",
         paddingHorizontal: 10,
         marginBottom: 10,
         borderRadius: 5,
@@ -169,8 +194,12 @@ const styles = StyleSheet.create({
     item: {
         padding: 16,
         marginVertical: 8,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: 'white',
         borderRadius: 8,
+    },
+    label: {
+        fontSize: 18,
+        fontWeight: "bold"
     },
     itemText: {
         fontSize: 16,
@@ -182,9 +211,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     button: {
-        backgroundColor: '#FFA000',
-        padding: 12,
-        borderRadius: 5,
+        paddingVertical: 12,
+        borderRadius: 10,
         flex: 1,
         marginHorizontal: 5,
         alignItems: 'center',
@@ -218,3 +246,4 @@ const styles = StyleSheet.create({
 });
 
     export default Seguimientos;
+

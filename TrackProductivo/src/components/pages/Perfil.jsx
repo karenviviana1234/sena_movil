@@ -58,15 +58,15 @@ const Perfil = () => {
             </View>
             <View style={styles.infoContainer}>
               <Icon name="id-card" size={24} color="black" />
-              <Text style={styles.text}>{userData.identificacion}</Text>
+              <Text style={styles.text}>Identificacion: {userData.identificacion}</Text>
             </View>
             <View style={styles.infoContainer}>
               <Icon name="phone" size={24} color="black" />
-              <Text style={styles.text}>{userData.telefono}</Text>
+              <Text style={styles.text}>Telefono: {userData.telefono}</Text>
             </View>
             <View style={styles.infoContainer}>
               <Icon name="envelope" size={24} color="black" />
-              <Text style={styles.text}>{userData.correo}</Text>
+              <Text style={styles.text}>Correo: {userData.correo}</Text>
             </View>
             <View style={styles.infoContainer}>
               <Icon name="check-circle" size={24} color="black" />
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   containerDos: {
     backgroundColor: "white",
-    width: 300,
+    width: 330,
     borderRadius: 15
   },
   title: {
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
     fontSize: 22,
-    marginLeft: 30,
+    marginLeft: 10,
     marginTop: 20
   },
   infoContainer: {
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 30,
-    backgroundColor: "orange",
+    backgroundColor: "#74cd62",
     width: 200,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 50,
   },
   buttonText: {
     color: "white",
