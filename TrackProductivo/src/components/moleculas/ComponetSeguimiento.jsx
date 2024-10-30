@@ -43,7 +43,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
       <Text style={styles.title}>Seguimiento {numero}</Text>
       
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Bitácoras</Text>
+        <Text>Bitácoras</Text>
         {seguimientoData.bitacoras.map((bitacora) => (
           <View key={bitacora.id} style={styles.documentItem}>
             <Text style={styles.documentTitle}>{bitacora.titulo}</Text>
@@ -59,7 +59,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Acta</Text>
+        <Text >Acta</Text>
         <View style={styles.documentItem}>
           <Text style={styles.documentTitle}>{seguimientoData.acta.titulo}</Text>
           <Text>Estado: {seguimientoData.acta.estado}</Text>
@@ -88,11 +88,7 @@ const styles = StyleSheet.create({
   section: {
       marginBottom: 24,
   },
-  sectionTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 12,
-  },
+
   documentItem: {
       backgroundColor: '#f0f0f0',
       padding: 16,

@@ -5,6 +5,7 @@ import axiosClient from '../../axiosClient';
 import ModalBitacoras from '../moleculas/Modal_Bitacoras';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SeguimientosContext from '../../Context/ContextSeguimiento';
+import { FileUp } from "lucide-react-native";
 
 const Bitacoras = () => {
   const [bitacoras, setBitacoras] = useState([]);
@@ -56,7 +57,7 @@ const Bitacoras = () => {
 
   const renderBitacora = ({ item }) => {
     const formattedDate = new Date(item.fecha).toLocaleDateString();
-    return (
+    /* return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemTitle}>Fecha: {formattedDate}</Text>
         <Text style={styles.itemSubtitle}>Bitácora: {item.bitacora}</Text>
@@ -67,8 +68,12 @@ const Bitacoras = () => {
             <Text style={styles.itemLink}>Ver PDF</Text>
           </TouchableOpacity>
         )}
+        <TouchableOpacity>
+              <FileUp name="download" size={20} color="gray" />
+              <Text style={styles.buttonText}>Cargar Bitacora</Text>
+            </TouchableOpacity>
       </View>
-    );
+    ); */
   };
 
   const renderSectionHeader = ({ section }) => (
@@ -89,7 +94,7 @@ const Bitacoras = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleOpenModal}>
             <Icon name="upload" size={20} color="#fff" style={styles.icon} />
-            <Text style={styles.buttonText}>Subir Bitácora</Text>
+            <Text style={styles.buttonText}>Subir Bitacoras</Text>
           </TouchableOpacity>
         </View>
         {loading ? (
