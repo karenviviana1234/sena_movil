@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         backgroundColor: "#f6fbff",
-        height: "115%"
+        height: "110%"
     },
     searchInput: {
         height: 40,
