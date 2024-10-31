@@ -247,5 +247,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
+/* como vas */
 export default Seguimientos;
