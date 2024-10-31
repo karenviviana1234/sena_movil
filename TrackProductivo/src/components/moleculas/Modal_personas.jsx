@@ -19,7 +19,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
   const [telefono, setTelefono] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [municipiosList, setMunicipiosList] = useState([]);
-  const { id_persona } = usePersonas();
+  const { id_persona , setUserData} = usePersonas();
 
   // Obtener la lista de municipios al cargar el componente
   useEffect(() => {
@@ -51,7 +51,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       nombres: nombres || userData.nombres,
       correo: correo || userData.correo,
       telefono: telefono || userData.telefono,
-      municipio: Number(municipio) || Number(userData.id_municipio), // Convertir el municipio a número
+      municipio: Number(municipio) || Number(userData.id_municipio),
     };
   
     try {
@@ -60,7 +60,10 @@ const PersonasModal = ({ visible, onClose, userData }) => {
         updatedData
       );
       Alert.alert('Perfil Actualizado con éxito');
-      onClose();
+  
+      // Actualiza el contexto para reflejar los cambios
+      setUserData(response.data); // Asume que `response.data` contiene los datos actualizados del usuario
+      onClose(); // Cierra el modal
     } catch (error) {
       console.error(
         "Error al actualizar los datos del usuario:",
@@ -68,6 +71,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       );
     }
   };
+  
   
 
   return (

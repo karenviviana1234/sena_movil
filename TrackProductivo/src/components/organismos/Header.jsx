@@ -1,18 +1,34 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Menu, CircleUserRound } from "lucide-react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const Header = ({ title, toggleMenu }) => {
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  // Verificar la pantalla actual y ajustar la ruta de navegación
+  const handleProfileNavigation = () => {
+    if (route.name === "perfil") {
+      navigation.navigate("principal"); // Navega a la página principal si estás en el perfil
+    } else {
+      navigation.navigate("perfil"); // Navega al perfil si estás en cualquier otra pantalla
+    }
+  };
+
   return (
     <View style={styles.header}>
       <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-        <Icon name="bars" size={30} color="black" />
+        <Menu name="bars" size={30} color="#0d324c" />
       </TouchableOpacity>
-      {/* como vamos 
-       */}
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
         {title}
       </Text>
+      <TouchableOpacity onPress={handleProfileNavigation}>
+        <View>
+          <CircleUserRound name="user" size={30} color="#0d324c" />
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -30,7 +46,7 @@ const styles = StyleSheet.create({
     marginRight: 16, 
   },
   title: {
-    color: 'black',
+    color: '#0d324c',
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1, 

@@ -5,14 +5,14 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
-import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react-native";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -23,6 +23,8 @@ const Login = () => {
   const navigation = useNavigation();
 
   const { SetRol, SetId_persona } = usePersonas();
+
+
 
   const handleLogin = async () => {
     try {
@@ -59,7 +61,7 @@ const Login = () => {
               "Los roles permitidos son Seguimiento, Instructor, y Aprendiz."
             );
           }
-                   
+
         }
       }
     } catch (error) {
@@ -79,90 +81,102 @@ const Login = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.textTitle}>TrackProductivo</Text>
-      <Image
-        source={require("../../../public/logoTic.png")}
-        style={styles.logo}
-        resizeMode="cover"
-      />
-      <TextInput
-        style={[styles.input, isFocusedEmail && styles.inputFocused]}
-        onFocus={() => setIsFocusedEmail(true)}
-        onBlur={() => setIsFocusedEmail(false)}
-        placeholder="Correo"
-        placeholderTextColor="black"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <View
-        style={[
-          styles.input,
-          styles.passwordContainer,
-          isFocusedPassword && styles.inputFocused,
-        ]}
-      >
-        <TextInput
-          style={styles.passwordInput}
-          onFocus={() => setIsFocusedPassword(true)}
-          onBlur={() => setIsFocusedPassword(false)}
-          placeholder="Contraseña"
-          placeholderTextColor="black"
-          secureTextEntry={!isPasswordVisible}
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity
-          style={styles.eyeIcon}
-          onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-        >
-          <Icon
-            name={isPasswordVisible ? "eye-slash" : "eye"}
-            size={24}
-            color="gray"
+    <ImageBackground
+      source={require('../../../public/Mobile.png')}
+      style={styles.backgroundImage}
+    >
+      <View style={styles.container}>
+        <Text style={styles.textTitle}>Bienvenid@ a TrackProductivo</Text>
+        <Text style={styles.text}>Ingrese a su cuenta</Text>
+        <View style={styles.inputContainer}>
+          <Mail size={24} color="green" style={styles.icon} />
+          <TextInput
+            style={[styles.input, isFocusedEmail && styles.inputFocused]}
+            onFocus={() => setIsFocusedEmail(true)}
+            onBlur={() => setIsFocusedEmail(false)}
+            placeholder="Correo"
+
+            placeholderTextColor="#219162"
+            value={email}
+            onChangeText={setEmail}
           />
+        </View>
+        <View
+          style={[
+            styles.inputContainer,
+            styles.passwordContainer,
+            isFocusedPassword && styles.inputFocused,
+          ]}
+        >
+          <Lock size={24} color="green" style={styles.icon} />
+          <TextInput
+  style={styles.passwordInput}
+  onFocus={() => setIsFocusedPassword(true)}
+  onBlur={() => setIsFocusedPassword(false)}
+  placeholder="Contraseña"
+  placeholderTextColor="#219162"
+  value={password}
+  onChangeText={setPassword}
+/>
+
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+          >
+            {isPasswordVisible ? (
+              <EyeOff size={24} color="green" />
+            ) : (
+              <Eye size={24} color="green" />
+            )}
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
+          <Text style={styles.button}>Ingresar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={styles.textOlvide}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
-        <Text style={styles.button}>Ingresar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleForgotPassword}>
-        <Text style={styles.textOlvide}>¿Olvidaste tu contraseña?</Text>
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover", // Asegura que la imagen cubra toda la pantalla
+  },
   container: {
-    height: "100%",
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    paddingHorizontal: 20,
   },
-  textTitle: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "black",
+
+  text: {
+    fontSize: 17,
+    color: "gray",
+    marginTop: 5,
     marginBottom: 20,
   },
-  logo: {
-    width: 200,
-    height: 140,
+  textTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#0d324c",
+    marginTop: 250,
   },
-  input: {
+  inputContainer: {
     width: 300,
     margin: 10,
-    borderWidth: 2,
-    borderColor: "gray",
     borderRadius: 10,
-    fontSize: 18,
-    height: 60,
+    height: 50,
     paddingHorizontal: 10,
-    color: "black",
+    backgroundColor: "#ECFFE1",
+    paddingLeft: 50,
+    color:'black'
   },
   inputFocused: {
-    borderColor: "orange",
+    borderColor: "green",
   },
   passwordContainer: {
     flexDirection: "row",
@@ -173,32 +187,40 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     height: "100%",
-    fontSize: 18,
+    fontSize: 14,
     color: "black",
     paddingRight: 40,
+  },
+  icon: {
+    position: "absolute",
+    left: 15,
+    top: 12,
   },
   eyeIcon: {
     position: "absolute",
     right: 15,
   },
+  input: {
+    color: 'black'
+  },
   buttonContainer: {
-    height: 50,
-    width: 180,
+    height: 48,
+    width: 290,
     justifyContent: "center",
-    backgroundColor: "#0c8652",
+    backgroundColor: "#74cd62",
     alignItems: "center",
     marginTop: 20,
-    borderRadius: 10,
+    borderRadius: 50,
   },
   button: {
-    fontSize: 28,
+    fontSize: 20,
     color: "white",
     fontWeight: "600",
   },
   textOlvide: {
     fontSize: 16,
-    marginTop: 30,
-    color: "black",
+    marginTop: 20,
+    color: "gray",
     textDecorationLine: "underline",
   },
 });

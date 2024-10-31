@@ -50,9 +50,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
             <Text>Estado: {bitacora.estado}</Text>
             <Text>Fecha: {bitacora.fecha}</Text>
             <View style={styles.actionContainer}>
-              <TouchableOpacity onPress={() => handleDocumentAction(bitacora, 'descargar')}>
-                <Icon name="download" size={20} color="#2196F3" />
-              </TouchableOpacity>
+              
             </View>
           </View>
         ))}
@@ -64,11 +62,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
           <Text style={styles.documentTitle}>{seguimientoData.acta.titulo}</Text>
           <Text>Estado: {seguimientoData.acta.estado}</Text>
           <Text>Fecha: {seguimientoData.acta.fecha}</Text>
-          <View style={styles.actionContainer}>
-            <TouchableOpacity onPress={() => handleDocumentAction(seguimientoData.acta, 'descargar')}>
-              <Icon name="download" size={20} color="#2196F3" />
-            </TouchableOpacity>
-          </View>
+          
         </View>
       </View>
     </ScrollView>
