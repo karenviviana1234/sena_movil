@@ -6,9 +6,11 @@ import ActaSeguimiento from '../organismos/ActaSeguimiento.jsx';
 import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
 import axiosClient from '../../axiosClient.js';
 import ModalBitacoras from './Modal_Bitacoras.jsx';
-import { Download, X, XCircle, FileUp, SendHorizontal } from "lucide-react-native";
+import { Download, X, FileUp, SendHorizontal } from "lucide-react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
+import RNFetchBlob from 'rn-fetch-blob';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
   const { getSeguimiento } = useContext(SeguimientosContext);
@@ -70,6 +72,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
       }
     }
   };
+
   const handleSubmitBitacora = useCallback(async () => {
     if (!bitacoraPdf) {
       Alert.alert("Error", "Debes cargar un archivo PDF para poder enviarlo");
@@ -110,7 +113,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
         Alert.alert("Error", `Error al enviar la Bitacora: ${response.data.message}`);
       }
     } catch (error) {
-      // Muestra el error completo de Axios para diagnosticar el problema.
       console.error("Error del servidor:", error.response ? error.response.data : error.message);
       Alert.alert("Error del servidor", error.message);
     }
@@ -146,6 +148,56 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
 
   const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
 
+  const requestStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Permiso de almacenamiento",
+          message: "La aplicación necesita acceso al almacenamiento para descargar archivos.",
+          buttonNeutral: "Preguntar después",
+          buttonNegative: "Cancelar",
+          buttonPositive: "Aceptar"
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      Alert.alert("Permiso denegado", "No se concedieron los permisos necesarios.");
+      return false;
+    }
+  };
+
+  const Ip = '192.168.0.107';
+
+  const downloadFile = async (id_bitacora) => {
+    try {
+      const granted = await requestStoragePermission();
+      if (!granted) return;
+
+      const { config, fs } = RNFetchBlob;
+      let DownloadDir = fs.dirs.DownloadDir;
+      const baseUrl = "http://192.168.0.107:3000";
+
+      config({
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: `${DownloadDir}/bitacora_${id_bitacora}.pdf`,
+          description: 'Descargando archivo...',
+        }
+      })
+        .fetch('GET', `${baseUrl}/bitacoras/download/${id_bitacora}`)
+        .then((res) => {
+          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
+        })
+        .catch((error) => {
+          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Modal
       transparent={true}
@@ -156,7 +208,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <X name="download" size={24} color="#0d324c" />
+            <X size={24} color="#0d324c" />
           </TouchableOpacity>
           <ScrollView style={styles.contentContainer}>
             <Text style={styles.title}>Seguimiento {idSeguimiento}</Text>
@@ -179,38 +231,45 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                           <Icon name={icon} size={20} color={color} />
                           <Text style={[styles.estadoText, { color }]}>{bitacora.estado}</Text>
                         </View>
+                        
                       </View>
                       <Text style={styles.label}>{bitacora.pdf}</Text>
                       <View style={styles.containerPdf}>
+                      {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
+                        <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
+                      )}
                         <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
-                          <FileUp name="download" size={20} color="gray" />
+                          <FileUp size={20} color="gray" />
                           <Text style={styles.buttonText}>Cargar Pdf</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleSubmitBitacora}>
-                          <SendHorizontal name="download" size={24} color="green" />
+                          <SendHorizontal size={24} color="green" />
                         </TouchableOpacity>
-                          <TouchableOpacity>
-                            <Download name="download" size={24} color="#0d324c" />
-                          </TouchableOpacity>
+                        <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
+                          <Download size={24} color="#0d324c" />
+                        </TouchableOpacity>
                       </View>
+
+                      {/* Mostrar el nombre del archivo PDF cargado */}
+                     
+                      
                       <Text style={styles.labelB}>{bitacora.instructor}</Text>
                       <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
                     </View>
                   );
                 })
               ) : (
-                <Text style={styles.noBitacorasText}>No hay bitácoras disponibles.</Text>
+                <Text style={styles.errorText}>No hay bitácoras disponibles</Text>
               )}
             </View>
           </ScrollView>
         </View>
+        <ModalBitacoras
+          visible={modalVisible}
+          onClose={handleCloseModal}
+          id_seguimiento={id_seguimiento}
+        />
       </View>
-
-      <ModalBitacoras
-        visible={modalVisible}
-        onClose={handleCloseModal}
-        idSeguimiento={idSeguimiento}
-      />
     </Modal>
   );
 };
@@ -228,6 +287,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     maxHeight: '80%',
+  },
+  fileName: {
+    position: 'absolute', 
+    bottom: 55, 
+    fontSize: 17, 
+    color: 'gray', 
+    padding: 5,
+
   },
   closeButton: {
     position: 'absolute',
