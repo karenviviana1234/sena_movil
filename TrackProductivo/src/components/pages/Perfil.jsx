@@ -122,9 +122,9 @@ const styles = StyleSheet.create({
     borderRadius: 15
   },
   text: {
-    color: "black",
     fontSize: 20,
     marginLeft: 10,
+    color: "black",
   },
   textName: {
     color: "black",
