@@ -1,21 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Menu, CircleUserRound } from "lucide-react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { usePersonas } from "../../Context/ContextPersonas";
 
 const Header = ({ title, toggleMenu }) => {
   const navigation = useNavigation();
-  const route = useRoute();
-
-  // Verificar la pantalla actual y ajustar la ruta de navegación
-  const handleProfileNavigation = () => {
-    if (route.name === "perfil") {
-      navigation.navigate("principal"); // Navega a la página principal si estás en el perfil
-    } else {
-      navigation.navigate("perfil"); // Navega al perfil si estás en cualquier otra pantalla
-    }
-  };
-
   return (
     <View style={styles.header}>
       <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
@@ -24,11 +14,13 @@ const Header = ({ title, toggleMenu }) => {
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
         {title}
       </Text>
-      <TouchableOpacity onPress={handleProfileNavigation}>
-        <View>
-          <CircleUserRound name="user" size={30} color="#0d324c" />
-        </View>
-      </TouchableOpacity>
+      <TouchableOpacity
+          onPress={() => navigation.navigate("perfil")}
+        >
+          <View >
+            <CircleUserRound name="user" size={30} color="#0d324c"  />
+          </View>
+        </TouchableOpacity>
     </View>
   );
 };
