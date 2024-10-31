@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 26,
-    color: "green",
+    color: "orange",
     fontWeight: "bold",
     marginBottom: 15,
   },
@@ -176,20 +176,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   input: {
-    backgroundColor: "#EDEDED",
+    color: "black",
     height: 50,
     width: "100%",
-    borderRadius: 15,
+    borderColor: "orange",
+    borderWidth: 2,
+    borderRadius: 10,
     marginBottom: 15,
     fontSize: 18,
     paddingHorizontal: 10,
   },
   pickerContainer: {
     width: "100%",
-    backgroundColor: "#EDEDED",
+    borderWidth: 2,
+    borderColor: "orange",
     borderRadius: 10,
     marginBottom: 15,
-    height: 50
   },
   buttonContainer: {
     flexDirection: "row",

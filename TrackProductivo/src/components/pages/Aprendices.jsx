@@ -70,7 +70,7 @@ const Aprendices = (onClose) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 25,
+    padding: 20,
   },
   itemContainer: {
     marginBottom: 20,

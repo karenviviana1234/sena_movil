@@ -1,10 +1,19 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
-import axiosClient from '../../axiosClient';
-import AsyncStorage from '@react-native-async-storage/async-storage'; 
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import RNFS from 'react-native-fs';
+import { Buffer } from "buffer"; // Importar Buffer desde la biblioteca 'buffer'
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import DocumentPicker from "react-native-document-picker";
+import axiosClient from "../../axiosClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import RNFS from "react-native-fs";
+import RNFetchBlob from "rn-fetch-blob";
+import { PermissionsAndroid, Platform } from "react-native";
+import {
+  Download,
+  CircleMinus,
+  SendHorizontal,
+  FileUp,
+} from "lucide-react-native";
 
 const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
   const [seguimientoPdf, setSeguimientoPdf] = useState(null);
@@ -18,6 +27,29 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     1: 1,
     2: 2,
     3: 3,
+  };
+
+  const requestStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Permiso de almacenamiento",
+          message:
+            "La aplicación necesita acceso al almacenamiento para descargar archivos.",
+          buttonNeutral: "Preguntar después",
+          buttonNegative: "Cancelar",
+          buttonPositive: "Aceptar",
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      Alert.alert(
+        "Permiso denegado",
+        "No se concedieron los permisos necesarios."
+      );
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -140,23 +172,35 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 
   const downloadFile = async () => {
     try {
-      const response = await axiosClient.get(`/seguimientos/descargarPdf/${id_seguimiento}`, {
-        responseType: 'blob',
-      });
-  
-      if (response.status === 200) {
-        const pdfFileName = `archivo-${id_seguimiento}.pdf`; // O usa el nombre que necesites
-        const path = `${RNFS.DocumentDirectoryPath}/${pdfFileName}`;
-        
-        // Guardar el archivo
-        await RNFS.writeFile(path, response.data, 'base64'); // Asegúrate de que la respuesta sea base64
-        Alert.alert("Éxito", "Archivo descargado correctamente.");
-        
-        // O puedes usar Linking para abrir el archivo
-        // Linking.openURL(path); // Si quieres abrir el archivo después de descargarlo
-      } else {
-        Alert.alert("Error", "No se pudo descargar el archivo.");
-      }
+      const granted = await requestStoragePermission();
+      if (!granted) return;
+
+      const { config, fs } = RNFetchBlob;
+      let DownloadDir = fs.dirs.DownloadDir;
+      const Ip = "192.168.100.105";
+      const baseUrl = `http://${Ip}:3000`; // Asegúrate de reemplazar esto con la url correcta
+
+      config({
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: `${DownloadDir}/acta_seguimiento_${id_seguimiento}.pdf`,
+          description: "Descargando archivo...",
+        },
+      })
+        .fetch("GET", `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
+        .then((res) => {
+          Alert.alert(
+            "Descarga completa",
+            "El archivo se ha descargado correctamente."
+          );
+        })
+        .catch((error) => {
+          Alert.alert(
+            "Error de descarga",
+            "No se pudo descargar el archivo: " + error.message
+          );
+        });
     } catch (error) {
       console.error(error);
     }
@@ -186,37 +230,52 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Acta:</Text>
       <View style={styles.card}>
-        <Text style={styles.subtitle}>
-          Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
-        </Text>
+        {estado && (
+          <View style={styles.Container}>
+            <Text style={styles.subtitle}>
+              Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
+            </Text>
+            <View style={styles.estadoC}>
+              <Icon name={icon} size={20} color={color} />
+              <Text style={[styles.estadoText, { color }]}>{estado}</Text>
+            </View>
+          </View>
+        )}
 
         {pdfName && <Text style={styles.pdfName}>{pdfName}</Text>}
 
         <View style={styles.buttonContainer}>
-          {estado !== 'aprobado' && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
-            <TouchableOpacity style={styles.button} onPress={handleActaPdfSubmit}>
-              <Text style={styles.buttonText}>Subir PDF</Text>
-            </TouchableOpacity>
-          )}
-          {estado !== 'aprobado' && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
-            <TouchableOpacity style={styles.button} onPress={handleSubmitActa}>
-              <Text style={styles.buttonText}>Enviar</Text>
-            </TouchableOpacity>
-          )}
-          {estado !== 'aprobado' && (userRole === 'Aprendiz') && (
-            <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
-              <Text style={styles.buttonText}>Descargar</Text>
-            </TouchableOpacity>
-          )}
+          {estado !== "aprobado" &&
+            userRole &&
+            userRole !== "Administrativo" &&
+            userRole !== "Aprendiz" &&
+            userRole !== "Coordinador" && (
+              <TouchableOpacity
+                style={styles.buttonFile}
+                onPress={handleActaPdfSubmit}
+              >
+                <FileUp name="download" size={20} color="gray" />
+                <Text style={styles.buttonText}>Cargar Pdf</Text>
+              </TouchableOpacity>
+            )}
 
+          {estado !== "aprobado" &&
+            userRole !== "Administrativo" &&
+            userRole !== "Aprendiz" &&
+            userRole !== "Coordinador" && (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSubmitActa}
+              >
+                <SendHorizontal name="download" size={24} color="green" />
+              </TouchableOpacity>
+            )}
+          {(userRole === "Aprendiz" || userRole === "Instructor") && (
+            <TouchableOpacity style={styles.button} onPress={downloadFile}>
+              <Download name="download" size={24} color="#0d324c" />
+            </TouchableOpacity>
+          )}
         </View>
-
-        {estado && (
-          <View style={styles.estadoContainer}>
-            <Icon name={icon} size={24} color={color} />
-            <Text style={[styles.estadoText, { color }]}>{estado}</Text>
-          </View>
-        )}
       </View>
     </View>
   );
@@ -263,15 +322,28 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
+  buttonFile: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    backgroundColor: "#dfdfdf",
+    gap: 10,
+  },
   buttonText: {
-    color: "#fff",
+    color: "black",
     fontSize: 14,
-    
   },
   Container: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 3,
+    color: "black",
+  },
+  estadoC: {
+    flexDirection: "row",
+    marginLeft: 78,
+    marginBottom: 12,
   },
   estadoText: {
     marginLeft: 2,
@@ -280,4 +352,3 @@ const styles = StyleSheet.create({
 });
 
 export default ActaSeguimiento;
-

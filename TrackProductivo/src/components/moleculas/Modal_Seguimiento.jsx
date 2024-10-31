@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useContext, useState, useCallback } from "react";
 import {
   View,
@@ -27,23 +26,6 @@ const ModalSeguimiento = ({
   id_seguimiento,
   handleSubmit,
 }) => {
-=======
-import React, { useContext, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import ActaSeguimiento from '../organismos/ActaSeguimiento.jsx';
-import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
-import axiosClient from '../../axiosClient.js';
-import ModalBitacoras from './Modal_Bitacoras.jsx';
-import { Download, X, FileUp, SendHorizontal } from "lucide-react-native";
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import DocumentPicker from 'react-native-document-picker';
-import RNFetchBlob from 'rn-fetch-blob';
-import { PermissionsAndroid, Platform } from 'react-native';
-
-const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   const { getSeguimiento } = useContext(SeguimientosContext);
   const [idSeguimiento, setIdSeguimiento] = useState(null);
   const [bitacoras, setBitacoras] = useState([]);
@@ -56,13 +38,9 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
   const fetchBitacoras = useCallback(async (id_seguimiento) => {
     if (id_seguimiento) {
       try {
-<<<<<<< HEAD
         const response = await axiosClient.get(
           `/bitacoras/bitacorasSeguimiento/${id_seguimiento}`
         );
-=======
-        const response = await axiosClient.get(`/bitacoras/bitacorasSeguimiento/${id_seguimiento}`);
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
         setBitacoras(response.data);
         setError(null);
       } catch (err) {
@@ -122,11 +100,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
         "Ya existe un PDF cargado, ¿quieres reemplazarlo?",
         [
           { text: "Cancelar", onPress: () => resolve(false), style: "cancel" },
-<<<<<<< HEAD
           { text: "Sí, reemplazar", onPress: () => resolve(true) },
-=======
-          { text: "Sí, reemplazar", onPress: () => resolve(true) }
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
         ]
       );
     });
@@ -151,7 +125,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
         Alert.alert("Éxito", "Bitacora enviada correctamente");
         if (handleSubmit) handleSubmit();
       } else {
-<<<<<<< HEAD
         Alert.alert(
           "Error",
           `Error al enviar la Bitacora: ${response.data.message}`
@@ -162,12 +135,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
         "Error del servidor:",
         error.response ? error.response.data : error.message
       );
-=======
-        Alert.alert("Error", `Error al enviar la Bitacora: ${response.data.message}`);
-      }
-    } catch (error) {
-      console.error("Error del servidor:", error.response ? error.response.data : error.message);
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
       Alert.alert("Error del servidor", error.message);
     }
   }, [bitacoraPdf, currentBitacoraId, handleSubmit]);
@@ -200,14 +167,10 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     },
   };
 
-<<<<<<< HEAD
   const { color, icon } = estadoConfig[estado] || {
     color: "black",
     icon: "alert-circle",
   };
-=======
-  const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
 
   const requestStoragePermission = async () => {
     try {
@@ -215,39 +178,24 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
           title: "Permiso de almacenamiento",
-<<<<<<< HEAD
           message:
             "La aplicación necesita acceso al almacenamiento para descargar archivos.",
           buttonNeutral: "Preguntar después",
           buttonNegative: "Cancelar",
           buttonPositive: "Aceptar",
-=======
-          message: "La aplicación necesita acceso al almacenamiento para descargar archivos.",
-          buttonNeutral: "Preguntar después",
-          buttonNegative: "Cancelar",
-          buttonPositive: "Aceptar"
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
         }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-<<<<<<< HEAD
       Alert.alert(
         "Permiso denegado",
         "No se concedieron los permisos necesarios."
       );
-=======
-      Alert.alert("Permiso denegado", "No se concedieron los permisos necesarios.");
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
       return false;
     }
   };
 
-<<<<<<< HEAD
   const Ip = "192.168.100.105";
-=======
-  const Ip = '192.168.0.107';
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
 
   const downloadFile = async (id_bitacora) => {
     try {
@@ -256,18 +204,13 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-<<<<<<< HEAD
       const baseUrl = `http://${Ip}:3000`;
-=======
-      const baseUrl = "http://192.168.0.107:3000";
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
 
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
           path: `${DownloadDir}/bitacora_${id_bitacora}.pdf`,
-<<<<<<< HEAD
           description: "Descargando archivo...",
         },
       })
@@ -283,17 +226,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
             "Error de descarga",
             "No se pudo descargar el archivo: " + error.message
           );
-=======
-          description: 'Descargando archivo...',
-        }
-      })
-        .fetch('GET', `${baseUrl}/bitacoras/download/${id_bitacora}`)
-        .then((res) => {
-          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
-        })
-        .catch((error) => {
-          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
         });
     } catch (error) {
       console.error(error);
@@ -324,7 +256,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                 <Text style={styles.errorText}>{error}</Text>
               ) : bitacoras.length > 0 ? (
                 bitacoras.map((bitacora) => {
-<<<<<<< HEAD
                   const { color, icon } = estadoConfig[bitacora.estado] || {
                     color: "black",
                     icon: "alert-circle",
@@ -357,66 +288,32 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                           style={styles.buttonFile}
                           onPress={() => handlePdfSubmit(bitacora.id_bitacora)}
                         >
-=======
-                  const { color, icon } = estadoConfig[bitacora.estado] || { color: "black", icon: "alert-circle" };
-                  return (
-                    <View key={bitacora.id_bitacora} style={styles.bitacoraItem}>
-                      <View style={styles.containerHeader}>
-                        <Text style={styles.labelB}>Bitácora: {bitacora.bitacora}</Text>
-                        <View style={styles.containerEstado}>
-                          <Icon name={icon} size={20} color={color} />
-                          <Text style={[styles.estadoText, { color }]}>{bitacora.estado}</Text>
-                        </View>
-                        
-                      </View>
-                      <Text style={styles.label}>{bitacora.pdf}</Text>
-                      <View style={styles.containerPdf}>
-                      {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
-                        <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
-                      )}
-                        <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
                           <FileUp size={20} color="gray" />
                           <Text style={styles.buttonText}>Cargar Pdf</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleSubmitBitacora}>
                           <SendHorizontal size={24} color="green" />
                         </TouchableOpacity>
-<<<<<<< HEAD
                         <TouchableOpacity
                           onPress={() => downloadFile(bitacora.id_bitacora)}
                         >
-=======
-                        <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
                           <Download size={24} color="#0d324c" />
                         </TouchableOpacity>
                       </View>
 
                       {/* Mostrar el nombre del archivo PDF cargado */}
-<<<<<<< HEAD
 
                       <Text style={styles.labelB}>{bitacora.instructor}</Text>
                       <Text style={styles.labelf}>
                         {new Date(bitacora.fecha).toLocaleDateString()}
                       </Text>
-=======
-                     
-                      
-                      <Text style={styles.labelB}>{bitacora.instructor}</Text>
-                      <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
                     </View>
                   );
                 })
               ) : (
-<<<<<<< HEAD
                 <Text style={styles.errorText}>
                   No hay bitácoras disponibles
                 </Text>
-=======
-                <Text style={styles.errorText}>No hay bitácoras disponibles</Text>
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
               )}
             </View>
           </ScrollView>
@@ -452,14 +349,6 @@ const styles = StyleSheet.create({
     color: "gray",
     padding: 5,
   },
-  fileName: {
-    position: 'absolute', 
-    bottom: 55, 
-    fontSize: 17, 
-    color: 'gray', 
-    padding: 5,
-
-  },
   closeButton: {
     position: "absolute",
     top: 10,
@@ -479,26 +368,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginLeft: 70,
   },
-  containerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 5
-  },
-  containerEstado: {
-    flexDirection: "row",
-    marginLeft: 70
-  },
   contentContainer: {
     marginTop: 20,
   },
   containerPdf: {
     flexDirection: "row",
     alignItems: "center",
-<<<<<<< HEAD
     gap: 10,
-=======
-    gap: 10
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   buttonFile: {
     flexDirection: "row",
@@ -508,11 +384,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dfdfdf",
     width: 150,
     marginVertical: 12,
-<<<<<<< HEAD
     gap: 10,
-=======
-    gap: 10
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   buttonText: {
     color: "gray",
@@ -520,11 +392,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-<<<<<<< HEAD
     fontWeight: "bold",
-=======
-    fontWeight: 'bold',
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
     marginBottom: 24,
     textAlign: "center",
     color: "black",
@@ -534,28 +402,18 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 18,
-<<<<<<< HEAD
     fontWeight: "bold",
     marginBottom: 16,
     marginLeft: 20,
     color: "black",
-=======
-    fontWeight: 'bold',
-    marginBottom: 16,
-    marginLeft: 20
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   bitacoraItem: {
     marginBottom: 16,
     padding: 10,
     backgroundColor: "#f9f9f9",
     borderRadius: 5,
-<<<<<<< HEAD
     margin: 20,
     color: "black",
-=======
-    margin: 20
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   noBitacorasText: {
     textAlign: "center",
@@ -582,19 +440,6 @@ const styles = StyleSheet.create({
     color: "gray",
     marginVertical: 5,
   },
-  label: {
-    fontSize: 16,
-  },
-  labelB: {
-    fontSize: 16,
-    fontWeight: "bold"
-  },
-  labelf: {
-    fontSize: 14,
-    marginLeft: 150,
-    color: "gray",
-    marginVertical: 5
-  },
   buttonContainer: {
     alignItems: "flex-end",
     marginBottom: 15,
@@ -615,10 +460,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
-<<<<<<< HEAD
-=======
-
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   icon: {
     marginRight: 5,

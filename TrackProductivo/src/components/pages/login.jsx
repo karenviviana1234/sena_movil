@@ -95,10 +95,7 @@ const Login = () => {
             onFocus={() => setIsFocusedEmail(true)}
             onBlur={() => setIsFocusedEmail(false)}
             placeholder="Correo"
-<<<<<<< HEAD
 
-=======
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
             placeholderTextColor="#219162"
             value={email}
             onChangeText={setEmail}
@@ -113,7 +110,6 @@ const Login = () => {
         >
           <Lock size={24} color="green" style={styles.icon} />
           <TextInput
-<<<<<<< HEAD
   style={styles.passwordInput}
   onFocus={() => setIsFocusedPassword(true)}
   onBlur={() => setIsFocusedPassword(false)}
@@ -123,17 +119,6 @@ const Login = () => {
   onChangeText={setPassword}
 />
 
-=======
-            style={styles.passwordInput}
-            onFocus={() => setIsFocusedPassword(true)}
-            onBlur={() => setIsFocusedPassword(false)}
-            placeholder="Contraseña"
-            placeholderTextColor="#219162"
-            secureTextEntry={!isPasswordVisible}
-            value={password}
-            onChangeText={setPassword}
-          />
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -188,10 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: "#ECFFE1",
     paddingLeft: 50,
-<<<<<<< HEAD
     color:'black'
-=======
->>>>>>> 06a382a7af7d6ef558c08d8034ebaf8173dbf032
   },
   inputFocused: {
     borderColor: "green",
