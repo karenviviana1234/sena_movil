@@ -38,7 +38,9 @@ const Perfil = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
+    handleRefresh(); 
   };
+  
 
   return (
     <Layout title={"Perfil"}>

@@ -177,8 +177,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const Ip = "192.168.100.105";
-      const baseUrl = `http://${Ip}:3000`; // Asegúrate de reemplazar esto con la url correcta
+      const baseUrl = "http://192.168.0.107:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
@@ -284,13 +283,12 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    color: "black",
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
-    color: "black",
+            color: "black"
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -299,7 +297,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    color: "black",
+            color: "black"
   },
   subtitle: {
     fontSize: 16,
@@ -331,14 +329,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   buttonText: {
-    color: "black",
+    color: "gray",
     fontSize: 14,
   },
   Container: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 3,
-    color: "black",
   },
   estadoC: {
     flexDirection: "row",

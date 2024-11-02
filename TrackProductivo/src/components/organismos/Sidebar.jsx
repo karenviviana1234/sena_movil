@@ -13,6 +13,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import { usePersonas } from "../../Context/ContextPersonas";
 import { House, X, FolderSearch2, LogOut, Users } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -31,7 +32,7 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
     }).start();
   }, [menuVisible]);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     Alert.alert(
       "Cerrar sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
@@ -42,7 +43,13 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
         },
         {
           text: "Cerrar sesión",
-          onPress: () => {
+          onPress: async () => {
+            // Elimina todos los datos de sesión almacenados
+            await AsyncStorage.removeItem("userData");
+            await AsyncStorage.removeItem("token");
+            await AsyncStorage.removeItem("user");
+  
+            // Navega a la pantalla de inicio de sesión
             navigation.navigate("login");
           },
         },
@@ -50,6 +57,7 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
       { cancelable: false }
     );
   };
+  
 
   const toggleSubMenu = () => {
     setSubMenuVisible(!subMenuVisible); // Alterna la visibilidad del submenú
@@ -213,7 +221,7 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
         )} */}
        
 
-        <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
+       <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
           <View style={styles.menuItemContent}>
             <LogOut
               name="sign-out"
@@ -221,7 +229,7 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
               color="#0d324c"
               style={styles.menuIcon}
             />
-            <Text style={styles.menuText}>Cerrar sesion</Text>
+            <Text style={styles.menuText}>Cerrar sesión</Text>
           </View>
         </TouchableOpacity>
       </Animated.View>

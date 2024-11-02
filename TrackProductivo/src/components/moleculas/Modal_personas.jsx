@@ -19,7 +19,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
   const [telefono, setTelefono] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [municipiosList, setMunicipiosList] = useState([]);
-  const { id_persona , setUserData} = usePersonas();
+  const { id_persona } = usePersonas();
 
   // Obtener la lista de municipios al cargar el componente
   useEffect(() => {
@@ -51,7 +51,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       nombres: nombres || userData.nombres,
       correo: correo || userData.correo,
       telefono: telefono || userData.telefono,
-      municipio: Number(municipio) || Number(userData.id_municipio),
+      municipio: Number(municipio) || Number(userData.id_municipio), // Convertir el municipio a número
     };
   
     try {
@@ -60,10 +60,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
         updatedData
       );
       Alert.alert('Perfil Actualizado con éxito');
-  
-      // Actualiza el contexto para reflejar los cambios
-      setUserData(response.data); // Asume que `response.data` contiene los datos actualizados del usuario
-      onClose(); // Cierra el modal
+      onClose();
     } catch (error) {
       console.error(
         "Error al actualizar los datos del usuario:",
@@ -71,7 +68,6 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       );
     }
   };
-  
   
 
   return (
@@ -114,12 +110,12 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="phone-pad"
             placeholderTextColor="black"
           />
-{/*           {rol === "Aprendiz" && (
+{/*        {rol === "Aprendiz" && (
 
-          ) }; */}
+          ) };  */}
           <Text style={styles.texto}>Municipio</Text>
           <View style={styles.pickerContainer}>
-            <Picker
+            <Picker style={styles.texto}
               selectedValue={municipio}
               onValueChange={(itemValue) => setMunicipio(itemValue)} // Esto actualiza el estado con el ID del municipio
             >
@@ -167,7 +163,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 26,
-    color: "orange",
+    color: "green",
     fontWeight: "bold",
     marginBottom: 15,
   },
@@ -176,22 +172,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   input: {
-    color: "black",
+    backgroundColor: "#EDEDED",
     height: 50,
     width: "100%",
-    borderColor: "orange",
-    borderWidth: 2,
-    borderRadius: 10,
+    borderRadius: 15,
     marginBottom: 15,
     fontSize: 18,
     paddingHorizontal: 10,
+            color: "black"
   },
   pickerContainer: {
     width: "100%",
-    borderWidth: 2,
-    borderColor: "orange",
+    backgroundColor: "#EDEDED",
     borderRadius: 10,
     marginBottom: 15,
+    height: 50,
+            color: "black"
   },
   buttonContainer: {
     flexDirection: "row",

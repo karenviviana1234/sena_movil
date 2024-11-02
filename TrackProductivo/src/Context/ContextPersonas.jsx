@@ -6,8 +6,6 @@ const ContextPersonas = createContext();
 export const usePersonas = () => useContext(ContextPersonas);
 
 export const PersonasProvider = ({ children }) => {
-  const [userData, setUserData] = useState(null);
-
   const [personas, SetPersonas] = useState([]);
   const [persona, SetPersona] = useState({});
   const [id_persona, SetId_persona] = useState(null);
@@ -25,7 +23,7 @@ export const PersonasProvider = ({ children }) => {
     } catch (error) {
       console.log('Error del servidor' + error);
     }
-  };  
+  };
 
   const getPersona = async (id_persona) => {
     try {
@@ -45,7 +43,6 @@ export const PersonasProvider = ({ children }) => {
         persona,
         id_persona,
         rol,
-        setUserData,
         SetPersonas,
         SetPersona,
         SetId_persona,

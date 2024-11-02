@@ -1,31 +1,18 @@
-import React, { useContext, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
-import ActaSeguimiento from "../organismos/ActaSeguimiento.jsx";
-import SeguimientosContext from "../../Context/ContextSeguimiento.jsx";
-import axiosClient from "../../axiosClient.js";
-import ModalBitacoras from "./Modal_Bitacoras.jsx";
+import React, { useContext, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import ActaSeguimiento from '../organismos/ActaSeguimiento.jsx';
+import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
+import axiosClient from '../../axiosClient.js';
+import ModalBitacoras from './Modal_Bitacoras.jsx';
 import { Download, X, FileUp, SendHorizontal } from "lucide-react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import DocumentPicker from "react-native-document-picker";
-import RNFetchBlob from "rn-fetch-blob";
-import { PermissionsAndroid, Platform } from "react-native";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import DocumentPicker from 'react-native-document-picker';
+import RNFetchBlob from 'rn-fetch-blob';
+import { PermissionsAndroid, Platform } from 'react-native';
 
-const ModalSeguimiento = ({
-  visible,
-  onClose,
-  id_seguimiento,
-  handleSubmit,
-}) => {
+const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
   const { getSeguimiento } = useContext(SeguimientosContext);
   const [idSeguimiento, setIdSeguimiento] = useState(null);
   const [bitacoras, setBitacoras] = useState([]);
@@ -38,9 +25,7 @@ const ModalSeguimiento = ({
   const fetchBitacoras = useCallback(async (id_seguimiento) => {
     if (id_seguimiento) {
       try {
-        const response = await axiosClient.get(
-          `/bitacoras/bitacorasSeguimiento/${id_seguimiento}`
-        );
+        const response = await axiosClient.get(`/bitacoras/bitacorasSeguimiento/${id_seguimiento}`);
         setBitacoras(response.data);
         setError(null);
       } catch (err) {
@@ -53,7 +38,7 @@ const ModalSeguimiento = ({
   useFocusEffect(
     useCallback(() => {
       const fetchIdFromStorage = async () => {
-        const id = await AsyncStorage.getItem("idSeguimiento");
+        const id = await AsyncStorage.getItem('idSeguimiento');
         if (id) {
           setIdSeguimiento(id);
           fetchBitacoras(id);
@@ -100,7 +85,7 @@ const ModalSeguimiento = ({
         "Ya existe un PDF cargado, ¿quieres reemplazarlo?",
         [
           { text: "Cancelar", onPress: () => resolve(false), style: "cancel" },
-          { text: "Sí, reemplazar", onPress: () => resolve(true) },
+          { text: "Sí, reemplazar", onPress: () => resolve(true) }
         ]
       );
     });
@@ -125,16 +110,10 @@ const ModalSeguimiento = ({
         Alert.alert("Éxito", "Bitacora enviada correctamente");
         if (handleSubmit) handleSubmit();
       } else {
-        Alert.alert(
-          "Error",
-          `Error al enviar la Bitacora: ${response.data.message}`
-        );
+        Alert.alert("Error", `Error al enviar la Bitacora: ${response.data.message}`);
       }
     } catch (error) {
-      console.error(
-        "Error del servidor:",
-        error.response ? error.response.data : error.message
-      );
+      console.error("Error del servidor:", error.response ? error.response.data : error.message);
       Alert.alert("Error del servidor", error.message);
     }
   }, [bitacoraPdf, currentBitacoraId, handleSubmit]);
@@ -167,10 +146,7 @@ const ModalSeguimiento = ({
     },
   };
 
-  const { color, icon } = estadoConfig[estado] || {
-    color: "black",
-    icon: "alert-circle",
-  };
+  const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
 
   const requestStoragePermission = async () => {
     try {
@@ -178,24 +154,20 @@ const ModalSeguimiento = ({
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
           title: "Permiso de almacenamiento",
-          message:
-            "La aplicación necesita acceso al almacenamiento para descargar archivos.",
+          message: "La aplicación necesita acceso al almacenamiento para descargar archivos.",
           buttonNeutral: "Preguntar después",
           buttonNegative: "Cancelar",
-          buttonPositive: "Aceptar",
+          buttonPositive: "Aceptar"
         }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      Alert.alert(
-        "Permiso denegado",
-        "No se concedieron los permisos necesarios."
-      );
+      Alert.alert("Permiso denegado", "No se concedieron los permisos necesarios.");
       return false;
     }
   };
 
-  const Ip = "192.168.100.105";
+  const Ip = '192.168.100.155';
 
   const downloadFile = async (id_bitacora) => {
     try {
@@ -211,21 +183,15 @@ const ModalSeguimiento = ({
           useDownloadManager: true,
           notification: true,
           path: `${DownloadDir}/bitacora_${id_bitacora}.pdf`,
-          description: "Descargando archivo...",
-        },
+          description: 'Descargando archivo...',
+        }
       })
-        .fetch("GET", `${baseUrl}/bitacoras/download/${id_bitacora}`)
+        .fetch('GET', `${baseUrl}/bitacoras/download/${id_bitacora}`)
         .then((res) => {
-          Alert.alert(
-            "Descarga completa",
-            "El archivo se ha descargado correctamente."
-          );
+          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
         })
         .catch((error) => {
-          Alert.alert(
-            "Error de descarga",
-            "No se pudo descargar el archivo: " + error.message
-          );
+          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
         });
     } catch (error) {
       console.error(error);
@@ -256,64 +222,44 @@ const ModalSeguimiento = ({
                 <Text style={styles.errorText}>{error}</Text>
               ) : bitacoras.length > 0 ? (
                 bitacoras.map((bitacora) => {
-                  const { color, icon } = estadoConfig[bitacora.estado] || {
-                    color: "black",
-                    icon: "alert-circle",
-                  };
+                  const { color, icon } = estadoConfig[bitacora.estado] || { color: "black", icon: "alert-circle" };
                   return (
-                    <View
-                      key={bitacora.id_bitacora}
-                      style={styles.bitacoraItem}
-                    >
+                    <View key={bitacora.id_bitacora} style={styles.bitacoraItem}>
                       <View style={styles.containerHeader}>
-                        <Text style={styles.labelB}>
-                          Bitácora: {bitacora.bitacora}
-                        </Text>
+                        <Text style={styles.labelB}>Bitácora: {bitacora.bitacora}</Text>
                         <View style={styles.containerEstado}>
                           <Icon name={icon} size={20} color={color} />
-                          <Text style={[styles.estadoText, { color }]}>
-                            {bitacora.estado}
-                          </Text>
+                          <Text style={[styles.estadoText, { color }]}>{bitacora.estado}</Text>
                         </View>
+                        
                       </View>
                       <Text style={styles.label}>{bitacora.pdf}</Text>
                       <View style={styles.containerPdf}>
-                        {currentBitacoraId === bitacora.id_bitacora &&
-                          bitacoraPdf && (
-                            <Text style={styles.fileName}>
-                              {bitacoraPdf.name}
-                            </Text>
-                          )}
-                        <TouchableOpacity
-                          style={styles.buttonFile}
-                          onPress={() => handlePdfSubmit(bitacora.id_bitacora)}
-                        >
+                      {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
+                        <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
+                      )}
+                        <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
                           <FileUp size={20} color="gray" />
                           <Text style={styles.buttonText}>Cargar Pdf</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleSubmitBitacora}>
                           <SendHorizontal size={24} color="green" />
                         </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => downloadFile(bitacora.id_bitacora)}
-                        >
+                        <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
                           <Download size={24} color="#0d324c" />
                         </TouchableOpacity>
                       </View>
 
                       {/* Mostrar el nombre del archivo PDF cargado */}
-
+                     
+                      
                       <Text style={styles.labelB}>{bitacora.instructor}</Text>
-                      <Text style={styles.labelf}>
-                        {new Date(bitacora.fecha).toLocaleDateString()}
-                      </Text>
+                      <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
                     </View>
                   );
                 })
               ) : (
-                <Text style={styles.errorText}>
-                  No hay bitácoras disponibles
-                </Text>
+                <Text style={styles.errorText}>No hay bitácoras disponibles</Text>
               )}
             </View>
           </ScrollView>
@@ -331,42 +277,43 @@ const ModalSeguimiento = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
-    width: "90%",
-    backgroundColor: "white",
+    width: '90%',
+    backgroundColor: 'white',
     borderRadius: 8,
     padding: 16,
-    maxHeight: "80%",
+    maxHeight: '80%',
   },
   fileName: {
-    position: "absolute",
-    bottom: 55,
-    fontSize: 17,
-    color: "gray",
+    position: 'absolute', 
+    bottom: 55, 
+    fontSize: 17, 
+    color: 'gray', 
     padding: 5,
+
   },
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
     right: 10,
     padding: 5,
   },
   closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: 'white',
+    fontWeight: 'bold',
   },
   containerHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 5
   },
   containerEstado: {
     flexDirection: "row",
-    marginLeft: 70,
+    marginLeft: 70
   },
   contentContainer: {
     marginTop: 20,
@@ -374,7 +321,7 @@ const styles = StyleSheet.create({
   containerPdf: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 10
   },
   buttonFile: {
     flexDirection: "row",
@@ -384,7 +331,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dfdfdf",
     width: 150,
     marginVertical: 12,
-    gap: 10,
+    gap: 10
   },
   buttonText: {
     color: "gray",
@@ -392,67 +339,67 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 24,
-    textAlign: "center",
-    color: "black",
+    textAlign: 'center',
+        color: "black"
   },
   sectionContainer: {
     marginBottom: 32,
   },
   subTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 16,
     marginLeft: 20,
-    color: "black",
+        color: "black"
   },
   bitacoraItem: {
     marginBottom: 16,
     padding: 10,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
     borderRadius: 5,
     margin: 20,
-    color: "black",
+            color: "black"
   },
   noBitacorasText: {
-    textAlign: "center",
-    color: "#666",
-    fontStyle: "italic",
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
   },
   errorText: {
-    color: "red",
-    textAlign: "center",
-    fontWeight: "bold",
+    color: 'red',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   label: {
     fontSize: 16,
-    color: "black",
+            color: "black"
   },
   labelB: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "black",
+            color: "black"
   },
   labelf: {
     fontSize: 14,
     marginLeft: 150,
     color: "gray",
-    marginVertical: 5,
+    marginVertical: 5
   },
   buttonContainer: {
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
     marginBottom: 15,
   },
   button: {
-    backgroundColor: "#28a745",
+    backgroundColor: '#28a745',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -460,6 +407,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
+
   },
   icon: {
     marginRight: 5,

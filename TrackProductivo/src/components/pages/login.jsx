@@ -8,7 +8,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,8 +23,13 @@ const Login = () => {
   const navigation = useNavigation();
 
   const { SetRol, SetId_persona } = usePersonas();
-
-
+  useFocusEffect(
+    React.useCallback(() => {
+      // Limpiar campos cuando se enfoque la pantalla de login
+      setEmail("");
+      setPassword("");
+    }, [])
+  );
 
   const handleLogin = async () => {
     try {
@@ -44,12 +49,11 @@ const Login = () => {
         const storedToken = await AsyncStorage.getItem("token");
         console.log("Token almacenado:", storedToken);
         if (user) {
-
           SetRol(user.cargo);
           SetId_persona(user.id_persona);
 
-          await AsyncStorage.setItem('token', token);
-          await AsyncStorage.setItem('user', JSON.stringify(user));
+          await AsyncStorage.setItem("token", token);
+          await AsyncStorage.setItem("user", JSON.stringify(user));
 
           const allowedRoles = ["Administrativo", "Instructor", "Aprendiz"];
           if (allowedRoles.includes(user.cargo)) {
@@ -61,7 +65,6 @@ const Login = () => {
               "Los roles permitidos son Seguimiento, Instructor, y Aprendiz."
             );
           }
-
         }
       }
     } catch (error) {
@@ -69,7 +72,12 @@ const Login = () => {
       console.log("Detalles del error:", error.response?.data);
 
       if (error.response && error.response.status === 404) {
-        Alert.alert("Error", `${error.response.status}: ${error.response.data.message || 'Error de autenticación'}`);
+        Alert.alert(
+          "Error",
+          `${error.response.status}: ${
+            error.response.data.message || "Error de autenticación"
+          }`
+        );
       } else {
         Alert.alert("Error", "Hubo un problema con el servidor.");
       }
@@ -82,11 +90,11 @@ const Login = () => {
 
   return (
     <ImageBackground
-      source={require('../../../public/Mobile.png')}
+      source={require("../../../public/Mobile.png")}
       style={styles.backgroundImage}
     >
       <View style={styles.container}>
-        <Text style={styles.textTitle}>Bienvenid@ a TrackProductivo</Text>
+        <Text style={styles.textTitle}>Bienvenidos a TrackProductivo</Text>
         <Text style={styles.text}>Ingrese a su cuenta</Text>
         <View style={styles.inputContainer}>
           <Mail size={24} color="green" style={styles.icon} />
@@ -95,7 +103,6 @@ const Login = () => {
             onFocus={() => setIsFocusedEmail(true)}
             onBlur={() => setIsFocusedEmail(false)}
             placeholder="Correo"
-
             placeholderTextColor="#219162"
             value={email}
             onChangeText={setEmail}
@@ -110,15 +117,15 @@ const Login = () => {
         >
           <Lock size={24} color="green" style={styles.icon} />
           <TextInput
-  style={styles.passwordInput}
-  onFocus={() => setIsFocusedPassword(true)}
-  onBlur={() => setIsFocusedPassword(false)}
-  placeholder="Contraseña"
-  placeholderTextColor="#219162"
-  value={password}
-  onChangeText={setPassword}
-/>
-
+            style={styles.passwordInput}
+            onFocus={() => setIsFocusedPassword(true)}
+            onBlur={() => setIsFocusedPassword(false)}
+            placeholder="Contraseña"
+            placeholderTextColor="#219162"
+            secureTextEntry={!isPasswordVisible}
+            value={password}
+            onChangeText={setPassword}
+          />
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -151,6 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    color: "black",
   },
 
   text: {
@@ -173,10 +181,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: "#ECFFE1",
     paddingLeft: 50,
-    color:'black'
+    color: "black",
   },
   inputFocused: {
     borderColor: "green",
+    color: "black",
   },
   passwordContainer: {
     flexDirection: "row",
@@ -199,9 +208,6 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 15,
-  },
-  input: {
-    color: 'black'
   },
   buttonContainer: {
     height: 48,
