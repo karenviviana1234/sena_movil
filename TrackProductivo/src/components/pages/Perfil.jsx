@@ -53,7 +53,7 @@ const Perfil = () => {
 
         {userData ? (
           <View style={styles.containerDos}>
-            <View style={styles.infoContainer}>
+            <View style={styles.infoContainers}>
               <Text style={styles.textName}>{userData.nombres}</Text>
             </View>
             <View style={styles.infoContainer}>
@@ -134,15 +134,20 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
     fontSize: 22,
-    marginLeft: 10,
     marginTop: 20
   },
   infoContainer: {
     flexDirection: "row",
-    alignItems: "statrt",
+    alignItems: "start",
     justifyContent: "flex-start",
     marginBottom: 25,
     marginLeft: 20
+  },
+  infoContainers: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 25,
+    textAlign: "center"
   },
   button: {
     marginTop: 30,

@@ -245,5 +245,5 @@ const styles = StyleSheet.create({
     },
 });
 
-    export default Seguimientos;
+export default Seguimientos;
 
