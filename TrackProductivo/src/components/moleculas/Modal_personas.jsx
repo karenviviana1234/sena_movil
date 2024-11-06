@@ -46,6 +46,20 @@ const PersonasModal = ({ visible, onClose, userData }) => {
 
   // Enviar el ID correcto del municipio al actualizar
   const handleUpdate = async () => {
+
+    if (!/^\d{6,10}$/.test(identificacion)) {
+      Alert.alert("Error", "La identificación debe contener entre 6 y 10 dígitos numéricos.");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(correo)) {
+      Alert.alert("Error", "El correo debe tener un formato válido (incluyendo '@').");
+      return;
+    }
+    if (!/^\d{10}$/.test(telefono)) {
+      Alert.alert("Error", "El teléfono debe contener exactamente 10 dígitos.");
+      return;
+    }
+    
     const updatedData = {
       identificacion: identificacion || userData.identificacion,
       nombres: nombres || userData.nombres,
