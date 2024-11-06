@@ -1,10 +1,8 @@
-import React from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-
 import Principal from './src/components/pages/Principal';
-import Bitacoras from './src/components/pages/Bitacoras';
 import Perfil from './src/components/pages/Perfil';
 import GlobalProvider from './src/Context/GlobalContext';
 import Login from './src/components/pages/login';
@@ -14,61 +12,79 @@ import Seguimientos from './src/components/pages/Seguimientos';
 import Matriculas from './src/components/pages/Matriculas';
 import Empresas from './src/components/pages/Empresas';
 import Aprendices from './src/components/pages/Aprendices';
+import PrimeraScreen from './src/components/pages/Splahs';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  const [isShowSplash, setIsShowSplash] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsShowSplash(false);
+    }, 1000);
+  }, []);
+
   return (
     <GlobalProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName='login' screenOptions={{ headerShown: false }}>
-{/*           <Stack.Screen name="landing_page" component={Landing_page} /> */}
-          <Stack.Screen name="login" component={Login} />
-          <Stack.Screen 
-            name="principal" 
-            component={Principal} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="matriculas" 
-            component={Matriculas} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="empresas" 
-            component={Empresas} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="aprendices" 
-            component={Aprendices} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="seguimiento" 
-            component={Seguimientos} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="reporte" 
-            component={Reportes} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="personas" 
-            component={Usuarios} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="bitacoras" 
-            component={Bitacoras} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
-          <Stack.Screen 
-            name="perfil" 
-            component={Perfil} 
-            options={{ headerShown: false }} // Ocultar el encabezado para esta pantalla
-          />
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          {isShowSplash ? (
+            <Stack.Screen
+              name="Splash"
+              component={PrimeraScreen}
+              options={{ headerShown: false }}
+            />
+          ) : (
+            <>
+              <Stack.Screen name="login" component={Login} />
+              <Stack.Screen 
+                name="principal" 
+                component={Principal} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="matriculas" 
+                component={Matriculas} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="empresas" 
+                component={Empresas} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="aprendices" 
+                component={Aprendices} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="seguimiento" 
+                component={Seguimientos} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="reporte" 
+                component={Reportes} 
+                options={{ headerShown: false }} 
+              />
+              <Stack.Screen 
+                name="personas" 
+                component={Usuarios} 
+                options={{ headerShown: false }} 
+              />
+        
+              <Stack.Screen 
+                name="perfil" 
+                component={Perfil} 
+                options={{ headerShown: false }} 
+              />
+            </>
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalProvider>
