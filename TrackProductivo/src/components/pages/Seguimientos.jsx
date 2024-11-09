@@ -32,7 +32,7 @@ const Seguimientos = () => {
     }, [getSeguimientos]);
 
     const filteredItems = useMemo(() => {
-        return seguimientos.filter(seg => 
+        return seguimientos.filter(seg =>
             seg.identificacion ||
             seg.id_seguimiento.toString().includes(filterValue)
         );
@@ -50,7 +50,7 @@ const Seguimientos = () => {
             setError(`Error al obtener el seguimiento: ${error.message}`);
         }
     };
-    
+
 
     const handleCloseModal = async () => {
         setModalVisible(false);
@@ -59,19 +59,19 @@ const Seguimientos = () => {
         setSelectedSeguimientoId(null); // Limpiar el ID de seguimiento
         await AsyncStorage.removeItem('idSeguimiento');
     };
-    
-    
+
+
 
     const renderSeguimientoButtons = (item) => {
         const seguimientoFechas = [item.seguimiento1, item.seguimiento2, item.seguimiento3];
         const estados = [item.estado1, item.estado2, item.estado3];
-    
+
         const formatDate = (date) => {
             if (!date) return "Sin fecha";
             const formattedDate = new Date(date);
             return `${formattedDate.getDate().toString().padStart(2, '0')}-${(formattedDate.getMonth() + 1).toString().padStart(2, '0')}-${formattedDate.getFullYear()}`;
         };
-    
+
         const getButtonBackgroundColor = (estado) => {
             switch (estado) {
                 case "solicitud":
@@ -84,7 +84,7 @@ const Seguimientos = () => {
                     return "#BDBDBD"; // Color gris para estados no definidos
             }
         };
-    
+
         return (
             <View style={styles.buttonContainer}>
                 {["id_seguimiento1", "id_seguimiento2", "id_seguimiento3"].map((seguimientoKey, index) => (
@@ -103,9 +103,9 @@ const Seguimientos = () => {
             </View>
         );
     };
-    
-    
-    
+
+
+
     const renderItem = ({ item }) => (
         <View style={styles.item}>
             <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
@@ -137,6 +137,7 @@ const Seguimientos = () => {
     return (
         <Layout title="Seguimientos">
             <View style={styles.container}>
+
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Buscar seguimiento..."
@@ -148,7 +149,6 @@ const Seguimientos = () => {
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id_seguimiento?.toString()}
                 />
-
                 {seguimientoData && (
                     <View style={styles.seguimientoDetails}>
                         <Text style={styles.detailsTitle}>
