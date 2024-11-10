@@ -1,3 +1,4 @@
+// ForgotPassword.js
 import React, { useState } from "react";
 import {
   View,
@@ -10,38 +11,54 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axiosClient from "../../axiosClient";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react-native";
+import { Mail } from "lucide-react-native";
 
-const RestablecerContrasena = () => {
-  const [email, setEmail] = useState("");
-  const [estaEnfocadoEmail, setEstaEnfocadoEmail] = useState(false);
+const ForgotPassword = () => {
+  const [correo, setCorreo] = useState("");
+  const [estaEnfocadoCorreo, setEstaEnfocadoCorreo] = useState(false);
   const navigation = useNavigation();
 
-  const manejarRestablecerContrasena = async () => {
-    try {
-      console.log("Iniciando restablecimiento de contraseña...");
+  const manejarSolicitudToken = async () => {
+    if (!correo) {
+      Alert.alert("Error", "Por favor ingresa tu correo electrónico");
+      return;
+    }
 
-      const respuesta = await axiosClient.post("/reset-password", {
-        email: email,
+    try {
+      console.log("Enviando solicitud de recuperación para:", correo);
+      
+      const respuesta = await axiosClient.post("/password/recuperar", {
+        correo: correo.trim()
       });
 
+      console.log("Respuesta del servidor:", respuesta.data);
+
       if (respuesta.status === 200) {
-        console.log("Solicitud de restablecimiento de contraseña exitosa:", respuesta.data);
         Alert.alert(
-          "Restablecimiento de contraseña",
-          "Se han enviado las instrucciones para restablecer tu contraseña a tu correo electrónico."
+          "Recuperación de Contraseña",
+          "Se ha enviado un correo con las instrucciones para restablecer tu contraseña."
         );
-        navigation.goBack();
+        navigation.navigate('ResetPassword');
       }
     } catch (error) {
-      console.log("Error en el restablecimiento de contraseña:", error);
-      console.log("Detalles del error:", error.response?.data);
-
-      if (error.response && error.response.status === 404) {
-        Alert.alert("Error", `${error.response.status}: ${error.response.data.message || 'Error al restablecer la contraseña'}`);
-      } else {
-        Alert.alert("Error", "Hubo un problema con el servidor.");
+      console.log("Error completo:", error);
+      console.log("Respuesta del error:", error.response?.data);
+      
+      let mensajeError = "Hubo un problema al procesar tu solicitud.";
+      
+      if (error.response) {
+        if (error.response.status === 404) {
+          mensajeError = "No se encontró ninguna cuenta con ese correo electrónico.";
+        } else if (error.response.status === 500) {
+          mensajeError = "Error en el servidor. Por favor intenta más tarde.";
+        }
+        
+        if (error.response.data && error.response.data.message) {
+          mensajeError = error.response.data.message;
+        }
       }
+      
+      Alert.alert("Error", mensajeError);
     }
   };
 
@@ -56,16 +73,22 @@ const RestablecerContrasena = () => {
         <View style={estilos.contenedorDeEntrada}>
           <Mail size={24} color="green" style={estilos.icono} />
           <TextInput
-            style={[estilos.entrada, estaEnfocadoEmail && estilos.entradaEnfocada]}
-            onFocus={() => setEstaEnfocadoEmail(true)}
-            onBlur={() => setEstaEnfocadoEmail(false)}
+            style={[estilos.entrada, estaEnfocadoCorreo && estilos.entradaEnfocada]}
+            onFocus={() => setEstaEnfocadoCorreo(true)}
+            onBlur={() => setEstaEnfocadoCorreo(false)}
             placeholder="Correo"
             placeholderTextColor="#219162"
-            value={email}
-            onChangeText={setEmail}
+            value={correo}
+            onChangeText={setCorreo}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
-        <TouchableOpacity style={estilos.contenedorDeBoton} onPress={manejarRestablecerContrasena}>
+        <TouchableOpacity 
+          style={estilos.contenedorDeBoton} 
+          onPress={manejarSolicitudToken}
+        >
           <Text style={estilos.boton}>Enviar</Text>
         </TouchableOpacity>
       </View>
@@ -135,4 +158,4 @@ const estilos = StyleSheet.create({
   },
 });
 
-export default RestablecerContrasena;
+export default ForgotPassword;

@@ -13,7 +13,9 @@ import Matriculas from './src/components/pages/Matriculas';
 import Empresas from './src/components/pages/Empresas';
 import Aprendices from './src/components/pages/Aprendices';
 import PrimeraScreen from './src/components/pages/Splahs';
-import RestablecerContrasena from './src/components/pages/recoverPassword';
+import RestablecerContrasena from './src/components/pages/ForgotPassword';
+import ForgotPassword from './src/components/pages/ForgotPassword';
+import ResetPassword from './src/components/pages/ResetPassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,7 +45,10 @@ const App = () => {
           ) : (
             <>
               <Stack.Screen name="login" component={Login} />
-              <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasena} />
+
+              <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+              <Stack.Screen name="ResetPassword" component={ResetPassword} />
+
               <Stack.Screen 
                 name="principal" 
                 component={Principal} 

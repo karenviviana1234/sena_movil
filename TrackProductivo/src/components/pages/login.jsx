@@ -77,7 +77,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate("RestablecerContrasena");
+    navigation.navigate("ForgotPassword");
   };
 
   return (
