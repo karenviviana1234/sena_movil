@@ -77,7 +77,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log("Ir a la pantalla de recuperación de contraseña");
+    navigation.navigate("ForgotPassword");
   };
 
   return (
