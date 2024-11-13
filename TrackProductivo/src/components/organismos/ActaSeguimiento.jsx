@@ -1,19 +1,16 @@
-import { Buffer } from "buffer"; // Importar Buffer desde la biblioteca 'buffer'
-import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import DocumentPicker from "react-native-document-picker";
-import axiosClient from "../../axiosClient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import RNFS from "react-native-fs";
-import RNFetchBlob from "rn-fetch-blob";
-import { PermissionsAndroid, Platform } from "react-native";
-import {
-  Download,
-  CircleMinus,
-  SendHorizontal,
-  FileUp,
-} from "lucide-react-native";
+import { Buffer } from 'buffer'; // Importar Buffer desde la biblioteca 'buffer'
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import DocumentPicker from 'react-native-document-picker';
+import axiosClient from '../../axiosClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import RNFS from 'react-native-fs';
+import RNFetchBlob from 'rn-fetch-blob';
+import { PermissionsAndroid, Platform } from 'react-native';
+import { Download, CircleMinus, SendHorizontal, FileUp } from "lucide-react-native";
+
+
 
 const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
   const [seguimientoPdf, setSeguimientoPdf] = useState(null);
@@ -35,19 +32,15 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
           title: "Permiso de almacenamiento",
-          message:
-            "La aplicación necesita acceso al almacenamiento para descargar archivos.",
+          message: "La aplicación necesita acceso al almacenamiento para descargar archivos.",
           buttonNeutral: "Preguntar después",
           buttonNegative: "Cancelar",
-          buttonPositive: "Aceptar",
+          buttonPositive: "Aceptar"
         }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      Alert.alert(
-        "Permiso denegado",
-        "No se concedieron los permisos necesarios."
-      );
+      Alert.alert("Permiso denegado", "No se concedieron los permisos necesarios.");
       return false;
     }
   };
@@ -60,9 +53,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           const user = JSON.parse(userJson);
           setIdPersona(user?.id_persona || null);
         } else {
-          console.warn(
-            "No se encontró un valor válido para 'user' en AsyncStorage."
-          );
+          console.warn("No se encontró un valor válido para 'user' en AsyncStorage.");
         }
       } catch (error) {
         console.error("Error al obtener datos del usuario:", error);
@@ -78,14 +69,13 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 
   useEffect(() => {
     if (id_seguimiento) {
-      axiosClient
-        .get(`/seguimientos/listarEstado/${id_seguimiento}`)
-        .then((response) => {
+      axiosClient.get(`/seguimientos/listarEstado/${id_seguimiento}`)
+        .then(response => {
           setEstado(response.data.estado);
           setPdfName(response.data.pdf);
         })
-        .catch((error) => {
-          console.error("Error al obtener el estado del seguimiento:", error);
+        .catch(error => {
+          console.error('Error al obtener el estado del seguimiento:', error);
         });
     }
   }, [id_seguimiento]);
@@ -93,7 +83,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
   useEffect(() => {
     const getUserRole = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem("user");
+        const storedUser = await AsyncStorage.getItem('user');
         if (storedUser) {
           const user = JSON.parse(storedUser);
           setUserRole(user.cargo);
@@ -131,7 +121,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         "Ya existe un PDF cargado, ¿quieres reemplazarlo?",
         [
           { text: "Cancelar", onPress: () => resolve(false), style: "cancel" },
-          { text: "Sí, reemplazar", onPress: () => resolve(true) },
+          { text: "Sí, reemplazar", onPress: () => resolve(true) }
         ]
       );
     });
@@ -190,25 +180,15 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           useDownloadManager: true,
           notification: true,
           path: `${DownloadDir}/acta_seguimiento_${id_seguimiento}.pdf`,
-          description: "Descargando archivo...",
-        },
+          description: 'Descargando archivo...',
+        }
       })
-<<<<<<< HEAD
-        .fetch("GET", `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
-=======
         .fetch('GET', response.config.url)
->>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
         .then((res) => {
-          Alert.alert(
-            "Descarga completa",
-            "El archivo se ha descargado correctamente."
-          );
+          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
         })
         .catch((error) => {
-          Alert.alert(
-            "Error de descarga",
-            "No se pudo descargar el archivo: " + error.message
-          );
+          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
         });
 
     } catch (error) {
@@ -217,33 +197,12 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   };
 
-<<<<<<< HEAD
-  const estadoConfig = {
-    solicitud: {
-      color: "orange",
-      icon: "alert-circle",
-    },
-    aprobado: {
-      color: "green",
-      icon: "check-circle",
-    },
-    rechazado: {
-      color: "red",
-      icon: "alert-circle",
-    },
-  };
-
-  const { color, icon } = estadoConfig[estado] || {
-    color: "black",
-    icon: "alert-circle",
-  };
-=======
->>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Acta:</Text>
       <View style={styles.card}>
+
         {estado && (
           <View style={styles.Container}>
             <Text style={styles.subtitle}>
@@ -257,40 +216,32 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           </View>
         )}
 
-        {pdfName && <Text style={styles.pdfName}>{pdfName}</Text>}
+        {pdfName && (
+          <Text style={styles.pdfName}>{pdfName}</Text>
+        )}
 
         <View style={styles.buttonContainer}>
-          {estado !== "aprobado" &&
-            userRole &&
-            userRole !== "Administrativo" &&
-            userRole !== "Aprendiz" &&
-            userRole !== "Coordinador" && (
-              <TouchableOpacity
-                style={styles.buttonFile}
-                onPress={handleActaPdfSubmit}
-              >
-                <FileUp name="download" size={20} color="gray" />
-                <Text style={styles.buttonText}>Cargar Pdf</Text>
-              </TouchableOpacity>
-            )}
+          {estado !== 'aprobado' && userRole && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
+            <TouchableOpacity style={styles.buttonFile} onPress={handleActaPdfSubmit}>
+              <FileUp name="download" size={20} color="gray" />
+              <Text style={styles.buttonText}>Cargar Pdf</Text>
+            </TouchableOpacity>
+          )}
 
-          {estado !== "aprobado" &&
-            userRole !== "Administrativo" &&
-            userRole !== "Aprendiz" &&
-            userRole !== "Coordinador" && (
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleSubmitActa}
-              >
-                <SendHorizontal name="download" size={24} color="green" />
-              </TouchableOpacity>
-            )}
-          {(userRole === "Aprendiz" || userRole === "Instructor") && (
+          {estado !== 'aprobado' && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
+            <TouchableOpacity style={styles.button} onPress={handleSubmitActa}>
+              <SendHorizontal name="download" size={24} color="green" />
+            </TouchableOpacity>
+          )}
+          {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
             <TouchableOpacity style={styles.button} onPress={downloadFile}>
               <Download name="download" size={24} color="#0d324c" />
             </TouchableOpacity>
           )}
+
         </View>
+
+
       </View>
     </View>
   );
@@ -304,7 +255,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
-            color: "black"
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -313,18 +263,15 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
-            color: "black"
   },
   subtitle: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
-    color: "black",
   },
   pdfName: {
     fontSize: 14,
     marginBottom: 8,
-    color: "black",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -342,15 +289,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     backgroundColor: "#dfdfdf",
-    gap: 10,
+    gap: 10
   },
   buttonText: {
     color: "gray",
     fontSize: 14,
-<<<<<<< HEAD
-=======
 
->>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
   },
   Container: {
     flexDirection: "row",
@@ -359,13 +303,8 @@ const styles = StyleSheet.create({
   },
   containerEstado: {
     flexDirection: "row",
-<<<<<<< HEAD
-    marginLeft: 78,
-    marginBottom: 12,
-=======
     marginLeft: 70,
     alignItems: 'center',
->>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
   },
   estadoText: {
     fontSize: 14,

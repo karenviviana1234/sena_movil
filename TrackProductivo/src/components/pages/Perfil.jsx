@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, ScrollView, RefreshControl } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ImageBackground,
+  ScrollView,
+  RefreshControl,
+  Image,
+} from "react-native";
 import Layout from "../Template/Layout";
 import PersonasModal from "../moleculas/Modal_personas";
+import Icon from "react-native-vector-icons/FontAwesome";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
-import { CircleUserRound, IdCard, Mail, Phone, MapPinHouse } from "lucide-react-native";
+import {
+  CircleUserRound,
+  IdCard,
+  Mail,
+  Phone,
+  MapPinHouse,
+} from "lucide-react-native";
 
 const Perfil = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -18,7 +34,10 @@ const Perfil = () => {
       console.log("Datos del usuario recibidos:", response.data);
       setUserData(response.data);
     } catch (error) {
-      console.error("Error al obtener los datos del usuario:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error al obtener los datos del usuario:",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -38,14 +57,13 @@ const Perfil = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    handleRefresh(); 
+    handleRefresh();
   };
-  
 
   return (
     <Layout title={"Perfil"}>
       <ImageBackground
-        source={require('../../../public/MobilePerfil.png')}
+        source={require("../../../public/MobilePerfil.png")}
         style={styles.backgroundImage}
       >
         <ScrollView
@@ -61,25 +79,30 @@ const Perfil = () => {
                   <Text style={styles.textName}>{userData.nombres}</Text>
                 </View>
                 <View style={styles.infoContainer}>
-                  <Icon name="id-card" size={24} color="black" />
+                  <IdCard size={24} color="green" />
+                  <Text style={styles.subtext}>Identificación:</Text>
                   <Text style={styles.text}>{userData.identificacion}</Text>
                 </View>
                 <View style={styles.infoContainer}>
-                  <Icon name="phone" size={24} color="black" />
+                  <Phone size={24} color="green" />
+                  <Text style={styles.subtext}>Teléfono:</Text>
                   <Text style={styles.text}>{userData.telefono}</Text>
                 </View>
                 <View style={styles.infoContainer}>
-                  <Icon name="envelope" size={24} color="black" />
+                  <Mail size={24} color="green" />
+                  <Text style={styles.subtext}>Correo: </Text>
                   <Text style={styles.text}>{userData.correo}</Text>
                 </View>
                 <View style={styles.infoContainer}>
-                  <Icon name="check-circle" size={24} color="black" />
-                  <Text style={styles.text}>Rol: {userData.rol}</Text>
+                  <CircleUserRound size={24} color="green" />
+                  <Text style={styles.subtext}>Rol:</Text>
+                  <Text style={styles.text}>{userData.rol}</Text>
                 </View>
-                {rol === 'Aprendiz' && (
+                {rol === "Aprendiz" && (
                   <View style={styles.infoContainer}>
-                    <Icon name="map-marker" size={24} color="black" />
-                    <Text style={styles.text}>Municipio: {userData.id_municipio}</Text>
+                    <MapPinHouse size={24} color="green" />
+                    <Text style={styles.subtext}>Municipio:</Text>
+                    <Text style={styles.text}>{userData.id_municipio}</Text>
                   </View>
                 )}
               </View>
@@ -97,6 +120,14 @@ const Perfil = () => {
               userData={userData}
             />
           </View>
+
+          {/* Imagen en la parte inferior */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../../public/def_AGROSIS_LOGOTIC.png")}
+              style={styles.logo}
+            />
+          </View>
         </ScrollView>
       </ImageBackground>
     </Layout>
@@ -107,10 +138,11 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
-    height: "115%"
+    height: "115%",
   },
   scrollContainer: {
     paddingVertical: 20,
+    alignItems: "center", // Centra el contenido en ScrollView
   },
   container: {
     flex: 1,
@@ -119,16 +151,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   containerDos: {
+    marginTop: 80,
     backgroundColor: "white",
-    width: 300,
-    borderRadius: 15
+    width: 330,
+    borderRadius: 15,
+    alignItems: "center",
+    paddingVertical: 20, // Espaciado vertical en el contenedor para el nombre centrado
   },
-  title: {
-    fontSize: 30,
+  textName: {
     color: "black",
     fontWeight: "bold",
-    fontFamily: 'poppins',
-    marginBottom: 20,
+    textAlign: "center", // Centra el texto dentro de la vista
+    fontSize: 24,
+    marginBottom: 20, // Espacio entre el nombre y el resto de la información
+  },
+  infoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginBottom: 15,
+    width: "90%", // Alinea los elementos a la izquierda
   },
   subtext: {
     color: "black",
@@ -140,43 +182,32 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 20,
     marginLeft: 2,
-    flexShrink: 1,  // Permite que el texto se ajuste en caso de que sea largo
-  },
-  textName: {
-    color: "black",
-    fontWeight: "bold",
-    fontSize: 22,
-    marginLeft: 30,
-    marginTop: 20
-  },
-  infoContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    marginBottom: 25,
-    marginLeft: 20,
-    flexWrap: "wrap", 
-  },
-  infoContainers: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 25,
-    textAlign: "center"
+    flexShrink: 1, // Permite que el texto se ajuste si es largo
   },
   button: {
     marginTop: 30,
-    backgroundColor: "orange",
+    backgroundColor: "#74cd62",
     width: 200,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 50,
   },
   buttonText: {
     color: "white",
     fontSize: 24,
   },
+  logoContainer: {
+    marginTop: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 30,
+  },
+  logo: {
+    width: 220,
+    height: 180,
+    borderRadius: 40,
+  },
 });
-
 
 export default Perfil;
