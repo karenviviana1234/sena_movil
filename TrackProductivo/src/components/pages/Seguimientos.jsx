@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Linking } from 'react-native';
 import { usePersonas } from "../../Context/ContextPersonas.jsx";
 import SeguimientosContext from "../../Context/ContextSeguimiento.jsx";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +8,7 @@ import ComponentSeguimiento from '../moleculas/ComponetSeguimiento.jsx';
 import Layout from '../Template/Layout';
 
 const Seguimientos = () => {
-    const { rol } = usePersonas();
+    const { rol, cargo } = usePersonas();
     const { seguimientos, getSeguimientos, getSeguimiento } = useContext(SeguimientosContext);
     const [filterValue, setFilterValue] = useState("");
     const [selectedSeguimientoId, setSelectedSeguimientoId] = useState(null);
@@ -41,7 +41,7 @@ const Seguimientos = () => {
     const handleOpenModal = async (id_seguimiento, componentName) => {
         try {
             await AsyncStorage.setItem('idSeguimiento', id_seguimiento.toString());
-            setSelectedSeguimientoId(id_seguimiento); // Asignar explícitamente el ID de seguimiento
+            setSelectedSeguimientoId(id_seguimiento);
             const data = await getSeguimiento(id_seguimiento);
             setSelectedComponent(componentName);
             setSeguimientoData(data);
@@ -51,15 +51,25 @@ const Seguimientos = () => {
         }
     };
 
-
     const handleCloseModal = async () => {
         setModalVisible(false);
         setSelectedComponent(null);
         setSeguimientoData(null);
-        setSelectedSeguimientoId(null); // Limpiar el ID de seguimiento
+        setSelectedSeguimientoId(null);
         await AsyncStorage.removeItem('idSeguimiento');
     };
 
+    // Verificar si todas las bitácoras están aprobadas
+    const checkBitacorasApproved = (bitacoras) => {
+        if (!Array.isArray(bitacoras)) {
+            return false;
+        }
+
+        return bitacoras.every(seguimiento =>
+            Array.isArray(seguimiento) &&
+            seguimiento.every(bitacora => bitacora.estado_bitacora === "aprobado")
+        );
+    };
 
 
     const renderSeguimientoButtons = (item) => {
@@ -78,8 +88,8 @@ const Seguimientos = () => {
                     return "#FFA000"; // Naranja
                 case "aprobado":
                     return "#4CAF50"; // Verde
-                case "noaprobado":
-                    return "#F44336"; // Rojo
+                case "no aprobado":
+                    return "#e64133"; // Rojo
                 default:
                     return "#BDBDBD"; // Color gris para estados no definidos
             }
@@ -89,7 +99,7 @@ const Seguimientos = () => {
             <View style={styles.buttonContainer}>
                 {["id_seguimiento1", "id_seguimiento2", "id_seguimiento3"].map((seguimientoKey, index) => (
                     <TouchableOpacity
-                        key={index}
+                        key={seguimientoKey}
                         style={[styles.button, { backgroundColor: getButtonBackgroundColor(estados[index]) }]}
                         onPress={() => handleOpenModal(item[seguimientoKey], `ComponentSeguimiento${index + 1}`)}
                         accessible={true}
@@ -104,19 +114,66 @@ const Seguimientos = () => {
         );
     };
 
+    const handleEmailPress = () => {
+        Linking.openURL('mailto:certificacion9528@sena.edu.co');
+    };
 
+    const renderItem = ({ item }) => {
 
-    const renderItem = ({ item }) => (
-        <View style={styles.item}>
-            <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-            <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
-            <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
-            <Text style={styles.itemText}>Programa: {item.sigla}</Text>
-            <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
-            <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
-            {renderSeguimientoButtons(item)}
-        </View>
-    );
+        // Verificamos si todas las bitácoras están aprobadas
+        if (checkBitacorasApproved(item.bitacoras)) {
+            if (rol === "Aprendiz") {
+                return (
+                    <View key={item.id_seguimiento}>
+                        <Text style={styles.subtitle}>¿Como Certificarte?</Text>
+                        <Text style={styles.itemText}>
+                            Apreciad@ aprendiz, para solicitar el certificado del programa de formación cursado, por favor remitir un mensaje al correo
+                            <Text style={styles.emailText} onPress={handleEmailPress}> certificacion9528@sena.edu.co</Text>
+                            , solicitando su certificado, el programa de formación, el número de ficha y número de celular. Adicionalmente, adjuntar la siguiente documentación:
+                        </Text>
+                        <Text style={styles.itemText}>- Fotocopia documento de identidad</Text>
+                        <Text style={styles.itemText}>- Foto carnet del SENA destruido (sino lo tienen informar en el correo el motivo por el cual no lo tienen)</Text>
+                        <Text style={styles.itemText}>- Pruebas TYT para tecnólogos (Aplica para tecnólogos, pueden remitir soporte de la asistencia a la presentación no es necesario esperar los resultados)</Text>
+                        <Text style={styles.itemText}>- Hoja de vida actualizada en agencia pública de empleo (sino esta actualizada por este medio pueden remitir Diploma o acta de Bachiller o de 9)</Text>
+                        <Text style={styles.itemText}>- Certificado laboral donde hizo su etapa productiva</Text>
+                        <Text style={styles.itemText}>- Certificado por SOFIAPLUS (Ingresa a Sofia Plus, selecciona el rol de aprendiz, opción certificación, descargar soporte del programa que estaba estudiando para realizar el proceso de actualización)</Text>
+                    </View>
+                );
+            }
+        }
+
+        if (checkBitacorasApproved(item.bitacoras)) {
+            if (rol === "Instructor") {
+            return (
+                <View key={item.id_seguimiento} style={styles.item}>
+                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
+                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
+                <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
+                <Text style={styles.itemText}>Programa: {item.sigla}</Text>
+                <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+                <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
+                    <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
+                    <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
+                        <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+    }
+        
+        // Si no todas las bitácoras están aprobadas, mostramos la información original
+        return (
+            <View key={item.id_seguimiento} style={styles.item}>
+                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
+                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
+                <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
+                <Text style={styles.itemText}>Programa: {item.sigla}</Text>
+                <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+                <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
+                {renderSeguimientoButtons(item)}
+            </View>
+        );
+    };
 
     if (loading) {
         return (
@@ -137,18 +194,20 @@ const Seguimientos = () => {
     return (
         <Layout title="Seguimientos">
             <View style={styles.container}>
-
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Buscar seguimiento..."
-                    value={filterValue}
-                    onChangeText={setFilterValue}
-                />
+                {rol !== 'Aprendiz' && (
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar seguimiento..."
+                        value={filterValue}
+                        onChangeText={setFilterValue}
+                    />
+                )}
                 <FlatList
                     data={filteredItems}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id_seguimiento?.toString()}
                 />
+
                 {seguimientoData && (
                     <View style={styles.seguimientoDetails}>
                         <Text style={styles.detailsTitle}>
@@ -178,10 +237,11 @@ const Seguimientos = () => {
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: "#f6fbff",
+        backgroundColor: "#ecffe1",
         height: "110%"
     },
     searchInput: {
@@ -197,6 +257,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
     },
+    emailText: {
+        color: 'blue',
+        textDecorationLine: 'underline',
+    },
     label: {
         fontSize: 18,
         fontWeight: "bold"
@@ -204,6 +268,14 @@ const styles = StyleSheet.create({
     itemText: {
         fontSize: 16,
         marginBottom: 4,
+        color: "black"
+    },
+    subtitle: {
+        fontSize: 20,
+        marginBottom: 4,
+        fontWeight: "bold",
+        textAlign: "center",
+        color: "#0d324c"
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -246,4 +318,3 @@ const styles = StyleSheet.create({
 });
 
 export default Seguimientos;
-

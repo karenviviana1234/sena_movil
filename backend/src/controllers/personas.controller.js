@@ -501,6 +501,7 @@ export const actualizarPerfil = async (req, res) => {
   }
 };
 
+
 export const registrarUsuarios = async (req, res) => {
   try {
     const { identificacion, nombres, correo, telefono, password, cargo, sede } = req.body;
@@ -614,10 +615,8 @@ export const cambiarInstructor = async (req, res) => {
       message: "Error en el sistema: " + error.message,
     });
   }
-};
-
-export const listarAprendicesPorInstructor = async (req, res) => {
-  const { id_persona } = req.params; // Obtener el ID del instructor de la ruta
+};export const listarAprendicesPorInstructor = async (req, res) => {
+  const { id_persona } = req.params;
 
   const sql = `
       SELECT
@@ -627,6 +626,14 @@ export const listarAprendicesPorInstructor = async (req, res) => {
           f.codigo AS codigo,
           prg.sigla AS sigla,
           e.razon_social AS razon_social,
+          s.id_seguimiento AS id_seguimiento,
+          s.seguimiento AS seguimiento,
+          s.fecha AS fecha_seguimiento,
+          s.estado AS estado_seguimiento,
+          s.pdf AS pdf_seguimiento,  -- Incluir PDF del seguimiento
+          b.id_bitacora AS id_bitacora,
+          b.estado AS estado_bitacora,
+          b.pdf AS pdf_bitacora,  -- PDF de la bitácora
           instr.identificacion AS instructor_identificacion,
           instr.nombres AS nombre_instructor
       FROM
@@ -639,15 +646,58 @@ export const listarAprendicesPorInstructor = async (req, res) => {
           LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
           LEFT JOIN actividades a ON asg.actividad = a.id_actividad
           LEFT JOIN personas instr ON a.instructor = instr.id_persona
+          LEFT JOIN seguimientos s ON s.productiva = pr.id_productiva
+          LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
       WHERE
-          instr.id_persona = ? 
+          instr.id_persona = ?
       ORDER BY
-          p.identificacion;
+          p.identificacion, s.seguimiento, b.id_bitacora;
   `;
 
   try {
-      const [results] = await pool.query(sql, [id_persona]); // Usar el ID del instructor en la consulta
-      res.status(200).json(results);
+      const [results] = await pool.query(sql, [id_persona]);
+
+      const aprendicesMap = {};
+
+      results.forEach(row => {
+          if (!aprendicesMap[row.identificacion]) {
+              aprendicesMap[row.identificacion] = {
+                  identificacion: row.identificacion,
+                  nombres: row.nombres,
+                  correo: row.correo,
+                  codigo: row.codigo,
+                  sigla: row.sigla,
+                  razon_social: row.razon_social,
+                  seguimientos: [],
+                  instructor_identificacion: row.instructor_identificacion,
+                  nombre_instructor: row.nombre_instructor,
+              };
+          }
+
+          let seguimiento = aprendicesMap[row.identificacion].seguimientos.find(s => s.id_seguimiento === row.id_seguimiento);
+
+          if (!seguimiento && row.id_seguimiento) {
+              seguimiento = {
+                  id_seguimiento: row.id_seguimiento,
+                  seguimiento: row.seguimiento,
+                  fecha_seguimiento: row.fecha_seguimiento,
+                  estado_seguimiento: row.estado_seguimiento,
+                  pdf_seguimiento: row.pdf_seguimiento, // PDF del seguimiento
+                  bitacoras: []
+              };
+              aprendicesMap[row.identificacion].seguimientos.push(seguimiento);
+          }
+
+          if (row.id_bitacora) {
+              seguimiento.bitacoras.push({
+                  id_bitacora: row.id_bitacora,
+                  estado_bitacora: row.estado_bitacora,
+                  pdf: row.pdf_bitacora // PDF de la bitácora
+              });
+          }
+      });
+
+      res.status(200).json(Object.values(aprendicesMap));
   } catch (error) {
       console.error("Error al listar aprendices asignados al instructor:", error);
       res.status(500).json({ message: "Error al obtener los aprendices asignados al instructor" });
