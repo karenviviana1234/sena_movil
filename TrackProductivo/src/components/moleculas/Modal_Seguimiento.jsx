@@ -6,7 +6,7 @@ import ActaSeguimiento from '../organismos/ActaSeguimiento.jsx';
 import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
 import axiosClient from '../../axiosClient.js';
 import ModalBitacoras from './Modal_Bitacoras.jsx';
-import { Download, X, FileUp, SendHorizontal } from "lucide-react-native";
+import { Download, X, FileUp, SendHorizontal, CheckCircle, AlertCircle } from "lucide-react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -131,22 +131,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     return null;
   }
 
-  const estadoConfig = {
-    solicitud: {
-      color: "orange",
-      icon: "alert-circle",
-    },
-    aprobado: {
-      color: "green",
-      icon: "check-circle",
-    },
-    rechazado: {
-      color: "red",
-      icon: "alert-circle",
-    },
-  };
 
-  const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
 
   const requestStoragePermission = async () => {
     try {
@@ -178,6 +163,12 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
       let DownloadDir = fs.dirs.DownloadDir;
       const baseUrl = `http://${Ip}:3000`;
 
+      // Realizamos la solicitud de descarga con axiosClient
+      const response = await axiosClient.get(`/bitacoras/download/${id_bitacora}`, {
+        responseType: 'blob', // Asegúrate de que la respuesta sea un blob para descargar archivos
+      });
+
+      // Procesamos el archivo recibido y lo guardamos en el dispositivo
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
@@ -186,18 +177,19 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
           description: 'Descargando archivo...',
         }
       })
-        .fetch('GET', `${baseUrl}/bitacoras/download/${id_bitacora}`)
+        .fetch('GET', response.config.url)
         .then((res) => {
           Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
         })
         .catch((error) => {
           Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
         });
+
     } catch (error) {
       console.error(error);
+      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
     }
   };
-
   return (
     <Modal
       transparent={true}
@@ -218,49 +210,48 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
             <View style={styles.sectionContainer}>
               <Text style={styles.subTitle}>Bitácoras:</Text>
 
-              {error ? (
-                <Text style={styles.errorText}>{error}</Text>
-              ) : bitacoras.length > 0 ? (
-                bitacoras.map((bitacora) => {
-                  const { color, icon } = estadoConfig[bitacora.estado] || { color: "black", icon: "alert-circle" };
-                  return (
-                    <View key={bitacora.id_bitacora} style={styles.bitacoraItem}>
-                      <View style={styles.containerHeader}>
-                        <Text style={styles.labelB}>Bitácora: {bitacora.bitacora}</Text>
-                        <View style={styles.containerEstado}>
-                          <Icon name={icon} size={20} color={color} />
-                          <Text style={[styles.estadoText, { color }]}>{bitacora.estado}</Text>
-                        </View>
-                        
+              {bitacoras.map((bitacora) => {
+                return (
+                  <View key={bitacora.id_bitacora} style={styles.bitacoraItem}>
+                    <View style={styles.containerHeader}>
+                      <Text style={styles.labelB}>Bitácora: {bitacora.bitacora}</Text>
+                      <View style={styles.containerEstado}>
+                        <Text style={[styles.estadoText, styles.getEstadoStyle(bitacora.estado)]}>
+                          {bitacora.estado}
+                        </Text>
                       </View>
-                      <Text style={styles.label}>{bitacora.pdf}</Text>
-                      <View style={styles.containerPdf}>
+                    </View>
+                    <Text style={styles.label}>{bitacora.pdf}</Text>
+                    <View style={styles.containerPdf}>
                       {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
                         <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
                       )}
-                        <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
-                          <FileUp size={20} color="gray" />
-                          <Text style={styles.buttonText}>Cargar Pdf</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSubmitBitacora}>
-                          <SendHorizontal size={24} color="green" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
-                          <Download size={24} color="#0d324c" />
-                        </TouchableOpacity>
-                      </View>
 
-                      {/* Mostrar el nombre del archivo PDF cargado */}
-                     
-                      
-                      <Text style={styles.labelB}>{bitacora.instructor}</Text>
-                      <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
+                      {/* Solo mostrar el botón "Cargar Pdf" si la bitácora no está aprobada */}
+                      {bitacora.estado !== "aprobado" && (
+                        <View style={styles.buttonsContainer}>
+                          <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
+                            <FileUp size={20} color="gray" />
+                            <Text style={styles.buttonText}>Cargar Pdf</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={handleSubmitBitacora}>
+                            <SendHorizontal size={24} color="green" />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+
+                      <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
+                        <Download size={24} color="#0d324c" />
+                      </TouchableOpacity>
                     </View>
-                  );
-                })
-              ) : (
-                <Text style={styles.errorText}>No hay bitácoras disponibles</Text>
-              )}
+
+                    <Text style={styles.labelB}>{bitacora.instructor}</Text>
+                    <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
+                  </View>
+                );
+              })}
+
             </View>
           </ScrollView>
         </View>
@@ -289,12 +280,17 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
   },
   fileName: {
-    position: 'absolute', 
-    bottom: 55, 
-    fontSize: 17, 
-    color: 'gray', 
+    position: 'absolute',
+    bottom: 55,
+    fontSize: 17,
+    color: 'gray',
     padding: 5,
 
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10, // Espacio entre los botones
   },
   closeButton: {
     position: 'absolute',
@@ -313,8 +309,29 @@ const styles = StyleSheet.create({
   },
   containerEstado: {
     flexDirection: "row",
-    marginLeft: 70
+    marginLeft: 70,
+    alignItems: 'center',
   },
+  estadoText: {
+    fontSize: 14,
+    color: '#fff', // Color de texto blanco para que sea legible
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12, // Bordes redondeados para el contenedor pequeño
+  },
+  getEstadoStyle: (estado) => {
+    switch (estado) {
+      case 'aprobado':
+        return { backgroundColor: 'rgba(0, 128, 0, 0.7)' }; // verde con 50% de opacidad
+      case 'solicitud':
+        return { backgroundColor: 'rgba(255, 165, 0, 0.7)' }; // naranja con 50% de opacidad
+      case 'noaprobado':
+        return { backgroundColor: 'rgba(255, 0, 0, 0.7)' }; // rojo con 50% de opacidad
+      default:
+        return { backgroundColor: 'rgba(128, 128, 128, 0.7)' }; // gris con 50% de opacidad
+    }
+  },
+  
   contentContainer: {
     marginTop: 20,
   },

@@ -64,14 +64,14 @@ const Login = () => {
           await AsyncStorage.setItem("token", token);
           await AsyncStorage.setItem("user", JSON.stringify(user));
 
-          const allowedRoles = ["Administrativo", "Instructor", "Aprendiz"];
+          const allowedRoles = [ "Instructor", "Aprendiz"];
           if (allowedRoles.includes(user.cargo)) {
             console.log("rol", user.cargo, "id", user.id_persona);
             navigation.navigate("principal");
           } else {
             Alert.alert(
               "Acceso denegado",
-              "Los roles permitidos son Seguimiento, Instructor, y Aprendiz."
+              "Los roles permitidos son Instructor, y Aprendiz."
             );
           }
         }
@@ -102,7 +102,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log("Ir a la pantalla de recuperación de contraseña");
+    navigation.navigate("ForgotPassword");
   };
 
   return (

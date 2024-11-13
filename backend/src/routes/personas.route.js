@@ -1,5 +1,5 @@
 import Router from 'express'
-import { registrarAprendiz, actualizarPersona, eliminarPersona, listarPersonas, buscarPersonas, listarAprendices, listarInstructores, registrarInstructor, listarMunicipios, desactivarPersona, registrarUsuarios, cambiarInstructor, listarInstructoresLider, perfil, actualizarPerfil } from '../controllers/personas.controller.js'
+import { registrarAprendiz, actualizarPersona, eliminarPersona, listarPersonas, buscarPersonas, listarAprendices, listarInstructores, registrarInstructor, listarMunicipios, desactivarPersona, registrarUsuarios, cambiarInstructor, listarInstructoresLider, perfil, actualizarPerfil, listarAprendicesPorInstructor } from '../controllers/personas.controller.js'
 import { validarToken } from '../controllers/seguridad.controller.js'
 
 const rutaPersona = Router()
@@ -7,7 +7,8 @@ const rutaPersona = Router()
 rutaPersona.get('/listar',  validarToken, listarPersonas)
 rutaPersona.get('/listarM', validarToken, listarMunicipios)
 rutaPersona.get('/listarA', /* validarToken, */ listarAprendices)
-rutaPersona.get('/listarI',/*  validarToken, */ listarInstructores)
+rutaPersona.get('/listarAprendicesI/:id_persona', validarToken, listarAprendicesPorInstructor)
+rutaPersona.get('/listarI', validarToken, listarInstructores)
 rutaPersona.get('/listarL', validarToken, listarInstructoresLider)
 rutaPersona.get('/buscar/:id_persona', validarToken, buscarPersonas)
 rutaPersona.post('/registrarA', registrarAprendiz)

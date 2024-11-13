@@ -10,7 +10,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* Multer para cargar el PDF */
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "public/seguimientos");
@@ -84,50 +83,46 @@ export const listarSeguimientoAprendices = async (req, res) => {
         } else if (cargo === 'Instructor') {
             // Si es instructor, filtrar los seguimientos donde es el instructor asignado
             sql = `
-                SELECT
-                    p.identificacion AS identificacion,
-                    p.nombres AS nombres,
-                    p.correo AS correo,  -- Agrega el correo del aprendiz
-                    f.codigo AS codigo,
-                    prg.sigla AS sigla,
-                    e.razon_social AS razon_social,
-                    s.id_seguimiento AS id_seguimiento,
-                    s.seguimiento AS seguimiento,
-                    s.fecha AS fecha,
-                    s.estado AS estado,
-                    COUNT(b.id_bitacora) AS total_bitacoras,
-                    SUM(CASE WHEN b.pdf IS NOT NULL THEN 1 ELSE 0 END) AS bitacoras_con_pdf,
-                    (SUM(CASE WHEN b.pdf IS NOT NULL THEN 1 ELSE 0 END) / 12) * 100 AS porcentaje,
-                    instr.identificacion AS instructor_identificacion,
-                    instr.nombres AS nombre_instructor
-
-                FROM
-                    seguimientos s
-                    LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
-                    LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
-                    LEFT JOIN personas p ON m.aprendiz = p.id_persona
-                    LEFT JOIN empresas e ON pr.empresa = e.id_empresa
-                    LEFT JOIN fichas f ON m.ficha = f.codigo
-                    LEFT JOIN programas prg ON f.programa = prg.id_programa
-                    LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
-                    LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
-                    LEFT JOIN actividades a ON asg.actividad = a.id_actividad
-                    LEFT JOIN personas instr ON a.instructor = instr.id_persona
-                WHERE
-                    instr.identificacion = ?  -- Filtrar por la identificación del instructor
-                GROUP BY
-                    s.id_seguimiento, p.identificacion, p.correo, s.seguimiento, s.fecha, f.codigo, prg.sigla, e.razon_social, s.estado, instr.identificacion, instr.nombres
-                ORDER BY
-                    p.identificacion, s.seguimiento;
-            `;
+               SELECT
+            p.identificacion AS identificacion,
+            p.nombres AS nombres,
+            p.correo AS correo,
+            f.codigo AS codigo,
+            prg.sigla AS sigla,
+            e.razon_social AS razon_social,
+            s.id_seguimiento AS id_seguimiento,
+            s.seguimiento AS seguimiento,
+            s.fecha AS fecha,
+            s.estado AS estado,
+            b.id_bitacora AS id_bitacora,
+            b.estado AS estado_bitacora,
+            instr.identificacion AS instructor_identificacion,
+            instr.nombres AS nombre_instructor
+        FROM
+            seguimientos s
+            LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
+            LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
+            LEFT JOIN personas p ON m.aprendiz = p.id_persona
+            LEFT JOIN empresas e ON pr.empresa = e.id_empresa
+            LEFT JOIN fichas f ON m.ficha = f.codigo
+            LEFT JOIN programas prg ON f.programa = prg.id_programa
+            LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
+            LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
+            LEFT JOIN actividades a ON asg.actividad = a.id_actividad
+            LEFT JOIN personas instr ON a.instructor = instr.id_persona
+        WHERE
+            instr.identificacion = ?  -- Filtrar por la identificación del instructor
+        ORDER BY
+            p.identificacion, s.seguimiento, b.id_bitacora;
+    `;
             params.push(identificacion);  // Asignar la identificación del instructor
         } else if (rol === 'Aprendiz') {
             // Si es aprendiz, filtrar los seguimientos por la identificación del aprendiz
             sql = `
-                SELECT
+               SELECT
                     p.identificacion AS identificacion,
                     p.nombres AS nombres,
-                    p.correo AS correo,  -- Agrega el correo del aprendiz
+                    p.correo AS correo,
                     f.codigo AS codigo,
                     prg.sigla AS sigla,
                     e.razon_social AS razon_social,
@@ -135,12 +130,10 @@ export const listarSeguimientoAprendices = async (req, res) => {
                     s.seguimiento AS seguimiento,
                     s.fecha AS fecha,
                     s.estado AS estado,
-                    COUNT(b.id_bitacora) AS total_bitacoras,
-                    SUM(CASE WHEN b.pdf IS NOT NULL THEN 1 ELSE 0 END) AS bitacoras_con_pdf,
-                    (SUM(CASE WHEN b.pdf IS NOT NULL THEN 1 ELSE 0 END) / 12) * 100 AS porcentaje,
+                    b.id_bitacora AS id_bitacora,
+                    b.estado AS estado_bitacora,
                     instr.identificacion AS instructor_identificacion,
                     instr.nombres AS nombre_instructor
-
                 FROM
                     seguimientos s
                     LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
@@ -154,11 +147,9 @@ export const listarSeguimientoAprendices = async (req, res) => {
                     LEFT JOIN actividades a ON asg.actividad = a.id_actividad
                     LEFT JOIN personas instr ON a.instructor = instr.id_persona
                 WHERE
-                    p.identificacion = ?  -- Filtrar por la identificación del aprendiz
-                GROUP BY
-                    s.id_seguimiento, p.identificacion, p.correo, s.seguimiento, s.fecha, f.codigo, prg.sigla, e.razon_social, s.estado, instr.identificacion, instr.nombres
+                    p.identificacion = ?
                 ORDER BY
-                    p.identificacion, s.seguimiento;
+                    p.identificacion, s.seguimiento, b.id_bitacora;
             `;
             params.push(identificacion);  // Asignar la identificación del aprendiz
         }
@@ -173,7 +164,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
                     personasMap[row.identificacion] = {
                         identificacion: row.identificacion,
                         nombres: row.nombres,
-                        correo: row.correo, 
+                        correo: row.correo,
                         codigo: row.codigo,
                         sigla: row.sigla,
                         razon_social: row.razon_social,
@@ -187,10 +178,22 @@ export const listarSeguimientoAprendices = async (req, res) => {
                         estado2: null,
                         estado3: null,
                         porcentaje: 0,
+                        bitacoras: [[], [], []],
                         instructor_identificacion: row.instructor_identificacion,
                         nombre_instructor: row.nombre_instructor
                     };
                 }
+
+                const seguimientoIndex = parseInt(row.seguimiento) - 1;
+
+                if (!personasMap[row.identificacion].bitacoras[seguimientoIndex]) {
+                    personasMap[row.identificacion].bitacoras[seguimientoIndex] = [];
+                }
+
+                personasMap[row.identificacion].bitacoras[seguimientoIndex].push({
+                    id_bitacora: row.id_bitacora,
+                    estado_bitacora: row.estado_bitacora
+                });
                 // Asignar seguimiento basado en el número de seguimiento
                 if (row.seguimiento === '1') {
                     personasMap[row.identificacion].id_seguimiento1 = row.id_seguimiento;
@@ -210,7 +213,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
             });
 
             Object.values(personasMap).forEach(aprendiz => {
-                aprendiz.porcentaje = Math.round(aprendiz.porcentaje);
+                aprendiz.porcentaje = Math.round(aprendiz.porcentaje) || 0;
             });
             return res.status(200).json(Object.values(personasMap));
         } else {
@@ -246,7 +249,7 @@ export const registrarSeguimiento = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error del servidor: ' + error });
     }
-};export const uploadPdfToSeguimiento = async (req, res) => {
+}; export const uploadPdfToSeguimiento = async (req, res) => {
     try {
         const { id_seguimiento } = req.params;  // Obtener el ID del seguimiento desde los parámetros de la URL
         const pdf = req.file?.originalname || null;  // Obtener el nombre del archivo PDF cargado
@@ -408,17 +411,12 @@ export const descargarPdf = async (req, res) => {
             return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
         }
 
-        // Leer el archivo y convertirlo en base64
-        const fileData = fs.readFileSync(filePath, 'base64');
-
-        // Enviar el archivo en formato base64
-        res.json({ data: fileData, fileName: pdfFileName });
+        res.sendFile(filePath, { headers: { 'Content-Disposition': `attachment; filename="${pdfFileName}"` } });
     } catch (error) {
         console.error('Error en el servidor:', error);
         res.status(500).json({ message: 'Error en el servidor: ' + error.message });
     }
 };
-
 
 export const listarEstadoSeguimiento = async (req, res) => {
     const { id_seguimiento } = req.params;
@@ -446,3 +444,82 @@ export const listarEstadoSeguimiento = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor: ' + error.message });
     }
 };
+export const listarEstadosBitacorasSeguimientos = async (req, res) => {
+    const { identificacion } = req.user;
+    if (!identificacion) {
+        return res.status(400).json({ message: 'Identificación no proporcionada.' });
+    }
+
+    try {
+        let sql;
+        let params = [];
+
+        sql = `
+            SELECT
+                s.seguimiento AS seguimiento,
+                b.id_bitacora AS id_bitacora,
+                b.estado AS estado_bitacora
+            FROM
+                seguimientos s
+                LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
+                LEFT JOIN matriculas m ON s.productiva = m.id_matricula
+                LEFT JOIN personas p ON m.aprendiz = p.id_persona
+            WHERE
+                p.identificacion = ?
+            ORDER BY
+                s.seguimiento, b.id_bitacora;
+        `;
+        params.push(identificacion);
+
+        const [result] = await pool.query(sql, params);
+
+        if (result.length > 0) {
+            // Estructura para almacenar los seguimientos y bitácoras (4 bitácoras por cada seguimiento)
+            const seguimientosMap = {
+                1: { bitacoras: [] },
+                2: { bitacoras: [] },
+                3: { bitacoras: [] }
+            };
+
+            // Añadir los datos obtenidos a seguimientosMap
+            result.forEach(row => {
+                if (row.id_bitacora) {
+                    const seguimiento = seguimientosMap[row.seguimiento];
+                    if (seguimiento.bitacoras.length < 4) {
+                        seguimiento.bitacoras.push({
+                            id: row.id_bitacora,
+                            estado: row.estado_bitacora || 'Pendiente'
+                        });
+                    }
+                }
+            });
+
+            // Rellenar con 'Pendiente' hasta tener 4 bitácoras por seguimiento
+            Object.keys(seguimientosMap).forEach(seguimientoKey => {
+                const bitacoras = seguimientosMap[seguimientoKey].bitacoras;
+                while (bitacoras.length < 4) {
+                    bitacoras.push({
+                        id: `pendiente-${seguimientoKey}-${bitacoras.length + 1}`, // ID único para bitácoras pendientes
+                        estado: 'Pendiente'
+                    });
+                }
+            });
+
+            // Verificar si todos los seguimientos tienen 4 bitácoras y si todas están aprobadas
+            const allApproved = Object.values(seguimientosMap).every(seg =>
+                seg.bitacoras.length === 4 && seg.bitacoras.every(bit => bit.estado === 'aprobado')
+            );
+
+            // Finalmente, devuelve la respuesta al cliente
+            return res.status(200).json({ seguimientosMap, allApproved });
+
+        } else {
+            return res.status(404).json({ message: 'No se encontraron datos.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error en el servidor.' });
+    }
+};
+
+

@@ -20,6 +20,7 @@ import rutaNovedades from './src/routes/novedades.route.js'
 import rutaAsignacion from './src/routes/asignacion.route.js'
 import router from './src/routes/importExcel.route.js'
 import rutaImportarExcel from './src/routes/importExcel.route.js'
+import routepassword from './src/routes/recuperar.route.js'
 
 const servidor = express()
 
@@ -49,6 +50,7 @@ servidor.use(rutaAsignacion )
 servidor.use('/import', router)
 servidor.use('/novedades', rutaNovedades)
 servidor.use('/excel', rutaImportarExcel)
+servidor.use('/password', routepassword)
 
 servidor.use(express.static('./public'))
 servidor.set('view engine', 'ejs')
@@ -57,6 +59,6 @@ servidor.get('/document', (req,res) => {
     res.render('document.ejs')
 })
 
-servidor.listen(3000, () => {
+servidor.listen(3000, '0.0.0.0', () => {
     console.log('Servidor funcionando en el puerto 3000');
-})
+});

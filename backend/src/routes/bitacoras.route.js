@@ -8,7 +8,7 @@ rutaBitacoras.get('/listar', validarToken, listarBitacora)
 rutaBitacoras.get('/listarEstados', validarToken, contarEstadosBitacoras)
 rutaBitacoras.post('/registrar', validarToken, cargarBitacora, registrarBitacora)
 
-rutaBitacoras.post('/cargarpdf/:id_bitacora', validarToken, cargarBitacora,uploadPdfToBitacoras)
+rutaBitacoras.post('/cargarpdf/:id_bitacora',  cargarBitacora,uploadPdfToBitacoras)
 
 rutaBitacoras.put('/actualizar/:id', validarToken, cargarBitacora, actualizarBitacora)
 rutaBitacoras.put('/aprobar/:id_bitacora', validarToken, aprobarBitacora)

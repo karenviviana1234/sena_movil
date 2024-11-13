@@ -170,15 +170,21 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   }, [seguimientoPdf, id_seguimiento, handleSubmit]);
 
-  const downloadFile = async () => {
+
+  const downloadFile = async (id_seguimiento) => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.107:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
+      // Realizamos la solicitud de descarga con axiosClient
+      const response = await axiosClient.get(`/seguimientos/descargarPdf/${id_seguimiento}`, {
+        responseType: 'blob', // Especificamos que la respuesta debe ser de tipo 'blob' para descargar el archivo
+      });
+
+      // Procesamos el archivo recibido y lo guardamos en el dispositivo
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
@@ -187,7 +193,11 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           description: "Descargando archivo...",
         },
       })
+<<<<<<< HEAD
         .fetch("GET", `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
+=======
+        .fetch('GET', response.config.url)
+>>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
         .then((res) => {
           Alert.alert(
             "Descarga completa",
@@ -200,11 +210,14 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             "No se pudo descargar el archivo: " + error.message
           );
         });
+
     } catch (error) {
       console.error(error);
+      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
     }
   };
 
+<<<<<<< HEAD
   const estadoConfig = {
     solicitud: {
       color: "orange",
@@ -224,6 +237,8 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     color: "black",
     icon: "alert-circle",
   };
+=======
+>>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
 
   return (
     <View style={styles.container}>
@@ -234,9 +249,10 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             <Text style={styles.subtitle}>
               Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
             </Text>
-            <View style={styles.estadoC}>
-              <Icon name={icon} size={20} color={color} />
-              <Text style={[styles.estadoText, { color }]}>{estado}</Text>
+            <View style={styles.containerEstado}>
+              <Text style={[styles.estadoText, styles.getEstadoStyle(estado)]}>
+                {estado}
+              </Text>
             </View>
           </View>
         )}
@@ -331,20 +347,44 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
+<<<<<<< HEAD
+=======
+
+>>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
   },
   Container: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 3,
   },
-  estadoC: {
+  containerEstado: {
     flexDirection: "row",
+<<<<<<< HEAD
     marginLeft: 78,
     marginBottom: 12,
+=======
+    marginLeft: 70,
+    alignItems: 'center',
+>>>>>>> bf38eaf0fa8698e2b8da11646bfcef0ef4f9c135
   },
   estadoText: {
-    marginLeft: 2,
     fontSize: 14,
+    color: '#fff', // Color de texto blanco para que sea legible
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12, // Bordes redondeados para el contenedor pequeño
+  },
+  getEstadoStyle: (estado) => {
+    switch (estado) {
+      case 'aprobado':
+        return { backgroundColor: 'rgba(0, 128, 0, 0.7)' }; // verde con 50% de opacidad
+      case 'solicitud':
+        return { backgroundColor: 'rgba(255, 165, 0, 0.7)' }; // naranja con 50% de opacidad
+      case 'noaprobado':
+        return { backgroundColor: 'rgba(255, 0, 0, 0.7)' }; // rojo con 50% de opacidad
+      default:
+        return { backgroundColor: 'rgba(128, 128, 128, 0.7)' }; // gris con 50% de opacidad
+    }
   },
 });
 

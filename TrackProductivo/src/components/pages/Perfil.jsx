@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, ScrollView, RefreshControl } from "react-native";
 import Layout from "../Template/Layout";
 import PersonasModal from "../moleculas/Modal_personas";
-import Icon from "react-native-vector-icons/FontAwesome";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
+import { CircleUserRound, IdCard, Mail, Phone, MapPinHouse } from "lucide-react-native";
 
 const Perfil = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -123,10 +123,24 @@ const styles = StyleSheet.create({
     width: 300,
     borderRadius: 15
   },
+  title: {
+    fontSize: 30,
+    color: "black",
+    fontWeight: "bold",
+    fontFamily: 'poppins',
+    marginBottom: 20,
+  },
+  subtext: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 20,
+    marginLeft: 10,
+  },
   text: {
     color: "black",
     fontSize: 20,
-    marginLeft: 10,
+    marginLeft: 2,
+    flexShrink: 1,  // Permite que el texto se ajuste en caso de que sea largo
   },
   textName: {
     color: "black",
@@ -137,10 +151,17 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "flex-start",
     marginBottom: 25,
-    marginLeft: 20
+    marginLeft: 20,
+    flexWrap: "wrap", 
+  },
+  infoContainers: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 25,
+    textAlign: "center"
   },
   button: {
     marginTop: 30,
@@ -156,5 +177,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
 });
+
 
 export default Perfil;

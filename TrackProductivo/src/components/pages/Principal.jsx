@@ -10,37 +10,38 @@ import Layout from "../Template/Layout.jsx";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { usePersonas } from "../../Context/ContextPersonas";
 import { Download } from "lucide-react-native";
+import RNFS from 'react-native-fs';
 
 const Principal = () => {
   const { rol } = usePersonas();
 
   const downloadOptions = [
-    { title: "Contrato de Aprendizaje" },
-    { title: "Pasantías" },
-    { title: "Proyecto Productivo" },
-    { title: "Monitorías" },
+    { title: "Contrato de Aprendizaje", fileName: "Modalidad Contrato aprendizaje-20241106T214047Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Contrato_aprendizaje.zip" },
+    { title: "Pasantías", fileName: "Modalidad Pasantia-20241106T214000Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Pasantia.zip" },
+    { title: "Proyecto Productivo", fileName: "Modalidad Proyecto-20241106T213957Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Proyecto.zip" },
+    { title: "Monitorías", fileName: "Modalidad Viculacion Laboral-20241107T232242Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Viculacion_Laboral.zip" },
   ];
 
-  const handleDownload = (title) => {
-    Alert.alert(
-      "Descarga exitosa",
-      `El archivo de ${title} se ha descargado correctamente.`,
-      [{ text: "OK" }]
-    );
+
+  const downloadZipFromAssets = async (fileName) => {
+    try {
+      const destinationPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+      console.log(`Copiando desde: assets/${fileName} a ${destinationPath}`);
+  
+      await RNFS.copyFileAssets(fileName, destinationPath);
+      Alert.alert('Descarga completada', `El archivo ${fileName} se ha guardado en Descargas`);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo descargar el archivo');
+    }
   };
-  const handleupload = (title) => {
-    Alert.alert(
-      "Archivo cargado con éxito",
-      `El archivo de ${title} se ha cargado correctamente.`,
-      [{ text: "OK" }]
-    );
-  };
+
 
   return (
     <Layout title={"Inicio"}>
       <View style={styles.container}>
         <Text style={styles.subtitle}>
-          A continuación se muestran los tipos de Modalidades de Etapa Productiva, seguidamente se podra descargar los formatos correspondientes
+          A continuación se muestran los tipos de Modalidades de Etapa Productiva, seguidamente se podrá descargar los formatos correspondientes
         </Text>
 
         {downloadOptions.map((option, index) => (
@@ -56,14 +57,16 @@ const Principal = () => {
               <Text style={styles.downloadText}>archivo.zip</Text>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => handleDownload(option.title)}
+                onPress={() => downloadZipFromProject(option.fileName)}
               >
                 <Download name="download" size={24} color="green" />
               </TouchableOpacity>
+
+
               {rol === "Seguimiento" && (
                 <TouchableOpacity
                   style={styles.iconButton}
-                  onPress={() => handleupload(option.title)}
+                  onPress={() => handleUpload(option.title)}
                 >
                   <Icon name="upload" size={24} color="green" />
                 </TouchableOpacity>
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     height: "115%",
     padding: 16,
-    backgroundColor: "#f6fbff",
+    backgroundColor: "white",
   },
   subtitle: {
     fontSize: 18,
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   optionContainer: {
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#ecffe1",
     borderRadius: 8,
     padding: 18,
     marginBottom: 18,

@@ -11,6 +11,7 @@ import {
 import axiosClient from "../../axiosClient";
 import { Picker } from "@react-native-picker/picker";
 import { usePersonas } from "../../Context/ContextPersonas";
+import { X } from "lucide-react-native";
 
 const PersonasModal = ({ visible, onClose, userData }) => {
   const [identificacion, setIdentificacion] = useState("");
@@ -19,8 +20,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
   const [telefono, setTelefono] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [municipiosList, setMunicipiosList] = useState([]);
-  const { id_persona } = usePersonas();
-
+  const { id_persona, rol } = usePersonas();
   // Obtener la lista de municipios al cargar el componente
   useEffect(() => {
     const fetchMunicipios = async () => {
@@ -67,7 +67,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       telefono: telefono || userData.telefono,
       municipio: Number(municipio) || Number(userData.id_municipio), // Convertir el municipio a número
     };
-  
+
     try {
       const response = await axiosClient.put(
         `/personas/perfilActualizar/${id_persona}`,
@@ -82,14 +82,17 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       );
     }
   };
-  
+
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
+          <TouchableOpacity onPress={onClose} style={styles.buttonClose}>
+            <X size={24} color="#0d324c" />
+          </TouchableOpacity>
           <Text style={styles.modalTitle}>Editar Perfil</Text>
-          <Text style={styles.texto}>Identificación</Text>
+          <Text style={styles.texto}>Identificación:</Text>
           <TextInput
             style={styles.input}
             value={identificacion.toString()}
@@ -98,7 +101,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="numeric"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Nombre</Text>
+          <Text style={styles.texto}>Nombres:</Text>
           <TextInput
             style={styles.input}
             value={nombres}
@@ -106,7 +109,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             placeholder="Nombre"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Correo</Text>
+          <Text style={styles.texto}>Correo:</Text>
           <TextInput
             style={styles.input}
             value={correo}
@@ -115,7 +118,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="email-address"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Teléfono</Text>
+          <Text style={styles.texto}>Teléfono:</Text>
           <TextInput
             style={styles.input}
             value={telefono}
@@ -124,10 +127,12 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="phone-pad"
             placeholderTextColor="black"
           />
-{/*        {rol === "Aprendiz" && (
+          {/*           {rol === "Aprendiz" && (
 
-          ) };  */}
-          <Text style={styles.texto}>Municipio</Text>
+          ) }; */}
+          {rol === 'Aprendiz' && (
+            <View>
+          <Text style={styles.texto}>Municipio:</Text>
           <View style={styles.pickerContainer}>
             <Picker style={styles.texto}
               selectedValue={municipio}
@@ -142,15 +147,14 @@ const PersonasModal = ({ visible, onClose, userData }) => {
               ))}
             </Picker>
           </View>
+          </View>
+          )}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.updateButton}
               onPress={handleUpdate}
             >
               <Text style={styles.updateButtonText}>Actualizar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -184,6 +188,9 @@ const styles = StyleSheet.create({
   texto: {
     color: "black",
     fontSize: 18,
+    textAlign: "left",
+    alignSelf: "flex-start",
+    marginBottom: 5
   },
   input: {
     backgroundColor: "#EDEDED",
@@ -201,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
     height: 50,
-            color: "black"
+    color: "black"
   },
   buttonContainer: {
     flexDirection: "row",
@@ -209,28 +216,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   updateButton: {
-    backgroundColor: "#28a745",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginRight: 10,
+    backgroundColor: "#74cd62",
+    width: 250,
+    height: 50,
+    justifyContent: "center",
     alignItems: "center",
-  },
-  closeButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    alignItems: "center",
+    borderRadius: 50,
   },
   updateButtonText: {
     color: "white",
     fontSize: 18,
   },
-  closeButtonText: {
-    color: "white",
-    fontSize: 18,
-  },
+  buttonClose: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  }
 });
 
 export default PersonasModal;
