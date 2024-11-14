@@ -245,7 +245,8 @@ export const registrarSeguimiento = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error del servidor: ' + error });
     }
-};export const uploadPdfToSeguimiento = async (req, res) => {
+};
+export const uploadPdfToSeguimiento = async (req, res) => {
     try {
         const { id_seguimiento } = req.params;  // Obtener el ID del seguimiento desde los parámetros de la URL
         const pdf = req.file?.originalname || null;  // Obtener el nombre del archivo PDF cargado

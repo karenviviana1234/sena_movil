@@ -4,44 +4,183 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  PermissionsAndroid,
+  Platform,
+  Linking,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../Template/Layout.jsx";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { usePersonas } from "../../Context/ContextPersonas";
 import { Download } from "lucide-react-native";
-import RNFS from 'react-native-fs';
+import RNFS from 'react-native-fs'; 
+import RNFetchBlob from 'rn-fetch-blob'; 
+
+
+const requestStoragePermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const permissions = [
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+      ];
+      
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
+      
+      return Object.values(granted).every(
+        permission => permission === PermissionsAndroid.RESULTS.GRANTED
+      );
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
+  return true;
+};
+
+const openFile = (filePath) => {
+  RNFetchBlob.android.actionViewIntent(filePath, 'application/zip');
+};
+
+const descargarPdf = async (url, fileName) => {
+  try {
+    const hasPermission = await requestStoragePermission();
+    if (!hasPermission) {
+      Alert.alert(
+        'Permiso denegado', 
+        'La aplicación necesita permisos de almacenamiento para guardar archivos.'
+      );
+      return;
+    }
+
+    // Imprimir todas las rutas disponibles para debug
+    console.log('Rutas disponibles:');
+    console.log('MainBundleDir:', RNFS.MainBundleDir);
+    console.log('CachesDirectoryPath:', RNFS.CachesDirectoryPath);
+    console.log('DocumentDirectoryPath:', RNFS.DocumentDirectoryPath);
+    console.log('DownloadDirectoryPath:', RNFS.DownloadDirectoryPath);
+    console.log('ExternalDirectoryPath:', RNFS.ExternalDirectoryPath);
+    console.log('ExternalStorageDirectoryPath:', RNFS.ExternalStorageDirectoryPath);
+
+    // Definir múltiples rutas posibles de descarga
+    const possiblePaths = [
+      `${RNFS.DownloadDirectoryPath}/${fileName}`,
+      `${RNFS.ExternalStorageDirectoryPath}/Download/${fileName}`,
+      `${RNFS.ExternalDirectoryPath}/${fileName}`,
+      `/storage/emulated/0/Download/${fileName}`
+    ];
+
+    const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`; 
+
+    Alert.alert(
+      'Iniciando descarga',
+      `Intentando descargar en:\n${downloadPath}`
+    );
+
+    // Configurar la descarga
+    const options = {
+      fromUrl: url,
+      toFile: downloadPath,
+      background: true,
+      begin: (res) => {
+        console.log('Comenzando descarga...');
+        console.log('Tamaño del archivo:', res.contentLength);
+      },
+      progress: (res) => {
+        const progress = (res.bytesWritten / res.contentLength) * 100;
+        console.log(`Progreso: ${progress.toFixed(2)}%`);
+      }
+    };
+
+    const download = RNFS.downloadFile(options);
+    const result = await download.promise;
+
+    if (result.statusCode === 200) {
+      // Verificar en qué rutas existe el archivo
+      console.log('Verificando ubicaciones del archivo:');
+      for (const path of possiblePaths) {
+        const exists = await RNFS.exists(path);
+        console.log(`${path}: ${exists ? 'EXISTE' : 'NO EXISTE'}`);
+      }
+
+      if (Platform.OS === 'android') {
+        try {
+          await RNFS.scanFile(downloadPath);
+        } catch (err) {
+          console.warn('Error al escanear el archivo:', err);
+        }
+      }
+      
+      Alert.alert(
+        'Descarga completa',
+        `El archivo se ha guardado en:\n${downloadPath}\n\n¿Desea ver la ubicación?`,
+        [
+          { 
+            text: 'No',
+            style: 'cancel'
+          },
+          {
+            text: 'Ver archivo',
+            onPress: async () => {
+              try {
+                if (Platform.OS === 'android') {
+                  const android = RNFetchBlob.android;
+                  android.actionViewIntent(downloadPath, 'application/zip');
+                  
+                }
+              } catch (error) {
+                console.error('Error al abrir el archivo:', error);
+                Alert.alert('Error', 'No se pudo abrir el archivo');
+              }
+            }
+          }
+        ]
+      );
+    } else {
+      throw new Error(`Error en la descarga: ${result.statusCode}`);
+    }
+  } catch (error) {
+    console.error('Error al descargar el archivo:', error);
+    Alert.alert(
+      'Error de descarga',
+      'No se pudo completar la descarga. Por favor, verifica tu conexión a internet e inténtalo de nuevo.'
+    );
+  }
+};
 
 const Principal = () => {
-  const { rol } = usePersonas();
+  const { rol } = usePersonas(); // Uso de contexto
 
+  // Opciones de descarga (deben estar dentro del componente)
   const downloadOptions = [
-    { title: "Contrato de Aprendizaje", fileName: "Modalidad Contrato aprendizaje-20241106T214047Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Contrato_aprendizaje.zip" },
-    { title: "Pasantías", fileName: "Modalidad Pasantia-20241106T214000Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Pasantia.zip" },
-    { title: "Proyecto Productivo", fileName: "Modalidad Proyecto-20241106T213957Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Proyecto.zip" },
-    { title: "Monitorías", fileName: "Modalidad Viculacion Laboral-20241107T232242Z-001.zip", url: "http://192.168.0.110:3000/Modalidad_Viculacion_Laboral.zip" },
+    {
+      title: "Contrato de Aprendizaje",
+      fileName: "Modalidad Contrato aprendizaje.zip",
+      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
+    },
+    {
+      title: "Pasantías",
+      fileName: "Modalidad Pasantia.zip",
+      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
+    },
+    {
+      title: "Proyecto Productivo",
+      fileName: "Modalidad Proyecto.zip",
+      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
+    },
+    {
+      title: "Monitorías",
+      fileName: "Modalidad Viculacion Laboral.zip",
+      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
+    },
   ];
-
-
-  const downloadZipFromAssets = async (fileName) => {
-    try {
-      const destinationPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-      console.log(`Copiando desde: assets/${fileName} a ${destinationPath}`);
-  
-      await RNFS.copyFileAssets(fileName, destinationPath);
-      Alert.alert('Descarga completada', `El archivo ${fileName} se ha guardado en Descargas`);
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'No se pudo descargar el archivo');
-    }
-  };
-
 
   return (
     <Layout title={"Inicio"}>
       <View style={styles.container}>
         <Text style={styles.subtitle}>
-          A continuación se muestran los tipos de Modalidades de Etapa Productiva, seguidamente se podrá descargar los formatos correspondientes
+          A continuación se muestran los tipos de Modalidades de Etapa Productiva,
+          seguidamente se podrá descargar los formatos correspondientes
         </Text>
 
         {downloadOptions.map((option, index) => (
@@ -57,11 +196,10 @@ const Principal = () => {
               <Text style={styles.downloadText}>archivo.zip</Text>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => downloadZipFromProject(option.fileName)}
+                onPress={() => descargarPdf(option.url, option.fileName)}
               >
-                <Download name="download" size={24} color="green" />
+                <Download size={24} color="green" />
               </TouchableOpacity>
-
 
               {rol === "Seguimiento" && (
                 <TouchableOpacity
@@ -78,6 +216,7 @@ const Principal = () => {
     </Layout>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -102,7 +241,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#0d324c",
     marginBottom: 8,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   downloadContainer: {
     flexDirection: "row",
@@ -111,11 +250,15 @@ const styles = StyleSheet.create({
   downloadText: {
     fontSize: 18,
     color: "gray",
-    marginRight: 180, // Espacio entre el texto y los botones
+    marginRight: 180,
   },
   iconButton: {
-    marginHorizontal: 5, // Espacio horizontal entre los botones
+    marginHorizontal: 5,
+  },
+  lastOption: {
+    marginBottom: 0,
   },
 });
+
 
 export default Principal;
