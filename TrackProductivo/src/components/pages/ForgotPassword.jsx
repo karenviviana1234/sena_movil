@@ -35,10 +35,15 @@ const ForgotPassword = () => {
 
       if (respuesta.status === 200) {
         Alert.alert(
-          "Recuperación de Contraseña",
-          "Se ha enviado un correo con las instrucciones para restablecer tu contraseña."
+          "Código Enviado",
+          "Se ha enviado un código de verificación a tu correo electrónico",
+          [{
+            text: "OK",
+            onPress: () => navigation.navigate('VerifyCode', { 
+              correo: correo.trim() 
+            })
+          }]
         );
-        navigation.navigate('ResetPassword');
       }
     } catch (error) {
       console.log("Error completo:", error);
@@ -92,6 +97,7 @@ const ForgotPassword = () => {
           <Text style={estilos.boton}>Enviar</Text>
         </TouchableOpacity>
       </View>
+      
     </ImageBackground>
   );
 };
