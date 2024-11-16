@@ -70,9 +70,6 @@ export const listarInstructoresLider = async (req, res) => {
   }
 };
 
-
-
-
 export const listarAprendices = async (req, res) => {
   try {
     // Consulta SQL con JOIN para obtener el nombre del municipio
@@ -157,7 +154,6 @@ export const registrarAprendiz = async (req, res) => {
   }
 };
 
-
 /* Registrar Instructores */
 export const registrarInstructor = async (req, res) => {
   try {
@@ -226,7 +222,6 @@ export const registrarInstructor = async (req, res) => {
     });
   }
 };
-
 
 /* Actualizar Personas */
 export const actualizarPersona = async (req, res) => {
@@ -329,7 +324,6 @@ export const buscarPersonas = async (req, res) => {
     });
   }
 };
-
 
 /* Eliminar Persona */
 export const eliminarPersona = async (req, res) => {
@@ -500,6 +494,7 @@ export const actualizarPerfil = async (req, res) => {
     });
   }
 };
+
 
 
 export const registrarUsuarios = async (req, res) => {

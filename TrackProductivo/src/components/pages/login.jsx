@@ -8,14 +8,14 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react-native";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [correo, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isFocusedEmail, setIsFocusedEmail] = useState(false);
@@ -23,16 +23,30 @@ const Login = () => {
   const navigation = useNavigation();
 
   const { SetRol, SetId_persona } = usePersonas();
+  useFocusEffect(
+    React.useCallback(() => {
+      // Limpiar campos cuando se enfoque la pantalla de login
+      setEmail("");
+      setPassword("");
+    }, [])
+  );
 
-
+  const isValidEmail = (correo) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(correo);
+  }
 
   const handleLogin = async () => {
+    if (!isValidEmail(correo)) {
+      Alert.alert("Error", "Por favor ingrese un correo electrónico válido.");
+      return;
+    }
     try {
       console.log("Iniciando login...");
-      console.log({ correo: email, password: password });
+      console.log({ correo: correo, password: password });
 
       const response = await axiosClient.post("/validacion", {
-        correo: email,
+        correo: correo,
         password: password,
       });
 
@@ -44,12 +58,11 @@ const Login = () => {
         const storedToken = await AsyncStorage.getItem("token");
         console.log("Token almacenado:", storedToken);
         if (user) {
-
           SetRol(user.cargo);
           SetId_persona(user.id_persona);
 
-          await AsyncStorage.setItem('token', token);
-          await AsyncStorage.setItem('user', JSON.stringify(user));
+          await AsyncStorage.setItem("token", token);
+          await AsyncStorage.setItem("user", JSON.stringify(user));
 
           const allowedRoles = [ "Instructor", "Aprendiz"];
           if (allowedRoles.includes(user.cargo)) {
@@ -61,17 +74,29 @@ const Login = () => {
               "Los roles permitidos son Instructor, y Aprendiz."
             );
           }
-
         }
       }
     } catch (error) {
+      
       console.log("Error en login:", error);
       console.log("Detalles del error:", error.response?.data);
 
-      if (error.response && error.response.status === 404) {
-        Alert.alert("Error", `${error.response.status}: ${error.response.data.message || 'Error de autenticación'}`);
+      if (error.response) {
+        if (error.response.status === 404) {
+          Alert.alert(
+            "Correo no encontrado",
+            "El correo ingresado no está registrado."
+          );
+        } else if (error.response.status === 401) {
+          Alert.alert(
+            "Contraseña incorrecta",
+            "La contraseña ingresada no es correcta."
+          );
+        } else {
+          Alert.alert("Error", "Hubo un problema con el servidor.");
+        }
       } else {
-        Alert.alert("Error", "Hubo un problema con el servidor.");
+        Alert.alert("Error", "No se pudo conectar al servidor.");
       }
     }
   };
@@ -82,11 +107,11 @@ const Login = () => {
 
   return (
     <ImageBackground
-      source={require('../../../public/Mobile.png')}
+      source={require("../../../public/Mobile.png")}
       style={styles.backgroundImage}
     >
       <View style={styles.container}>
-        <Text style={styles.textTitle}>Bienvenid@ a TrackProductivo</Text>
+        <Text style={styles.textTitle}>Bienvenidos a TrackProductivo</Text>
         <Text style={styles.text}>Ingrese a su cuenta</Text>
         <View style={styles.inputContainer}>
           <Mail size={24} color="green" style={styles.icon} />
@@ -96,7 +121,7 @@ const Login = () => {
             onBlur={() => setIsFocusedEmail(false)}
             placeholder="Correo"
             placeholderTextColor="#219162"
-            value={email}
+            value={correo}
             onChangeText={setEmail}
           />
         </View>
@@ -150,6 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    color: "black",
   },
 
   text: {
@@ -172,9 +198,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: "#ECFFE1",
     paddingLeft: 50,
+    color: "black",
   },
   inputFocused: {
     borderColor: "green",
+    color: "black",
   },
   passwordContainer: {
     flexDirection: "row",
