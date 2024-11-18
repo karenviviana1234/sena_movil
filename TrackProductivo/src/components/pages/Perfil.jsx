@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, ImageBackground } from "react-native";
 import Layout from "../Template/Layout";
 import PersonasModal from "../moleculas/Modal_personas";
-import Icon from "react-native-vector-icons/FontAwesome";
 import axiosClient from "../../axiosClient";
 import { usePersonas } from "../../Context/ContextPersonas";
-import { CircleUserRound, User } from "lucide-react-native";
+import { CircleUserRound, IdCard, Mail, Phone, MapPinHouse } from "lucide-react-native";
+
 
 const Perfil = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -44,58 +44,63 @@ const Perfil = () => {
 
   return (
     <Layout title={"Perfil"}>
-       <ImageBackground
-      source={require('../../../public/MobilePerfil.png')}
-      style={styles.backgroundImage}
-    >
-      <View style={styles.container}>
+      <ImageBackground
+        source={require('../../../public/MobilePerfil.png')}
+        style={styles.backgroundImage}
+      >
+        <View style={styles.container}>
 
 
-        {userData ? (
-          <View style={styles.containerDos}>
-            <View style={styles.infoContainers}>
-              <Text style={styles.textName}>{userData.nombres}</Text>
-            </View>
-            <View style={styles.infoContainer}>
-              <Icon name="id-card" size={24} color="black" />
-              <Text style={styles.text}>Identificacion: {userData.identificacion}</Text>
-            </View>
-            <View style={styles.infoContainer}>
-              <Icon name="phone" size={24} color="black" />
-              <Text style={styles.text}>Telefono: {userData.telefono}</Text>
-            </View>
-            <View style={styles.infoContainer}>
-              <Icon name="envelope" size={24} color="black" />
-              <Text style={styles.text}>Correo: {userData.correo}</Text>
-            </View>
-            <View style={styles.infoContainer}>
-              <Icon name="check-circle" size={24} color="black" />
-              <Text style={styles.text}>Rol: {userData.rol}</Text>
-            </View>
-            {rol === 'Aprendiz' && (
-              <View style={styles.infoContainer}>
-                <Icon name="map-marker" size={24} color="black" />
-                <Text style={styles.text}>Municipio: {userData.id_municipio}</Text>
+          {userData ? (
+            <View style={styles.containerDos}>
+              <View style={styles.infoContainers}>
+                <Text style={styles.textName}>{userData.nombres}</Text>
               </View>
-            )}
-          </View>
-        ) : (
-          <Text>Cargando datos del usuario...</Text>
-        )}
+              <View style={styles.infoContainer}>
+                <IdCard size={24} color="green" />
+                <Text style={styles.subtext}>Identificacion:</Text>
+                <Text style={styles.text}>{userData.identificacion}</Text>
+              </View>
+              <View style={styles.infoContainer}>
+                <Phone size={24} color="green" />
+                <Text style={styles.subtext}>Telefono:</Text>
+                <Text style={styles.text}>{userData.telefono}</Text>
+              </View>
+              <View style={styles.infoContainer}>
+                <Mail size={24} color="green" />
+                <Text style={styles.subtext}>Correo: </Text>
+                <Text style={styles.text}>{userData.correo}</Text>
+              </View>
+              <View style={styles.infoContainer}>
+                <CircleUserRound size={24} color="green" />
+                <Text style={styles.subtext}>Rol:</Text>
+                <Text style={styles.text}>{userData.rol}</Text>
+              </View>
+              {rol === 'Aprendiz' && (
+                <View style={styles.infoContainer}>
+                  <MapPinHouse size={24} color="green" />
+                  <Text style={styles.subtext}>Municipio:</Text>
+                  <Text style={styles.text}>{userData.id_municipio}</Text>
+                </View>
+              )}
+            </View>
+          ) : (
+            <Text>Cargando datos del usuario...</Text>
+          )}
 
-        <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
-          <Text style={styles.buttonText}>Editar Perfil</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
+            <Text style={styles.buttonText}>Editar Perfil</Text>
+          </TouchableOpacity>
 
 
 
-        {/* Pasar los datos del usuario al modal */}
-        <PersonasModal
-          visible={modalVisible}
-          onClose={handleCloseModal}
-          userData={userData}
-        />
-      </View>
+          {/* Pasar los datos del usuario al modal */}
+          <PersonasModal
+            visible={modalVisible}
+            onClose={handleCloseModal}
+            userData={userData}
+          />
+        </View>
       </ImageBackground>
     </Layout>
   );
@@ -104,7 +109,7 @@ const Perfil = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    resizeMode: "cover", 
+    resizeMode: "cover",
     height: "115%"
   },
   container: {
@@ -125,12 +130,19 @@ const styles = StyleSheet.create({
     fontFamily: 'poppins',
     marginBottom: 20,
   },
-  text: {
+  subtext: {
     color: "black",
+    fontWeight: "bold",
     fontSize: 20,
     marginLeft: 10,
   },
-  textName:{
+  text: {
+    color: "black",
+    fontSize: 20,
+    marginLeft: 2,
+    flexShrink: 1,  // Permite que el texto se ajuste en caso de que sea largo
+  },
+  textName: {
     color: "black",
     fontWeight: "bold",
     fontSize: 22,
@@ -138,10 +150,11 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: "row",
-    alignItems: "start",
+    alignItems: "flex-start",
     justifyContent: "flex-start",
     marginBottom: 25,
-    marginLeft: 20
+    marginLeft: 20,
+    flexWrap: "wrap", 
   },
   infoContainers: {
     flexDirection: "row",
@@ -171,5 +184,6 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
 });
+
 
 export default Perfil;

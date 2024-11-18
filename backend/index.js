@@ -1,4 +1,5 @@
 import express from 'express'
+
 import body_parser from 'body-parser'
 import cors from 'cors'
 import rutaPersona from './src/routes/personas.route.js'
@@ -21,6 +22,7 @@ import rutaAsignacion from './src/routes/asignacion.route.js'
 import router from './src/routes/importExcel.route.js'
 import rutaImportarExcel from './src/routes/importExcel.route.js'
 import routepassword from './src/routes/recuperar.route.js'
+import { Principal } from './src/routes/principal.route.js'
 
 const servidor = express()
 
@@ -51,6 +53,7 @@ servidor.use('/import', router)
 servidor.use('/novedades', rutaNovedades)
 servidor.use('/excel', rutaImportarExcel)
 servidor.use('/password', routepassword)
+servidor.use('/principal', Principal)
 
 servidor.use(express.static('./public'))
 servidor.set('view engine', 'ejs')
