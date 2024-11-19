@@ -8,7 +8,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, CommonActions } from "@react-navigation/native";
 import axiosClient from "../../axiosClient";
 import { Eye, EyeOff, Lock } from "lucide-react-native";
 
@@ -24,6 +24,15 @@ const ResetPassword = () => {
   const route = useRoute();
   const token = route.params?.token;
 
+  const resetearFormulario = () => {
+    setPassword("");
+    setConfirmPassword("");
+    setMostrarPassword(false);
+    setMostrarConfirmPassword(false);
+    setEstaEnfocadoPassword(false);
+    setEstaEnfocadoConfirmPassword(false);
+  };
+
   const manejarResetPassword = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Error", "Las contraseñas no coinciden");
@@ -31,19 +40,28 @@ const ResetPassword = () => {
     }
 
     try {
-      const respuesta = await axiosClient.post("/password/cambiar", {
+      const respuesta = await axiosClient.put("/password/cambiar", {
         token: token,
         password: password
       });
 
       if (respuesta.status === 200) {
+        resetearFormulario(); 
         Alert.alert(
           "Éxito",
           "Tu contraseña ha sido actualizada correctamente",
           [
             {
               text: "OK",
-              onPress: () => navigation.navigate('Login')
+              onPress: () => {
+                // Usamos CommonActions para resetear el estado de navegación
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'login' }],
+                  })
+                );
+              }
             }
           ]
         );
