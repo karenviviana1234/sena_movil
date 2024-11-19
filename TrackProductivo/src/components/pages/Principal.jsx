@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   container: {
     height: "115%",
     padding: 16,
-    backgroundColor: "white",
+    backgroundColor: "#f6fbff",
   },
   subtitle: {
     fontSize: 18,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   optionContainer: {
-    backgroundColor: "#ecffe1",
+    backgroundColor: "#e2e8f0",
     borderRadius: 8,
     padding: 18,
     marginBottom: 18,
