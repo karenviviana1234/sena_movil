@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
     tokenPassword,
     resetPassword,
-    verifyToken // Nuevo endpoint
+    verifyToken 
 } from "../controllers/recuperar.controller.js";
 
 const routepassword = Router();
