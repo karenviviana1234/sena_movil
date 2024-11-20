@@ -121,13 +121,15 @@ const Perfil = () => {
             />
           </View>
 
+
           {/* Imagen en la parte inferior */}
-          <View style={styles.logoContainer}>
+          
+{/*           <View style={styles.logoContainer}>
             <Image
               source={require("../../../public/def_AGROSIS_LOGOTIC.png")}
               style={styles.logo}
             />
-          </View>
+          </View> */}
         </ScrollView>
       </ImageBackground>
     </Layout>
@@ -208,6 +210,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 40,
   },
+
 });
 
 export default Perfil;
