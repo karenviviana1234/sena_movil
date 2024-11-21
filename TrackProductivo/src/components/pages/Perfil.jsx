@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
-    height: "115%",
+    height: "105%",
   },
   scrollContainer: {
     paddingVertical: 20,
@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   containerDos: {
-    marginTop: 80,
+    marginTop: 50,
     backgroundColor: "white",
     width: 330,
     borderRadius: 15,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     flexShrink: 1, // Permite que el texto se ajuste si es largo
   },
   button: {
-    marginTop: 30,
+    marginTop: 20,
     backgroundColor: "#74cd62",
     width: 200,
     height: 50,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   logoContainer: {
-    marginTop: 40,
+    marginTop: 20,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 30,
