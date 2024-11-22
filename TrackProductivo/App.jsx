@@ -16,6 +16,7 @@ import PrimeraScreen from './src/components/pages/Splahs';
 import RestablecerContrasena from './src/components/pages/ForgotPassword';
 import ForgotPassword from './src/components/pages/ForgotPassword';
 import ResetPassword from './src/components/pages/ResetPassword';
+import VerifyCode from './src/components/pages/VerifyCode';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +48,7 @@ const App = () => {
               <Stack.Screen name="login" component={Login} />
 
               <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+              <Stack.Screen name="VerifyCode" component={VerifyCode} />
               <Stack.Screen name="ResetPassword" component={ResetPassword} />
 
               <Stack.Screen 

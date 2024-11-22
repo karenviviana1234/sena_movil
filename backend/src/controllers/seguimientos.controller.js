@@ -394,29 +394,30 @@ export const rechazarSeguimiento = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor: ' + error.message });
     }
 };
-
 export const descargarPdf = async (req, res) => {
     try {
-        const id_seguimiento = decodeURIComponent(req.params.id_seguimiento);
-        const [result] = await pool.query('SELECT pdf FROM seguimientos WHERE id_seguimiento = ?', [id_seguimiento]);
-
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'Bitácora no encontrada' });
-        }
-
-        const pdfFileName = result[0].pdf;
-        const filePath = path.resolve(__dirname, '../../public/seguimientos', pdfFileName);
-
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
-        }
-
-        res.sendFile(filePath, { headers: { 'Content-Disposition': `attachment; filename="${pdfFileName}"` } });
+      const id_seguimiento = decodeURIComponent(req.params.id_seguimiento);
+      const [result] = await pool.query('SELECT pdf FROM seguimientos WHERE id_seguimiento = ?', [id_seguimiento]);
+  
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Bitácora no encontrada' });
+      }
+  
+      const pdfFileName = result[0].pdf;
+      const filePath = path.resolve(__dirname, '../../public/seguimientos', pdfFileName);
+  
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
+      }
+  
+      res.setHeader('Content-Disposition', `attachment; filename="${pdfFileName}"`);
+      res.sendFile(filePath);
     } catch (error) {
-        console.error('Error en el servidor:', error);
-        res.status(500).json({ message: 'Error en el servidor: ' + error.message });
+      console.error('Error en el servidor:', error);
+      res.status(500).json({ message: `Error en el servidor: ${error.message}` });
     }
-};
+  };
+  
 
 export const listarEstadoSeguimiento = async (req, res) => {
     const { id_seguimiento } = req.params;
