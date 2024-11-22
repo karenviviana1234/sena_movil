@@ -160,43 +160,59 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   }, [seguimientoPdf, id_seguimiento, handleSubmit]);
 
-
-  const downloadFile = async (id_seguimiento) => {
+  const downloadFile = async () => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
-
+  
       const { config, fs } = RNFetchBlob;
-      let DownloadDir = fs.dirs.DownloadDir;
-
-      // Realizamos la solicitud de descarga con axiosClient
-      const response = await axiosClient.get(`/seguimientos/descargarPdf/${id_seguimiento}`, {
-        responseType: 'blob', // Especificamos que la respuesta debe ser de tipo 'blob' para descargar el archivo
-      });
-
-      // Procesamos el archivo recibido y lo guardamos en el dispositivo
+      const DownloadDir = fs.dirs.DownloadDir; // Ruta de descargas
+      const baseUrl = "http://192.168.42.206:3000"; // Reemplaza con la URL de tu servidor
+  
+      const filePath = `${RNFetchBlob.fs.dirs.DocumentDir}/acta_seguimiento_${id_seguimiento}.pdf`;
+      const downloadUrl = `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`; // URL completa del archivo
+  
       config({
+        fileCache: true,
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
           path: `${DownloadDir}/acta_seguimiento_${id_seguimiento}.pdf`,
           description: 'Descargando archivo...',
-        }
+          mime: 'application/pdf',
+          mediaScannable: true,
+        },
       })
-        .fetch('GET', response.config.url)
-        .then((res) => {
-          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
-        })
-        .catch((error) => {
-          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
-        });
-
+      .fetch('GET', `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
+      .then((res) => {
+        Alert.alert('Descarga completa', 'El archivo se ha descargado correctamente.');
+        console.log('Ruta del archivo descargado:', res.path());
+      })
+      .catch((error) => {
+        console.error('Error al descargar el archivo:', error.message);
+      });      
     } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
+      console.error("Error al manejar la descarga:", error);
     }
   };
+  
 
+  const estadoConfig = {
+    solicitud: {
+      color: "orange",
+      icon: "alert-circle",
+    },
+    aprobado: {
+      color: "green",
+      icon: "check-circle",
+    },
+    rechazado: {
+      color: "red",
+      icon: "alert-circle",
+    },
+  };
+
+  const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
 
   return (
     <View style={styles.container}>
@@ -208,10 +224,9 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             <Text style={styles.subtitle}>
               Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
             </Text>
-            <View style={styles.containerEstado}>
-              <Text style={[styles.estadoText, styles.getEstadoStyle(estado)]}>
-                {estado}
-              </Text>
+            <View style={styles.estadoC}>
+              <Icon name={icon} size={20} color={color} />
+              <Text style={[styles.estadoText, { color }]}>{estado}</Text>
             </View>
           </View>
         )}
@@ -301,29 +316,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 3,
   },
-  containerEstado: {
+  estadoC: {
     flexDirection: "row",
-    marginLeft: 70,
-    alignItems: 'center',
+    marginLeft: 78,
+    marginBottom: 12
   },
   estadoText: {
+    marginLeft: 2,
     fontSize: 14,
-    color: '#fff', // Color de texto blanco para que sea legible
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12, // Bordes redondeados para el contenedor pequeño
-  },
-  getEstadoStyle: (estado) => {
-    switch (estado) {
-      case 'aprobado':
-        return { backgroundColor: 'rgba(0, 128, 0, 0.7)' }; // verde con 50% de opacidad
-      case 'solicitud':
-        return { backgroundColor: 'rgba(255, 165, 0, 0.7)' }; // naranja con 50% de opacidad
-      case 'noaprobado':
-        return { backgroundColor: 'rgba(255, 0, 0, 0.7)' }; // rojo con 50% de opacidad
-      default:
-        return { backgroundColor: 'rgba(128, 128, 128, 0.7)' }; // gris con 50% de opacidad
-    }
   },
 });
 
