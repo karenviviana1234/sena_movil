@@ -156,22 +156,22 @@ const Principal = () => {
     {
       title: "Contrato de Aprendizaje",
       fileName: "Modalidad Contrato aprendizaje.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
+      url: "http://192.168.0.101:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
     },
     {
       title: "Pasantías",
       fileName: "Modalidad Pasantia.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
+      url: "http://192.168.0.101:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
     },
     {
       title: "Proyecto Productivo",
       fileName: "Modalidad Proyecto.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
+      url: "http://192.168.0.101:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
     },
     {
       title: "Monitorías",
       fileName: "Modalidad Viculacion Laboral.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
+      url: "http://192.168.0.101:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
     },
   ];
 
