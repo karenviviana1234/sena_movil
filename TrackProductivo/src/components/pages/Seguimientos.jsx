@@ -32,10 +32,14 @@ const Seguimientos = () => {
     }, [getSeguimientos]);
 
     const filteredItems = useMemo(() => {
-        return seguimientos.filter(seg =>
-            seg.identificacion ||
-            seg.id_seguimiento.toString().includes(filterValue)
-        );
+        return seguimientos.filter((seg) => {
+            const filterText = filterValue.toLowerCase();
+            return (
+                seg.nombres?.toLowerCase().includes(filterText) || // Filtra por nombre
+                seg.identificacion?.toString().includes(filterText) || // Filtra por identificación
+                seg.id_seguimiento?.toString().includes(filterText) // Filtra por ID de seguimiento
+            );
+        });
     }, [seguimientos, filterValue]);
 
     const handleOpenModal = async (id_seguimiento, componentName) => {
@@ -59,18 +63,15 @@ const Seguimientos = () => {
         await AsyncStorage.removeItem('idSeguimiento');
     };
 
-    // Verificar si todas las bitácoras están aprobadas
     const checkBitacorasApproved = (bitacoras) => {
         if (!Array.isArray(bitacoras)) {
             return false;
         }
-
         return bitacoras.every(seguimiento =>
             Array.isArray(seguimiento) &&
             seguimiento.every(bitacora => bitacora.estado_bitacora === "aprobado")
         );
     };
-
 
     const renderSeguimientoButtons = (item) => {
         const seguimientoFechas = [item.seguimiento1, item.seguimiento2, item.seguimiento3];
@@ -85,13 +86,13 @@ const Seguimientos = () => {
         const getButtonBackgroundColor = (estado) => {
             switch (estado) {
                 case "solicitud":
-                    return "#FFA000"; // Naranja
+                    return "#FFA000";
                 case "aprobado":
-                    return "#4CAF50"; // Verde
+                    return "#4CAF50";
                 case "no aprobado":
-                    return "#e64133"; // Rojo
+                    return "#e64133";
                 default:
-                    return "#BDBDBD"; // Color gris para estados no definidos
+                    return "#BDBDBD";
             }
         };
 
@@ -119,49 +120,23 @@ const Seguimientos = () => {
     };
 
     const renderItem = ({ item }) => {
-
-        // Verificamos si todas las bitácoras están aprobadas
         if (checkBitacorasApproved(item.bitacoras)) {
             if (rol === "Aprendiz") {
                 return (
                     <View key={item.id_seguimiento}>
-                        <Text style={styles.subtitle}>¿Como Certificarte?</Text>
+                        <Text style={styles.subtitle}>¿Cómo Certificarte?</Text>
                         <Text style={styles.itemText}>
                             Apreciad@ aprendiz, para solicitar el certificado del programa de formación cursado, por favor remitir un mensaje al correo
                             <Text style={styles.emailText} onPress={handleEmailPress}> certificacion9528@sena.edu.co</Text>
-                            , solicitando su certificado, el programa de formación, el número de ficha y número de celular. Adicionalmente, adjuntar la siguiente documentación:
+                            , adjuntando los siguientes documentos:
                         </Text>
                         <Text style={styles.itemText}>- Fotocopia documento de identidad</Text>
-                        <Text style={styles.itemText}>- Foto carnet del SENA destruido (sino lo tienen informar en el correo el motivo por el cual no lo tienen)</Text>
-                        <Text style={styles.itemText}>- Pruebas TYT para tecnólogos (Aplica para tecnólogos, pueden remitir soporte de la asistencia a la presentación no es necesario esperar los resultados)</Text>
-                        <Text style={styles.itemText}>- Hoja de vida actualizada en agencia pública de empleo (sino esta actualizada por este medio pueden remitir Diploma o acta de Bachiller o de 9)</Text>
-                        <Text style={styles.itemText}>- Certificado laboral donde hizo su etapa productiva</Text>
-                        <Text style={styles.itemText}>- Certificado por SOFIAPLUS (Ingresa a Sofia Plus, selecciona el rol de aprendiz, opción certificación, descargar soporte del programa que estaba estudiando para realizar el proceso de actualización)</Text>
+                        <Text style={styles.itemText}>- Certificados necesarios según su etapa formativa</Text>
                     </View>
                 );
             }
         }
 
-        if (checkBitacorasApproved(item.bitacoras)) {
-            if (rol === "Instructor") {
-            return (
-                <View key={item.id_seguimiento} style={styles.item}>
-                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
-                <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
-                <Text style={styles.itemText}>Programa: {item.sigla}</Text>
-                <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
-                <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
-                    <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
-                    <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
-                        <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
-                    </TouchableOpacity>
-                </View>
-            );
-        }
-    }
-        
-        // Si no todas las bitácoras están aprobadas, mostramos la información original
         return (
             <View key={item.id_seguimiento} style={styles.item}>
                 <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
@@ -197,7 +172,7 @@ const Seguimientos = () => {
                 {rol !== 'Aprendiz' && (
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Buscar seguimiento..."
+                        placeholder="Buscar por nombre, identificación o ID..."
                         value={filterValue}
                         onChangeText={setFilterValue}
                     />
