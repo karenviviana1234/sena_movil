@@ -73,8 +73,8 @@ const descargarPdf = async (url, fileName) => {
     const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`; 
 
     Alert.alert(
-      'Iniciando descarga',
-      `Intentando descargar en:\n${downloadPath}`
+      'Iniciando descarga por favor espere....',
+      // `Intentando descargar en:\n${downloadPath}`
     );
 
     // Configurar la descarga
@@ -113,7 +113,7 @@ const descargarPdf = async (url, fileName) => {
       
       Alert.alert(
         'Descarga completa',
-        `El archivo se ha guardado en:\n${downloadPath}\n\n¿Desea ver la ubicación?`,
+        `El archivo se ha guardado en  sus descargar:¿Desea ver la ubicación?`,
         [
           { 
             text: 'No',
@@ -156,22 +156,22 @@ const Principal = () => {
     {
       title: "Contrato de Aprendizaje",
       fileName: "Modalidad Contrato aprendizaje.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
+      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
     },
     {
       title: "Pasantías",
       fileName: "Modalidad Pasantia.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
+      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
     },
     {
       title: "Proyecto Productivo",
       fileName: "Modalidad Proyecto.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
+      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
     },
     {
       title: "Monitorías",
       fileName: "Modalidad Viculacion Laboral.zip",
-      url: "http://192.168.0.110:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
+      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
     },
   ];
 

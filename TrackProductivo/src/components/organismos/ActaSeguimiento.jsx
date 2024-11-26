@@ -164,38 +164,30 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
-  
+
       const { config, fs } = RNFetchBlob;
-      const DownloadDir = fs.dirs.DownloadDir; // Ruta de descargas
-      const baseUrl = "http://192.168.42.206:3000"; // Reemplaza con la URL de tu servidor
-  
-      const filePath = `${RNFetchBlob.fs.dirs.DocumentDir}/acta_seguimiento_${id_seguimiento}.pdf`;
-      const downloadUrl = `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`; // URL completa del archivo
-  
+      let DownloadDir = fs.dirs.DownloadDir;
+      const baseUrl = "http://192.168.0.107:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+
       config({
-        fileCache: true,
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
           path: `${DownloadDir}/acta_seguimiento_${id_seguimiento}.pdf`,
           description: 'Descargando archivo...',
-          mime: 'application/pdf',
-          mediaScannable: true,
-        },
+        }
       })
-      .fetch('GET', `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
-      .then((res) => {
-        Alert.alert('Descarga completa', 'El archivo se ha descargado correctamente.');
-        console.log('Ruta del archivo descargado:', res.path());
-      })
-      .catch((error) => {
-        console.error('Error al descargar el archivo:', error.message);
-      });      
+        .fetch('GET', `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
+        .then((res) => {
+          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
+        })
+        .catch((error) => {
+          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
+        });
     } catch (error) {
-      console.error("Error al manejar la descarga:", error);
+      console.error(error);
     }
   };
-  
 
   const estadoConfig = {
     solicitud: {
@@ -309,7 +301,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
-
+    
   },
   Container: {
     flexDirection: "row",

@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
     <application
         android:name=".MainApplication"
@@ -13,6 +13,7 @@
         android:allowBackup="false"
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true"> <!-- Permite el acceso a almacenamiento tradicional para Android 10 y anteriores -->
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
