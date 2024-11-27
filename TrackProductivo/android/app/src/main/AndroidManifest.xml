@@ -2,8 +2,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<<<<<<< HEAD
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+=======
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+>>>>>>> 8eb454cee9ea6a0ed0982183c180dacec38a8941
 
     <application
         android:name=".MainApplication"
