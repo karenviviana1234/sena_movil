@@ -156,38 +156,22 @@ const Principal = () => {
     {
       title: "Contrato de Aprendizaje",
       fileName: "Modalidad Contrato aprendizaje.zip",
-<<<<<<< HEAD
       url: "http://192.168.0.108:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
-=======
-      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Contrato aprendizaje.zip"
->>>>>>> 8eb454cee9ea6a0ed0982183c180dacec38a8941
     },
     {
       title: "Pasantías",
       fileName: "Modalidad Pasantia.zip",
-<<<<<<< HEAD
       url: "http://192.168.0.108:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
-=======
-      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Pasantia.zip"
->>>>>>> 8eb454cee9ea6a0ed0982183c180dacec38a8941
     },
     {
       title: "Proyecto Productivo",
       fileName: "Modalidad Proyecto.zip",
-<<<<<<< HEAD
       url: "http://192.168.0.108:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
-=======
-      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Proyecto.zip"
->>>>>>> 8eb454cee9ea6a0ed0982183c180dacec38a8941
     },
     {
       title: "Monitorías",
       fileName: "Modalidad Viculacion Laboral.zip",
-<<<<<<< HEAD
       url: "http://192.168.0.108:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
-=======
-      url: "http://192.168.0.107:3000/principal/descargar?nombre=Modalidad Viculacion Laboral.zip"
->>>>>>> 8eb454cee9ea6a0ed0982183c180dacec38a8941
     },
   ];
 
@@ -238,7 +222,7 @@ const styles = StyleSheet.create({
   container: {
     height: "115%",
     padding: 16,
-    backgroundColor: "#f6fbff",
+    backgroundColor: "white",
   },
   subtitle: {
     fontSize: 18,
@@ -248,7 +232,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   optionContainer: {
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#ecffe1",
     borderRadius: 8,
     padding: 18,
     marginBottom: 18,

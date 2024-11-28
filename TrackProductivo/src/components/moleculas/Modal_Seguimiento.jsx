@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import { PermissionsAndroid, Platform } from 'react-native';
+import RNFS from 'react-native-fs';
 
 const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
   const { getSeguimiento } = useContext(SeguimientosContext);
@@ -98,6 +99,8 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
       type: bitacoraPdf.type,
       name: bitacoraPdf.name,
     });
+    console.log(bitacoraPdf);
+
 
     try {
       const response = await axiosClient.post(
@@ -167,7 +170,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     }
   };
 
-  const Ip = '192.168.0.107';
+  const Ip = '192.168.0.102';
 
   const downloadFile = async (id_bitacora) => {
     try {
@@ -176,7 +179,8 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.101:3000";
+
+      const baseUrl = axiosClient.defaults.baseURL;
 
       config({
         addAndroidDownloads: {
@@ -231,13 +235,13 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                           <Icon name={icon} size={20} color={color} />
                           <Text style={[styles.estadoText, { color }]}>{bitacora.estado}</Text>
                         </View>
-                        
+
                       </View>
                       <Text style={styles.label}>{bitacora.pdf}</Text>
                       <View style={styles.containerPdf}>
-                      {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
-                        <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
-                      )}
+                        {currentBitacoraId === bitacora.id_bitacora && bitacoraPdf && (
+                          <Text style={styles.fileName}>{bitacoraPdf.name}</Text>
+                        )}
                         <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
                           <FileUp size={20} color="gray" />
                           <Text style={styles.buttonText}>Cargar Pdf</Text>
@@ -245,14 +249,14 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                         <TouchableOpacity onPress={handleSubmitBitacora}>
                           <SendHorizontal size={24} color="green" />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => downloadFile(bitacora.id_bitacora)}>
-                          <Download size={24} color="#0d324c" />
+                        <TouchableOpacity  onPress={() => downloadFile(bitacora.id_bitacora)}>
+                          <Download name="download" size={24} color="#0d324c" />
                         </TouchableOpacity>
                       </View>
 
                       {/* Mostrar el nombre del archivo PDF cargado */}
-                     
-                      
+
+
                       <Text style={styles.labelB}>{bitacora.instructor}</Text>
                       <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>
                     </View>
@@ -289,10 +293,10 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
   },
   fileName: {
-    position: 'absolute', 
-    bottom: 55, 
-    fontSize: 17, 
-    color: 'gray', 
+    position: 'absolute',
+    bottom: 55,
+    fontSize: 17,
+    color: 'gray',
     padding: 5,
 
   },
