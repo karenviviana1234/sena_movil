@@ -160,17 +160,15 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   }, [seguimientoPdf, id_seguimiento, handleSubmit]);
 
-  const downloadFile = async (id_seguimiento) => {
+  const downloadFile = async () => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
-  
+
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-  
-      // Obtener la URL base desde axiosClient
-      const baseUrl = axiosClient.defaults.baseURL;
-  
+      const baseUrl = "http://192.168.0.107:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
@@ -190,7 +188,6 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
       console.error(error);
     }
   };
-  
 
   const estadoConfig = {
     solicitud: {
@@ -244,10 +241,9 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             </TouchableOpacity>
           )}
           {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
-            <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
+            <TouchableOpacity style={styles.button} onPress={downloadFile}>
               <Download name="download" size={24} color="#0d324c" />
             </TouchableOpacity>
-
           )}
 
         </View>
@@ -305,7 +301,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
-
+    
   },
   Container: {
     flexDirection: "row",
