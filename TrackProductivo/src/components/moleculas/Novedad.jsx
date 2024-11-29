@@ -5,6 +5,7 @@ import FormNovedades from './FormNovedad';
 import axiosClient from '../../axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from "@react-native-picker/picker";
+import NovedadFormulario from './FormNovedad';
 import Layout from "../Template/Layout";
 
 
@@ -17,6 +18,15 @@ const Novedades = ({ route }) => {
     const [seguimientoId, setSeguimientoId] = useState(''); // Estado para el seguimiento seleccionado
     const [productiva, setProductiva] = useState(null);
     const [seguimientos, setSeguimientos] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const handleAbrirModalFormNovedades = () => {
+        setModalVisible(true);
+    };
+    
+    const handleCloseModalFormNovedades = () => {
+        setModalVisible(false);
+    };
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -191,7 +201,12 @@ const Novedades = ({ route }) => {
                     </Picker>
                 </View>
 
-                <TouchableOpacity style={styles.formButton} onPress={() => handleOpenModal('formNovedades')}>
+                <NovedadFormulario
+                    visible={modalVisible}
+                    onClose={handleCloseModalFormNovedades}
+                />
+
+                <TouchableOpacity style={styles.formButton} onPress={handleAbrirModalFormNovedades}>
                     <BellPlus size={30} bottom={-8} color="green" style={styles.icon} />
                 </TouchableOpacity>
 

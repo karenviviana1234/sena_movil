@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, Platform, Modal } from 'react-native';
 import axios from '../../axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -11,7 +11,7 @@ import { usePersonas } from '../../Context/ContextPersonas';
 import moment from 'moment';
 import axiosClient from '../../axiosClient';
 
-const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
+const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClose }) => {
     const [descripcion, setDescripcion] = useState('');
     const [fecha, setFecha] = useState(new Date());
     const [instructor, setInstructor] = useState('');
@@ -42,13 +42,11 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
         }
     }, [productiva]);
 
-
     useEffect(() => {
         if (nombres) {
             setInstructor(nombres);
             console.log(nombres); // Asignar el nombre del usuario logueado
         }
-
         if (mode === 'update' && initialData.id_novedad) {
             setDescripcion(initialData.descripcion);
             setFecha(new Date(initialData.fecha));
@@ -87,14 +85,12 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
                 multiple: false,
                 compressImageQuality: 0.7,
             });
-
             setFotos([result]);
         } catch (error) {
             console.error('Error al seleccionar imágenes:', error);
             Alert.alert('Error', 'No se pudieron seleccionar las imágenes.');
         }
     };
-
 
     const removeImage = () => {
         setFotos([]);
@@ -103,8 +99,6 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
         console.log('Valor seleccionado en el Picker:', value);
         setSeguimiento(Number(value));
     };
-
-
 
     const showDatePicker = () => {
         setIsDatePickerVisible(true);
@@ -155,14 +149,12 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
 
         try {
             let url = mode === 'update' ? `/novedades/actualizar/${initialData.id_novedad}` : '/novedades/registrar';
-
             const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`
                 }
             });
-
             console.log('Respuesta exitosa:', response.data);
             Alert.alert('Éxito', 'Novedad registrada con éxito.');
             onSubmit();
@@ -180,95 +172,81 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
         }
     };
 
-
     return (
-        <View style={styles.container}>
-            <TitleWithBackButton navigation={navigation} />
-
-            <ScrollView style={styles.scrollView}>
-                <View style={styles.sectionSeparator}>
-
-                    <Text style={styles.instructor}>
-                        {instructor ? `Instructor: ${instructor}` : 'Seleccione un seguimiento para ver el instructor.'}
-                    </Text>
-
-
-
-                    <TextInput
-                        placeholder="Descripción de la Novedad"
-                        value={descripcion}
-                        onChangeText={setDescripcion}
-                        multiline
-                        numberOfLines={4}
-                        style={[styles.input, styles.descriptionInput]}
-                    />
-                </View>
-
-                <View style={styles.instructorContainer}>
-
-                    <View style={styles.containerpicker}>
-
-                        <Picker
-                            selectedValue={seguimientoId}
-                            onValueChange={(itemValue) => {
-                                console.log('Valor seleccionado en el Picker:', itemValue);
-                                setSeguimientoId(itemValue);  // Aquí estás actualizando el estado `seguimientoId`
-                            }}
-                        >
-                            <Picker.Item label="Selecciona un Seguimiento" value="" style={styles.picker} />
-                            {seguimientos.map((seguimiento) => (
-                                <Picker.Item
-                                    key={seguimiento.id}
-                                    label={`Seguimiento ${seguimiento.id}`}  // Para mayor claridad, puedes incluir el nombre
-                                    value={seguimiento.id}  // Aquí, el valor debe ser el ID del seguimiento
-                                />
-                            ))}
-                        </Picker>
-                    </View>
-                    <TouchableOpacity onPress={pickImages} style={[styles.buttonImage, styles.imageButton, styles.largeImageButton]}>
-                        <Text style={[styles.TextButton]}> + Cargar Imagen</Text>
-                    </TouchableOpacity>
-
-                </View>
-
-                <TouchableOpacity onPress={showDatePicker} style={styles.fecha}>
-                    <Text>{moment(fecha).format('YYYY-MM-DD')}</Text>
-                </TouchableOpacity>
-
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleDatePicked}
-                    onCancel={() => setIsDatePickerVisible(false)}
-                />
-
-
-                {fotos.length > 0 && (
-                    <View style={styles.imagesContainer}>
-                        {fotos.map((foto, index) => (
-                            <ImagePreview
-                                key={index}
-                                image={foto}
-                                onDelete={removeImage}
+        <Modal visible={visible} animationType="slide" transparent={true}>
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <TitleWithBackButton navigation={navigation} />
+                    <ScrollView style={styles.scrollView}>
+                        <View style={styles.sectionSeparator}>
+                            <Text style={styles.instructor}>
+                                {instructor ? `Instructor: ${instructor}` : 'Seleccione un seguimiento para ver el instructor.'}
+                            </Text>
+                            <TextInput
+                                placeholder="Descripción de la Novedad"
+                                value={descripcion}
+                                onChangeText={setDescripcion}
+                                multiline
+                                numberOfLines={4}
+                                style={[styles.input, styles.descriptionInput]}
                             />
-                        ))}
+                        </View>
+                        <View style={styles.instructorContainer}>
+                            <View style={styles.containerpicker}>
 
-
+                                <Picker
+                                    selectedValue={seguimientoId}
+                                    onValueChange={(itemValue) => {
+                                        console.log('Valor seleccionado en el Picker:', itemValue);
+                                        setSeguimientoId(itemValue);  // Aquí estás actualizando el estado `seguimientoId`
+                                    }}
+                                >
+                                    <Picker.Item label="Selecciona un Seguimiento" value="" style={styles.picker} />
+                                    {seguimientos.map((seguimiento) => (
+                                        <Picker.Item
+                                            key={seguimiento.id}
+                                            label={`Seguimiento ${seguimiento.id}`}  // Para mayor claridad, puedes incluir el nombre
+                                            value={seguimiento.id}  // Aquí, el valor debe ser el ID del seguimiento
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
+                            <TouchableOpacity onPress={pickImages} style={[styles.buttonImage, styles.imageButton, styles.largeImageButton]}>
+                                <Text style={[styles.TextButton]}> + Cargar Imagen</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity onPress={showDatePicker} style={styles.fecha}>
+                            <Text>{moment(fecha).format('YYYY-MM-DD')}</Text>
+                        </TouchableOpacity>
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={handleDatePicked}
+                            onCancel={() => setIsDatePickerVisible(false)}
+                        />
+                        {fotos.length > 0 && (
+                            <View style={styles.imagesContainer}>
+                                {fotos.map((foto, index) => (
+                                    <ImagePreview
+                                        key={index}
+                                        image={foto}
+                                        onDelete={removeImage}
+                                    />
+                                ))}
+                            </View>
+                        )}
+                    </ScrollView>
+                    <View>
+                        <TouchableOpacity onPress={handleSubmit} style={[styles.button, styles.submitButton]}>
+                            <Text style={[styles.TextButton]}>{mode === 'update' ? 'Actualizar Novedad' : 'Crear Novedad'}</Text>
+                        </TouchableOpacity>
                     </View>
-                )}
-
-
-
-            </ScrollView>
-
-
-
-            <View style={styles.bottomButtonContainer}>
-                <TouchableOpacity onPress={handleSubmit} style={[styles.button, styles.submitButton]}>
-                    <Text style={[styles.TextButton]}>{mode === 'update' ? 'Actualizar Novedad' : 'Crear Novedad'}</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Text style={styles.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </Modal>
     );
 };
 const ImagePreview = ({ image, onDelete }) => (
@@ -281,25 +259,50 @@ const ImagePreview = ({ image, onDelete }) => (
 );
 
 const styles = StyleSheet.create({
-    container: {
+    modalContainer: {
         flex: 1,
-        backgroundColor: '#ecffe1',
-        padding: 20,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    scrollView: {
-        flex: 1,
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        width: '90%',
+        maxHeight: '90%',
     },
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 15,
     },
     backButton: {
         marginRight: 10,
     },
     title: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
+    },
+    scrollView: {
+        flexGrow: 1,
+    },
+    sectionSeparator: {
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        paddingBottom: 10,
+    },
+    seguimientoContainer: {
+        marginBottom: 20,
+    },
+    instructorContainer: {
+        marginBottom: 15,
+    },
+    instructor: {
+        fontSize: 16,
+        fontWeight: '500',
+        marginBottom: 10,
     },
     input: {
         marginBottom: 10,
@@ -311,50 +314,12 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 18
     },
-    instructorInput: {
-        marginTop: 20,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        width: "100%",
-        height: 50,
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 50,
-    },
-    buttonImage: {
-        backgroundColor: "#EDEDED",
-        width: "39%",
-        paddingHorizontal: 2,
-        height: 50,
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 16,
-        marginLeft: 3
-    },
-    TextButton: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    seguimientoContainer: {
-        marginBottom: 20,
-    },
-    imagesContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        marginBottom: 20,
-    },
-    imagePreview: {
-        position: 'relative',
-        margin: 5,
-    },
-    previewThumbnail: {
-        width: 80,
-        height: 80,
-        resizeMode: 'cover',
-        borderRadius: 5,
+    containerpicker: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 5,
+        marginBottom: 10,
     },
     deleteButton: {
         position: 'absolute',
@@ -372,51 +337,77 @@ const styles = StyleSheet.create({
     },
     imageButton: {
         backgroundColor: '#03055B',
-
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        marginBottom: 20,
+    },
+    imagePreview: {
+        position: 'relative',
+        margin: 5,
+    },
+    previewThumbnail: {
+        width: 80,
+        height: 80,
+        resizeMode: 'cover',
+        borderRadius: 5,
     },
     largeImageButton: {
         marginVertical: 20,
     },
-    bottomButtonContainer: {
-        position: 'absolute',
+    picker: {
+        fontSize: 14,
+        backgroundColor: 'transparent',
+    },
+    buttonImage: {
+        backgroundColor: '#E89551',
+        paddingVertical: 10,
+        borderRadius: 8,
         alignItems: 'center',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
+        marginTop: 10,
+    },
+    TextButton: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    fecha: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 10,
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    imagePreview: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+        marginTop: 10,
     },
     submitButton: {
         backgroundColor: '#4CAF50',
-        padding: 15,
-        height: 55,
-    },
-    instructorContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        paddingVertical: 10,
+        borderRadius: 8,
         alignItems: 'center',
-        marginBottom: 20,
     },
-    instructor: {
-        fontSize: 20,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginBottom: 20
+    submitText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
-    containerpicker: {
-        height: 50,
-        width: '55%',
-        backgroundColor: "#EDEDED",
-        borderRadius: 15,
-        overflow: 'hidden',
+    closeButton: {
+        backgroundColor: "red",
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+        marginVertical: 10
     },
-    picker: {
-        height: 50,
-        width: '55%',
-        backgroundColor: 'transparent',
-    },
-    fecha: {
-        marginTop: 0,
-        marginLeft: 240
+    closeButtonText: {
+        color: "white",
+        fontSize: 18,
     },
 });
 
