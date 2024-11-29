@@ -10,6 +10,7 @@ export const PersonasProvider = ({ children }) => {
   const [persona, SetPersona] = useState({});
   const [id_persona, SetId_persona] = useState(null);
   const [rol, setRol] = useState(null); // Cambiado el nombre del setter para evitar confusiones
+  const [nombres, setNombres] = useState(null);
 
   const SetRol = (newRol) => {
     setRol(newRol);
@@ -43,12 +44,14 @@ export const PersonasProvider = ({ children }) => {
         persona,
         id_persona,
         rol,
+        nombres,
         SetPersonas,
         SetPersona,
         SetId_persona,
         getPersonas,
         getPersona,
-        SetRol
+        SetRol,
+        setNombres
       }}
     >
       {children}

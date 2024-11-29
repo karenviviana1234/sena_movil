@@ -1,212 +1,423 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
-// import { Picker } from '@react-native-picker/picker';
-// import * as ImagePicker from 'expo-image-picker';
-// import axiosClient from '../../axiosClient';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, Platform } from 'react-native';
+import axios from '../../axiosClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Picker } from '@react-native-picker/picker';
+import ImagePicker from 'react-native-image-crop-picker';
+import { ArrowLeft } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { usePersonas } from '../../Context/ContextPersonas';
+import moment from 'moment';
+import axiosClient from '../../axiosClient';
 
-// const FormNovedades = ({ onSubmit, onClose, actionLabel, mode, initialData }) => {
-//   const [descripcion, setDescripcion] = useState(initialData?.descripcion || "");
-//   const [fecha, setFecha] = useState(initialData?.fecha || new Date());
-//   const [foto, setFoto] = useState(null);
-//   const [seguimientos, setSeguimientos] = useState([]);
-//   const [selectedSeguimiento, setSelectedSeguimiento] = useState(initialData?.id_seguimiento || "");
-//   const [errorMessage, setErrorMessage] = useState("");
-//   const [instructor, setInstructor] = useState("");
+const NovedadFormulario = ({ mode, initialData, onSubmit, route }) => {
+    const [descripcion, setDescripcion] = useState('');
+    const [fecha, setFecha] = useState(new Date());
+    const [instructor, setInstructor] = useState('');
+    const { nombres } = usePersonas();
+    console.log(nombres);
+    const [fotos, setFotos] = useState([]);
+    const [seguimiento, setSeguimiento] = useState('');
+    const [seguimientos, setSeguimientos] = useState([]);
+    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [productiva, setProductiva] = useState(null);
+    const [seguimientoId, setSeguimientoId] = useState('');
 
-//   useEffect(() => {
-//     const fetchInitialData = async () => {
-//       try {
-//         if (mode === 'update' && initialData.id_novedad) {
-//           await loadInitialData();
-//         }
-//         const response = await axiosClient.get("/seguimientos/listar");
-//         setSeguimientos(response.data);
-//       } catch (error) {
-//         console.error("Error al cargar datos", error);
-//         setErrorMessage("Error al cargar datos. Intenta de nuevo más tarde.");
-//       }
-//     };
+    useEffect(() => {
+        const loadInitialData = async () => {
+            if (route?.params?.productiva) {
+                setProductiva(route.params.productiva);
+            } else {
+                Alert.alert('Error', 'No se recibió el parámetro productiva.');
+            }
+        };
+        loadInitialData();
+    }, [route?.params?.productiva]);
 
-//     fetchInitialData();
+    useEffect(() => {
+        // Llama a fetchSeguimientos solo si productiva está disponible
+        if (productiva) {
+            fetchSeguimientos(productiva);
+        }
+    }, [productiva]);
 
-//     // Obtén el instructor desde AsyncStorage
-//     const getInstructorFromStorage = async () => {
-//       try {
-//         const storedUser = await AsyncStorage.getItem('user');
-//         if (storedUser) {
-//           const user = JSON.parse(storedUser);
-//           setInstructor(user.nombres); // Asume que el objeto de usuario tiene una propiedad 'nombre'
-//         }
-//       } catch (error) {
-//         console.error("Error al obtener el instructor del almacenamiento:", error);
-//       }
-//     };
 
-//     getInstructorFromStorage();
-//   }, []);
+    useEffect(() => {
+        if (nombres) {
+            setInstructor(nombres);
+            console.log(nombres); // Asignar el nombre del usuario logueado
+        }
 
-//   const loadInitialData = async () => {
-//     try {
-//       const response = await axiosClient.get(`/novedad/listarN/${initialData.id_novedad}`);
-//       const novedad = response.data;
+        if (mode === 'update' && initialData.id_novedad) {
+            setDescripcion(initialData.descripcion);
+            setFecha(new Date(initialData.fecha));
+            setSeguimiento(initialData.seguimiento);
+            setFotos([initialData.foto]);
+        }
+    }, [nombres]);
 
-//       setFecha(new Date(novedad.fecha));
-//       setDescripcion(novedad.descripcion);
-//       setSelectedSeguimiento(novedad.id_seguimiento);
+    const fetchSeguimientos = async (productivaId) => {
+        try {
+            const response = await axiosClient.get(`/seguimientos/listarSeguimientoP/${productivaId}`);
+            if (response.data && response.data[productivaId]) {
+                const seguimientosList = Object.entries(response.data[productivaId]).map(([key, value]) => ({
+                    id: value,
+                    name: key,
+                }));
+                setSeguimientos(seguimientosList);
+            } else {
+                console.error("La respuesta no contiene los datos esperados:", response.data);
+                Alert.alert('Error', 'La respuesta de la API no es válida.');
+            }
+        } catch (error) {
+            console.error('Error al obtener seguimientos:', error);
+            Alert.alert('Error', 'Ocurrió un error al cargar los seguimientos.');
+        }
+    };
 
-//       if (novedad.foto) {
-//         setFoto({ uri: novedad.foto });
-//       }
-//     } catch (error) {
-//       console.error("Error al cargar datos iniciales:", error);
-//       setErrorMessage("Error al cargar datos iniciales. Intenta de nuevo más tarde.");
-//     }
-//   };
+    useEffect(() => {
+        fetchSeguimientos(); // Llamada inicial para obtener los seguimientos
+    }, []);
 
-//   const handleSubmit = async () => {
-//     setErrorMessage("");
 
-//     const formData = new FormData();
-//     formData.append("descripcion", descripcion);
-//     formData.append("fecha", fecha.toISOString().split('T')[0]);
-//     formData.append("instructor", instructor);
-//     formData.append("seguimiento", selectedSeguimiento);
+    const pickImages = async () => {
+        try {
+            const result = await ImagePicker.openPicker({
+                multiple: false,
+                compressImageQuality: 0.7,
+            });
 
-//     if (foto && typeof foto !== 'string') {
-//       formData.append("foto", {
-//         name: foto.name,
-//         type: foto.type,
-//         uri: Platform.OS === 'android' ? foto.uri : foto.uri.replace('file://', ''),
-//       });
-//     }
+            setFotos([result]);
+        } catch (error) {
+            console.error('Error al seleccionar imágenes:', error);
+            Alert.alert('Error', 'No se pudieron seleccionar las imágenes.');
+        }
+    };
 
-//     try {
-//       if (mode === 'update' && initialData?.id_novedad) {
-//         await axiosClient.put(`/novedad/actualizar/${initialData.id_novedad}`, formData, {
-//           headers: {
-//             'Content-Type': 'multipart/form-data',
-//           },
-//         });
-//       } else {
-//         await axiosClient.post("/novedad/registrar", formData, {
-//           headers: {
-//             'Content-Type': 'multipart/form-data',
-//           },
-//         });
-//       }
 
-//       // Mostrar alerta de éxito
-//       alert('Registro exitoso! La novedad se ha guardado correctamente.');
+    const removeImage = () => {
+        setFotos([]);
+    };
+    const selectSeguimiento = (value) => {
+        console.log('Valor seleccionado en el Picker:', value);
+        setSeguimiento(Number(value));
+    };
 
-//       if (onSubmit) onSubmit();
-//       if (onClose) onClose();
-//     } catch (error) {
-//       console.error("Error del servidor:", error);
-//       setErrorMessage("Error del servidor: " + error.message);
-//       alert('Ocurrió un error al guardar la novedad. Intenta de nuevo.');
-//     }
-//   };
 
-//   const pickImage = async () => {
-//     let result = await ImagePicker.launchImageLibraryAsync({
-//       mediaTypes: ImagePicker.MediaTypeOptions.All,
-//       allowsEditing: true,
-//       aspect: [4, 3],
-//       quality: 1,
-//     });
 
-//     if (!result.cancelled) {
-//       setFoto(result);
-//     }
-//   };
+    const showDatePicker = () => {
+        setIsDatePickerVisible(true);
+    };
 
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Registro de Novedades</Text>
-//       {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+    const handleDatePicked = (date) => {
+        setFecha(date);
+        setIsDatePickerVisible(false);
+    };
 
-//       <TouchableOpacity onPress={() => pickImage()} style={styles.imagePickerButton}>
-//         <Text style={styles.buttonText}>Seleccionar Foto</Text>
-//       </TouchableOpacity>
-//       {foto && typeof foto !== 'string' && (
-//         <Image source={{ uri: foto.uri }} style={styles.imagePreview} />
-//       )}
+    const navigation = useNavigation();
 
-//       <TextInput
-//         placeholder="Descripción"
-//         value={descripcion}
-//         onChangeText={(text) => setDescripcion(text)}
-//         style={styles.input}
-//         multiline
-//         numberOfLines={4}
-//       />
+    const TitleWithBackButton = ({ navigation }) => (
+        <View style={styles.titleContainer}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <ArrowLeft size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.title}>{mode === 'update' ? 'Actualizar Novedad' : 'Crear Novedad'}</Text>
+        </View>
+    );
 
-//       <Picker
-//         selectedValue={selectedSeguimiento}
-//         onValueChange={(itemValue) => setSelectedSeguimiento(itemValue)}
-//         style={styles.picker}
-//       >
-//         <Picker.Item label="Selecciona un Seguimiento" value="" />
-//         {seguimientos.map((seguimiento) => (
-//           <Picker.Item key={seguimiento.id_seguimiento} label={seguimiento.nombre} value={seguimiento.id_seguimiento} />
-//         ))}
-//       </Picker>
 
-//       <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-//         <Text style={styles.buttonText}>{mode === 'update' ? 'Actualizar' : 'Registrar'}</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
+    const handleSubmit = async () => {
+        if (!descripcion.trim() || !fecha || !seguimientoId) {
+            console.log('Estado actual:', { descripcion, fecha, seguimientoId });
+            Alert.alert('Advertencia', 'Por favor complete todos los campos.');
+            return;
+        }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginBottom: 20,
-//   },
-//   error: {
-//     color: 'red',
-//     marginBottom: 10,
-//   },
-//   imagePickerButton: {
-//     backgroundColor: '#0d324c',
-//     padding: 10,
-//     borderRadius: 5,
-//     marginBottom: 15,
-//   },
-//   buttonText: {
-//     color: 'white',
-//     fontSize: 16,
-//   },
-//   imagePreview: {
-//     width: '100%',
-//     height: 200,
-//     resizeMode: 'contain',
-//     marginBottom: 15,
-//   },
-//   input: {
-//     borderWidth: 1,
-//     borderColor: '#ccc',
-//     paddingHorizontal: 10,
-//     paddingVertical: 5,
-//     marginBottom: 15,
-//   },
-//   picker: {
-//     width: '100%',
-//     marginBottom: 15,
-//   },
-//   submitButton: {
-//     backgroundColor: '#0d324c',
-//     padding: 15,
-//     alignItems: 'center',
-//     borderRadius: 5,
-//   },
-// });
+        if (!instructor) {
+            Alert.alert('Error', 'No se pudo obtener la información del instructor.');
+            return;
+        }
 
-// export default FormNovedades;
+        const formData = new FormData();
+        formData.append("descripcion", descripcion);
+        formData.append("fecha", moment(fecha).format('YYYY-MM-DD'));
+        formData.append("instructor", instructor);
+        formData.append("seguimiento", seguimientoId);  // Usar el id de seguimiento
+
+        fotos.forEach(foto => {
+            formData.append('foto', {
+                uri: Platform.OS === 'android' ? foto.path : `file://${foto.path}`,
+                type: foto.mime,
+                name: foto.filename,
+            });
+        });
+
+        try {
+            let url = mode === 'update' ? `/novedades/actualizar/${initialData.id_novedad}` : '/novedades/registrar';
+
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`
+                }
+            });
+
+            console.log('Respuesta exitosa:', response.data);
+            Alert.alert('Éxito', 'Novedad registrada con éxito.');
+            onSubmit();
+        } catch (error) {
+            console.error('Error al registrar novedad:', error);
+            if (error.response) {
+                if (error.response.status === 404) {
+                    Alert.alert('Error', 'La URL de la API no se encuentra. Verifica la conexión.');
+                } else {
+                    Alert.alert('Error', error.response.data.message || 'Ocurrió un error al registrar la novedad.');
+                }
+            } else {
+                Alert.alert('Error', 'Ocurrió un error al enviar la solicitud.');
+            }
+        }
+    };
+
+
+    return (
+        <View style={styles.container}>
+            <TitleWithBackButton navigation={navigation} />
+
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.sectionSeparator}>
+
+                    <Text style={styles.instructor}>
+                        {instructor ? `Instructor: ${instructor}` : 'Seleccione un seguimiento para ver el instructor.'}
+                    </Text>
+
+
+
+                    <TextInput
+                        placeholder="Descripción de la Novedad"
+                        value={descripcion}
+                        onChangeText={setDescripcion}
+                        multiline
+                        numberOfLines={4}
+                        style={[styles.input, styles.descriptionInput]}
+                    />
+                </View>
+
+                <View style={styles.instructorContainer}>
+
+                    <View style={styles.containerpicker}>
+
+                        <Picker
+                            selectedValue={seguimientoId}
+                            onValueChange={(itemValue) => {
+                                console.log('Valor seleccionado en el Picker:', itemValue);
+                                setSeguimientoId(itemValue);  // Aquí estás actualizando el estado `seguimientoId`
+                            }}
+                        >
+                            <Picker.Item label="Selecciona un Seguimiento" value="" style={styles.picker} />
+                            {seguimientos.map((seguimiento) => (
+                                <Picker.Item
+                                    key={seguimiento.id}
+                                    label={`Seguimiento ${seguimiento.id}`}  // Para mayor claridad, puedes incluir el nombre
+                                    value={seguimiento.id}  // Aquí, el valor debe ser el ID del seguimiento
+                                />
+                            ))}
+                        </Picker>
+                    </View>
+                    <TouchableOpacity onPress={pickImages} style={[styles.buttonImage, styles.imageButton, styles.largeImageButton]}>
+                        <Text style={[styles.TextButton]}> + Cargar Imagen</Text>
+                    </TouchableOpacity>
+
+                </View>
+
+                <TouchableOpacity onPress={showDatePicker} style={styles.fecha}>
+                    <Text>{moment(fecha).format('YYYY-MM-DD')}</Text>
+                </TouchableOpacity>
+
+                <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleDatePicked}
+                    onCancel={() => setIsDatePickerVisible(false)}
+                />
+
+
+                {fotos.length > 0 && (
+                    <View style={styles.imagesContainer}>
+                        {fotos.map((foto, index) => (
+                            <ImagePreview
+                                key={index}
+                                image={foto}
+                                onDelete={removeImage}
+                            />
+                        ))}
+
+
+                    </View>
+                )}
+
+
+
+            </ScrollView>
+
+
+
+            <View style={styles.bottomButtonContainer}>
+                <TouchableOpacity onPress={handleSubmit} style={[styles.button, styles.submitButton]}>
+                    <Text style={[styles.TextButton]}>{mode === 'update' ? 'Actualizar Novedad' : 'Crear Novedad'}</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+};
+const ImagePreview = ({ image, onDelete }) => (
+    <View style={styles.imagePreview}>
+        <Image source={{ uri: image.path }} style={styles.previewThumbnail} />
+        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>X</Text>
+        </TouchableOpacity>
+    </View>
+);
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ecffe1',
+        padding: 20,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    backButton: {
+        marginRight: 10,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    input: {
+        marginBottom: 10,
+        borderRadius: 16,
+        padding: 10,
+        backgroundColor: "#EDEDED"
+    },
+    descriptionInput: {
+        marginBottom: 20,
+        fontSize: 18
+    },
+    instructorInput: {
+        marginTop: 20,
+    },
+    button: {
+        backgroundColor: '#007AFF',
+        width: "100%",
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 50,
+    },
+    buttonImage: {
+        backgroundColor: "#EDEDED",
+        width: "39%",
+        paddingHorizontal: 2,
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 16,
+        marginLeft: 3
+    },
+    TextButton: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    seguimientoContainer: {
+        marginBottom: 20,
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        marginBottom: 20,
+    },
+    imagePreview: {
+        position: 'relative',
+        margin: 5,
+    },
+    previewThumbnail: {
+        width: 80,
+        height: 80,
+        resizeMode: 'cover',
+        borderRadius: 5,
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        backgroundColor: 'red',
+        color: 'white',
+        paddingHorizontal: 5,
+        paddingVertical: 2,
+        borderRadius: 5,
+    },
+    deleteButtonText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    imageButton: {
+        backgroundColor: '#03055B',
+
+    },
+    largeImageButton: {
+        marginVertical: 20,
+    },
+    bottomButtonContainer: {
+        position: 'absolute',
+        alignItems: 'center',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 16,
+    },
+    submitButton: {
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        height: 55,
+    },
+    instructorContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    instructor: {
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 20
+    },
+    containerpicker: {
+        height: 50,
+        width: '55%',
+        backgroundColor: "#EDEDED",
+        borderRadius: 15,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 50,
+        width: '55%',
+        backgroundColor: 'transparent',
+    },
+    fecha: {
+        marginTop: 0,
+        marginLeft: 240
+    },
+});
+
+export default NovedadFormulario;
