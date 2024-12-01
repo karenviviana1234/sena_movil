@@ -22,7 +22,7 @@ const Login = () => {
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
   const navigation = useNavigation();
 
-  const { SetRol, SetId_persona } = usePersonas();
+  const { SetRol, SetId_persona, setNombres } = usePersonas();
   useFocusEffect(
     React.useCallback(() => {
       // Limpiar campos cuando se enfoque la pantalla de login
@@ -60,6 +60,7 @@ const Login = () => {
         if (user) {
           SetRol(user.cargo);
           SetId_persona(user.id_persona);
+          setNombres(user.nombres)
 
           await AsyncStorage.setItem("token", token);
           await AsyncStorage.setItem("user", JSON.stringify(user));

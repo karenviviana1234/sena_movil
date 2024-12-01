@@ -14,9 +14,9 @@ const rutaNovedades = Router();
 
 
 
-rutaNovedades.get('/listarN', validarToken, listar);
+rutaNovedades.get('/listarN/:id_seguimiento', validarToken, listar);
 
-rutaNovedades.get('/listar/:id_seguimiento', validarToken, listarnovedades);
+rutaNovedades.get('/listar/:identificacion', validarToken, listarnovedades);
 rutaNovedades.post('/registrar', validarToken, cargarImage, registrarNovedad);
 rutaNovedades.put('/actualizar/:id', validarToken, cargarImage, actualizarNovedades);
 rutaNovedades.delete('/eliminar/:id_novedad', validarToken, eliminarNovedad);

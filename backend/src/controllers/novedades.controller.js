@@ -46,43 +46,82 @@ export const registrarNovedad = async (req, res) => {
         });
     }
 };
-
 export const listar = async (req, res) => {
     try {
-        let sql = "SELECT * FROM novedades"
+        const { id_seguimiento } = req.params; // Obtener el ID del seguimiento desde los parámetros de la solicitud
 
-        const [results] = await pool.query(sql)
-        if(results.length>0){
-            res.status(200).json(results)
-        }else{
-            res.status(404).json({
-                message: 'No hay novedades registradas'
-            })
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error del servidor' + error
-        })
-    }
-};
+        // Consulta para obtener las novedades asociadas al seguimiento
+        const [novedades] = await pool.query(`
+            SELECT 
+                n.id_novedad,
+                n.descripcion,
+                n.fecha,
+                n.foto,
+                n.seguimiento,
+                n.instructor
+            FROM 
+                novedades n
+            JOIN 
+                seguimientos s ON s.id_seguimiento = n.seguimiento
+            WHERE 
+                n.seguimiento = ?;
+        `, [id_seguimiento]);
 
-
-export const listarnovedades = async (req, res) => {
-    try {
-        const { id_seguimiento } = req.params; // Obtén el ID del seguimiento desde los parámetros de la solicitud
-        let sql = `SELECT id_novedad, seguimiento, fecha, instructor, descripcion, foto FROM novedades WHERE seguimiento = ?`; // Asegúrate de incluir la columna de imagen
-
-        const [results] = await pool.query(sql, [id_seguimiento]);
-        if (results.length > 0) {
-            res.status(200).json(results);
+        if (novedades.length > 0) {
+            res.status(200).json(novedades); // Devolver las novedades
         } else {
             res.status(404).json({
-                message: 'No hay novedades registradas para este seguimiento'
+                message: 'No hay novedades registradas para este seguimiento',
             });
         }
     } catch (error) {
+        console.error('Error al listar novedades:', error);
         res.status(500).json({
-            message: 'Error del servidor: ' + error
+            message: 'Error del servidor: ' + error.message,
+        });
+    }
+};
+
+export const listarnovedades = async (req, res) => {
+    try {
+        const { identificacion } = req.params; // Obtén la identificación del aprendiz desde los parámetros de la solicitud
+
+        // Verifica si la identificacion es válida (debe ser un número)
+        if (!identificacion || isNaN(identificacion)) {
+            return res.status(400).json({
+                message: 'Identificación del aprendiz no válida.'
+            });
+        }
+
+        // Consulta SQL para obtener las novedades filtradas por la identificación del aprendiz
+        let sql = `
+            SELECT 
+                n.id_novedad, 
+                n.seguimiento, 
+                n.fecha, 
+                n.instructor, 
+                n.descripcion, 
+                n.foto 
+            FROM novedades n
+            JOIN seguimientos s ON n.seguimiento = s.id_seguimiento
+            JOIN productivas p ON s.productiva = p.id_productiva
+            WHERE p.aprendiz = (SELECT id_persona FROM personas WHERE identificacion = ?)`; // Filtra por la identificación del aprendiz
+
+        // Ejecuta la consulta y obtiene los resultados
+        const [results] = await pool.query(sql, [identificacion]);
+
+        // Si hay resultados, responde con ellos
+        if (results.length > 0) {
+            return res.status(200).json(results);
+        } else {
+            return res.status(404).json({
+                message: 'No hay novedades registradas para este aprendiz.'
+            });
+        }
+    } catch (error) {
+        console.error('Error en listarnovedades:', error); // Loguea el error para depuración
+        return res.status(500).json({
+            message: 'Error del servidor: ' + (error.message || error)
         });
     }
 };
