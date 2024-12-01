@@ -193,15 +193,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 18,
     paddingHorizontal: 10,
-            color: "black"
   },
   pickerContainer: {
     width: "100%",
     backgroundColor: "#EDEDED",
     borderRadius: 10,
     marginBottom: 15,
-    height: 50,
-            color: "black"
+    height: 50
   },
   buttonContainer: {
     flexDirection: "row",
@@ -209,28 +207,28 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   updateButton: {
-    backgroundColor: "#28a745",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginRight: 10,
+    marginTop: 30,
+    backgroundColor: "#74cd62",
+    width: 250,
+    height: 50,
+    justifyContent: "center",
     alignItems: "center",
-  },
-  closeButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    alignItems: "center",
+    borderRadius: 50,
   },
   updateButtonText: {
     color: "white",
     fontSize: 18,
   },
-  closeButtonText: {
-    color: "white",
-    fontSize: 18,
-  },
+  buttonClose: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  }
 });
 
 export default PersonasModal;
+
+
+
+
+

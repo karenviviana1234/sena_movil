@@ -15,7 +15,7 @@ export const descargarPdf = async (req, res) => {
         }
 
         // Ruta específica de tus archivos
-        const filePath = path.resolve('D:\\sena_movil\\backend\\public\\archivos', pdfFileName);
+        const filePath = path.resolve(__dirname, '../../public/archivos', pdfFileName);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
