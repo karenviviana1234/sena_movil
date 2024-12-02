@@ -24,9 +24,17 @@ const Seguimientos = () => {
     const navigation = useNavigation();
 
     const handleOpenNovedad = (identificacion, productiva) => {
+        if (!productiva) {
+            Alert.alert('Error', 'El campo productiva no está disponible.');
+            return;
+        }
+    
         console.log("Datos a enviar:", { identificacion, productiva });
         navigation.navigate('Novedad', { identificacion, productiva });
     };
+    
+
+    
 
     useEffect(() => {
         const fetchSeguimientos = async () => {

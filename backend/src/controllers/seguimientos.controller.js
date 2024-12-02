@@ -83,38 +83,39 @@ export const listarSeguimientoAprendices = async (req, res) => {
         } else if (cargo === 'Instructor') {
             // Si es instructor, filtrar los seguimientos donde es el instructor asignado
             sql = `
-               SELECT
-            p.identificacion AS identificacion,
-            p.nombres AS nombres,
-            p.correo AS correo,
-            f.codigo AS codigo,
-            prg.sigla AS sigla,
-            e.razon_social AS razon_social,
-            s.id_seguimiento AS id_seguimiento,
-            s.seguimiento AS seguimiento,
-            s.fecha AS fecha,
-            s.estado AS estado,
-            b.id_bitacora AS id_bitacora,
-            b.estado AS estado_bitacora,
-            instr.identificacion AS instructor_identificacion,
-            instr.nombres AS nombre_instructor
-        FROM
-            seguimientos s
-            LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
-            LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
-            LEFT JOIN personas p ON m.aprendiz = p.id_persona
-            LEFT JOIN empresas e ON pr.empresa = e.id_empresa
-            LEFT JOIN fichas f ON m.ficha = f.codigo
-            LEFT JOIN programas prg ON f.programa = prg.id_programa
-            LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
-            LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
-            LEFT JOIN actividades a ON asg.actividad = a.id_actividad
-            LEFT JOIN personas instr ON a.instructor = instr.id_persona
-        WHERE
-            instr.identificacion = ?  -- Filtrar por la identificación del instructor
-        ORDER BY
-            p.identificacion, s.seguimiento, b.id_bitacora;
-    `;
+                SELECT
+                    p.identificacion AS identificacion,
+                    p.nombres AS nombres,
+                    p.correo AS correo,
+                    f.codigo AS codigo,
+                    prg.sigla AS sigla,
+                    e.razon_social AS razon_social,
+                    s.id_seguimiento AS id_seguimiento,
+                    s.seguimiento AS seguimiento,
+                    s.fecha AS fecha,
+                    s.estado AS estado,
+                    pr.id_productiva AS productiva, -- Campo productiva
+                    b.id_bitacora AS id_bitacora,
+                    b.estado AS estado_bitacora,
+                    instr.identificacion AS instructor_identificacion,
+                    instr.nombres AS nombre_instructor
+                FROM
+                    seguimientos s
+                    LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
+                    LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
+                    LEFT JOIN personas p ON m.aprendiz = p.id_persona
+                    LEFT JOIN empresas e ON pr.empresa = e.id_empresa
+                    LEFT JOIN fichas f ON m.ficha = f.codigo
+                    LEFT JOIN programas prg ON f.programa = prg.id_programa
+                    LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
+                    LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
+                    LEFT JOIN actividades a ON asg.actividad = a.id_actividad
+                    LEFT JOIN personas instr ON a.instructor = instr.id_persona
+                WHERE
+                    instr.identificacion = ?
+                ORDER BY
+                    p.identificacion, s.seguimiento, b.id_bitacora;
+            `;
             params.push(identificacion);  // Asignar la identificación del instructor
         } else if (rol === 'Aprendiz') {
             // Si es aprendiz, filtrar los seguimientos por la identificación del aprendiz
@@ -130,6 +131,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
                     s.seguimiento AS seguimiento,
                     s.fecha AS fecha,
                     s.estado AS estado,
+                    pr.id_productiva AS productiva,
                     b.id_bitacora AS id_bitacora,
                     b.estado AS estado_bitacora,
                     instr.identificacion AS instructor_identificacion,
@@ -174,6 +176,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
                         seguimiento1: null,
                         seguimiento2: null,
                         seguimiento3: null,
+                        productiva: row.productiva,
                         estado1: null,
                         estado2: null,
                         estado3: null,
@@ -410,7 +413,7 @@ export const descargarPdf = async (req, res) => {
         return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
       }
   
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(pdfFileName)}"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${pdfFileName}"`);
       res.sendFile(filePath);
     } catch (error) {
       console.error('Error en el servidor:', error);
@@ -522,8 +525,6 @@ export const listarEstadosBitacorasSeguimientos = async (req, res) => {
         return res.status(500).json({ error: 'Error en el servidor.' });
     }
 };
-
-
 
 export const listarSeguimientoPorProductiva = async (req, res) => {
     try {
