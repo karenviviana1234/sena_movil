@@ -7,7 +7,7 @@ export const validar = async (req, res) => {
         const { correo, password } = req.body;
 
         // Consulta parametrizada para evitar inyecciones SQL
-        const [rows] = await pool.query('SELECT * FROM personas WHERE correo = ?', [correo]);
+        const [rows] = await pool.query('SELECT * FROM personas WHERE BINARY correo = ?', [correo]);
 
         if (rows.length > 0) {
             const user = rows[0];

@@ -5,9 +5,8 @@ import FormNovedades from './FormNovedad';
 import axiosClient from '../../axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from "@react-native-picker/picker";
-import NovedadFormulario from './FormNovedad';
 import Layout from "../Template/Layout";
-
+import NovedadFormulario from './FormNovedad';
 
 const Novedades = ({ route }) => {
     const [novedades, setNovedades] = useState([]);
@@ -17,7 +16,6 @@ const Novedades = ({ route }) => {
     const [identificacion, setIdentificacion] = useState(null);
     const [seguimientoId, setSeguimientoId] = useState(''); // Estado para el seguimiento seleccionado
     const [productiva, setProductiva] = useState(null);
-    console.log('route.params:', route.params);
     const [seguimientos, setSeguimientos] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -29,18 +27,20 @@ const Novedades = ({ route }) => {
         setModalVisible(false);
     };
 
+
     useEffect(() => {
         const loadInitialData = async () => {
-            const { identificacion, productiva } = route.params; // Obtener identificacion y productiva
-            console.log('Datos recibidos:', { identificacion, productiva });
+            const { identificacion, productiva } = route.params;
 
             if (identificacion) {
                 setIdentificacion(identificacion);
-                setProductiva(productiva); // Guardar productiva en el estado
-                listarNovedades(identificacion, '', productiva); // Pasar productiva a la función
+                setProductiva(productiva);
+                listarNovedades(identificacion, '', productiva);
             } else {
                 Alert.alert('Error', 'No se encontró la identificación del usuario.');
             }
+
+
         };
         loadInitialData();
     }, [route.params]);
@@ -122,15 +122,15 @@ const Novedades = ({ route }) => {
     const handleOpenModal = (formType, novedad = null) => {
         if (formType === 'formNovedades') {
             setBodyContent(
-                    <FormNovedades
-                        initialData={novedad}
-                        onClose={() => handleCloseModal()}
-                        onSubmit={(data) => handleSubmit(data)}
-                        mode={novedad ? 'edit' : 'create'}
-                        actionLabel={novedad ? 'Actualizar Novedad' : 'Registrar Novedad'}
-                        productiva={productiva}
-                        route={{ params: { productiva } }}
-                    />
+                <FormNovedades
+                    initialData={novedad}
+                    onClose={() => handleCloseModal()}
+                    onSubmit={(data) => handleSubmit(data)}
+                    mode={novedad ? 'edit' : 'create'}
+                    actionLabel={novedad ? 'Actualizar Novedad' : 'Registrar Novedad'}
+                    productiva={productiva}
+                    route={{ params: { productiva } }}
+                />
             );
         }
         setIsModalOpen(true);
@@ -212,6 +212,7 @@ const Novedades = ({ route }) => {
                 <TouchableOpacity style={styles.formButton} onPress={handleAbrirModalFormNovedades}>
                     <BellPlus size={30} bottom={-8} color="green" style={styles.icon} />
                 </TouchableOpacity>
+
 
                 {isLoading && <Text>Cargando...</Text>}
 
