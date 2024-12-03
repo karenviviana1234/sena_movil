@@ -12,6 +12,7 @@ import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import { PermissionsAndroid, Platform } from 'react-native';
 
+
 const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
   const { getSeguimiento } = useContext(SeguimientosContext);
   const [idSeguimiento, setIdSeguimiento] = useState(null);

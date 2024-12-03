@@ -19,18 +19,3 @@ rutaSeguimiento.get('/listarEstado/:id_seguimiento', validarToken, listarEstadoS
 
 
 export default rutaSeguimiento
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
