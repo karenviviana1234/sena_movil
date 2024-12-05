@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, Platform, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, Platform, Modal, ActivityIndicator } from 'react-native';
 import axios from '../../axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -24,51 +24,50 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
     const [productiva, setProductiva] = useState(null);
     console.log("Hola", productiva);
     const [seguimientoId, setSeguimientoId] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadInitialData = async () => {
             if (route?.params?.productiva) {
                 setProductiva(route.params.productiva);
-
-            } else {
+            } else if (!productiva) {
+                // Solo muestra la alerta si no se ha asignado un valor a 'productiva'
                 Alert.alert('Error', 'No se recibió el parámetro productiva.');
             }
         };
+
         loadInitialData();
-    }, [route?.params?.productiva]);
+    }, [route?.params?.productiva, productiva]);  // Solo ejecuta si productiva cambia
+
 
     useEffect(() => {
-        // Llama a fetchSeguimientos solo si productiva está disponible
-        if (productiva) {
+        if (visible && productiva) {  // Solo hacer la llamada si el modal está visible y productiva tiene valor
             fetchSeguimientos(productiva);
         }
-    }, [productiva]);
+    }, [visible, productiva]);
+
+
 
     useEffect(() => {
         if (nombres) {
             setInstructor(nombres);
-            console.log(nombres); // Asignar el nombre del usuario logueado
-        }
-        if (mode === 'update' && initialData.id_novedad) {
-            setDescripcion(initialData.descripcion);
-            setFecha(new Date(initialData.fecha));
-            setSeguimiento(initialData.seguimiento);
-            setFotos([initialData.foto]);
         }
     }, [nombres]);
 
     const fetchSeguimientos = async (productiva) => {
+        if (!productiva) {
+            console.error('No se pudo cargar la productiva.');
+            return;  // No hacer nada si productiva no está disponible
+        }
+        setIsLoading(true);
         try {
             const response = await axiosClient.get(`/seguimientos/listarSeguimientoP/${productiva}`);
             if (response.status === 200) {
                 const data = response.data;
-
-                // Transforma el objeto agrupado en un array plano
                 const parsedSeguimientos = Object.entries(data[productiva]).map(([label, id]) => ({
-                    label,   // "seguimiento 1", "seguimiento 2", etc.
-                    value: id, // El id correspondiente
+                    label,
+                    value: id,
                 }));
-
                 setSeguimientos(parsedSeguimientos);
             } else {
                 Alert.alert('Sin seguimientos', 'No hay seguimientos para la productiva seleccionada.');
@@ -77,10 +76,10 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         } catch (error) {
             console.error('Error al listar seguimientos:', error.message);
             Alert.alert('Error', 'No se pudieron cargar los seguimientos. Inténtelo nuevamente.');
+        } finally {
+            setIsLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         fetchSeguimientos(); // Llamada inicial para obtener los seguimientos
@@ -131,7 +130,6 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
 
     const handleSubmit = async () => {
         if (!descripcion.trim() || !fecha || !seguimientoId) {
-            console.log('Estado actual:', { descripcion, fecha, seguimientoId });
             Alert.alert('Advertencia', 'Por favor complete todos los campos.');
             return;
         }
@@ -141,11 +139,18 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
             return;
         }
 
+        // Verifica si 'seguimientoId' es un valor válido
+        if (!seguimientoId || seguimientoId === '') {
+            Alert.alert('Error', 'Por favor selecciona un seguimiento.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append("descripcion", descripcion);
         formData.append("fecha", moment(fecha).format('YYYY-MM-DD'));
         formData.append("instructor", instructor);
-        formData.append("seguimiento", seguimientoId);  // Usar el id de seguimiento
+        formData.append("seguimiento", seguimientoId);
+
 
         fotos.forEach(foto => {
             formData.append('foto', {
@@ -156,29 +161,24 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         });
 
         try {
-            let url = mode === 'update' ? `/novedades/actualizar/${initialData.id_novedad}` : '/novedades/registrar';
-            const response = await axios.post(url, formData, {
+            const response = await axios.post('/novedades/registrar', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`
                 }
             });
-            console.log('Respuesta exitosa:', response.data);
-            Alert.alert('Éxito', 'Novedad registrada con éxito.');
-            onSubmit();
+
+            if (response.data) {
+                Alert.alert('Éxito', 'Novedad registrada con éxito.');
+                console.log('Novedad registrada exitosamente');
+                onSubmit(); // Llamar a onSubmit solo si la respuesta es correcta
+            }
         } catch (error) {
             console.error('Error al registrar novedad:', error);
-            if (error.response) {
-                if (error.response.status === 404) {
-                    Alert.alert('Error', 'La URL de la API no se encuentra. Verifica la conexión.');
-                } else {
-                    Alert.alert('Error', error.response.data.message || 'Ocurrió un error al registrar la novedad.');
-                }
-            } else {
-                Alert.alert('Error', 'Ocurrió un error al enviar la solicitud.');
-            }
+            Alert.alert('Error', 'Hubo un problema al registrar la novedad.');
         }
     };
+
 
     return (
         <Modal visible={visible} animationType="slide" transparent={true}>
@@ -200,29 +200,31 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
                             />
                         </View>
                         <View style={styles.instructorContainer}>
-                            <View style={styles.containerpicker}>
+                            {isLoading ? (
+                                <ActivityIndicator size="large" color="#0000ff" />
+                            ) : (
+                                <View style={styles.containerpicker}>
 
-                                <Picker
-                                    selectedValue={seguimientoId}
-                                    onValueChange={(itemValue) => {
-                                        console.log('Valor seleccionado en el Picker:', itemValue);
-                                        setSeguimientoId(itemValue); // Actualizar el estado de seguimientoId
-                                    }}
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="Selecciona un Seguimiento" value="" />
-                                    {seguimientos.map((seguimiento) => (
-                                        <Picker.Item
-                                            key={seguimiento.value} // Usa el id del seguimiento como clave
-                                            label={seguimiento.value} // Asume que label es el nombre del seguimiento
-                                            value={seguimiento.value} // Asegúrate de que el valor sea el id
-                                        />
-                                    ))}
-                                </Picker>
+                                    <Picker
+                                        selectedValue={seguimientoId}
+                                        onValueChange={(itemValue) => {
+                                            console.log('Valor seleccionado en el Picker:', itemValue);
+                                            setSeguimientoId(itemValue); // Actualizar el estado de seguimientoId
+                                        }}
+                                        style={styles.picker}
+                                    >
+                                        <Picker.Item label="Selecciona un Seguimiento" value="" />
+                                        {seguimientos.map((seguimiento) => (
+                                            <Picker.Item
+                                                key={seguimiento.value} // Usa el id del seguimiento como clave
+                                                label={seguimiento.label} // Nombre del seguimiento
+                                                value={seguimiento.value} // id del seguimiento
+                                            />
+                                        ))}
+                                    </Picker>
 
-
-
-                            </View>
+                                </View>
+                            )}
                             <TouchableOpacity onPress={pickImages} style={[styles.buttonImage, styles.imageButton, styles.largeImageButton]}>
                                 <Text style={[styles.TextButton]}> + Cargar Imagen</Text>
                             </TouchableOpacity>

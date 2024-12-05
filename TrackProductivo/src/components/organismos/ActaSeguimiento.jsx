@@ -102,12 +102,14 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         type: [DocumentPicker.types.pdf],
       });
       setSeguimientoPdf(res[0]);
+      setPdfName(res[0].name); // Actualiza el estado con el nombre del archivo
     } catch (err) {
       if (!DocumentPicker.isCancel(err)) {
         console.error(err);
       }
     }
   };
+  
 
   const handleSubmitActa = useCallback(async () => {
     if (!seguimientoPdf) {
@@ -168,7 +170,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.105:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+      const baseUrl = "http://192.168.0.108:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
