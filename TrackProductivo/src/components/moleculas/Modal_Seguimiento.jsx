@@ -157,7 +157,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     try {
       const { config, fs } = RNFetchBlob;
       const DownloadDir = fs.dirs.DownloadDir;
-      const fullUrl = `http://192.168.0.105:3000/bitacoras/download/${id_bitacora}`;
+      const fullUrl = `http://192.168.1.2:3000/bitacoras/download/${id_bitacora}`;
       const filePath = `${DownloadDir}/bitacora_${id_bitacora}.pdf`;
   
       // Verifica si el archivo está accesible
