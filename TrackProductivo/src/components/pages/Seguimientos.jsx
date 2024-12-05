@@ -28,13 +28,14 @@ const Seguimientos = () => {
             Alert.alert('Error', 'El campo productiva no está disponible.');
             return;
         }
-    
+
         console.log("Datos a enviar:", { identificacion, productiva });
         navigation.navigate('Novedad', { identificacion, productiva });
     };
-    
 
-    
+
+
+
 
     useEffect(() => {
         const fetchSeguimientos = async () => {
@@ -185,12 +186,13 @@ const Seguimientos = () => {
         return (
             <View key={item.id_seguimiento} style={styles.item}>
                 <View style={styles.row}>
-                <Text style={styles.Text}>{item.nombres}</Text>
+                    <Text style={styles.Text}>{item.nombres}</Text>
                     <Bell
                         size={30}
                         color="green"
                         onPress={() => handleOpenNovedad(item.identificacion, item.productiva)}
                     />
+
                 </View>
                 <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
                 <Text style={styles.itemText}>Programa: {item.sigla}</Text>

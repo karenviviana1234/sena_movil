@@ -19,14 +19,14 @@ const PersonasModal = ({ visible, onClose, userData }) => {
   const [telefono, setTelefono] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [municipiosList, setMunicipiosList] = useState([]);
-  const { id_persona } = usePersonas();
+  const { id_persona, rol } = usePersonas();
 
   // Obtener la lista de municipios al cargar el componente
   useEffect(() => {
     const fetchMunicipios = async () => {
       try {
         const response = await axiosClient.get("/municipios/listar");
-        setMunicipiosList(response.data); // Asegúrate de que `response.data` tiene la lista de municipios
+        setMunicipiosList(response.data);
       } catch (error) {
         console.error("Error al obtener los municipios:", error);
       }
@@ -40,9 +40,19 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       setNombres(userData.nombres || "");
       setCorreo(userData.correo || "");
       setTelefono(userData.telefono || "");
-      setMunicipio(userData.id_municipio || ""); // Asegúrate de que userData.id_municipio contiene el ID
+      // setMunicipio(userData.id_municipio || "");
+      const municipioSeleccionado = municipiosList.find((muni) => {
+        muni.nombre_mpio.trim() === userData.id_municipio.trim() ? muni : null;
+      } 
+        
+    );
+    if (municipioSeleccionado) {
+      setMunicipio(municipioSeleccionado.id_municipio);
     }
-  }, [userData]);
+    console.log("UserData ", userData.id_municipio)
+  }
+}, [userData, municipiosList]);
+
 
   // Enviar el ID correcto del municipio al actualizar
   const handleUpdate = async () => {
@@ -59,15 +69,15 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       Alert.alert("Error", "El teléfono debe contener exactamente 10 dígitos.");
       return;
     }
-    
+
     const updatedData = {
       identificacion: identificacion || userData.identificacion,
       nombres: nombres || userData.nombres,
       correo: correo || userData.correo,
       telefono: telefono || userData.telefono,
-      municipio: Number(municipio) || Number(userData.id_municipio), // Convertir el municipio a número
+      municipio: municipio || userData.id_municipio
     };
-  
+
     try {
       const response = await axiosClient.put(
         `/personas/perfilActualizar/${id_persona}`,
@@ -82,7 +92,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       );
     }
   };
-  
+
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
@@ -124,24 +134,27 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="phone-pad"
             placeholderTextColor="black"
           />
-{/*        {rol === "Aprendiz" && (
+          {rol === "Aprendiz" && (
+            <>
+              <Text style={styles.texto}>Municipio</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  style={styles.texto}
+                  selectedValue={municipio}
+                  onValueChange={(itemValue) => setMunicipio(itemValue)}
+                >
+                  {municipiosList.map((muni) => (
+                    <Picker.Item
+                      key={muni.id_municipio}
+                      label={muni.nombre_mpio}
+                      value={muni.id_municipio} 
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </>
+          )}
 
-          ) };  */}
-          <Text style={styles.texto}>Municipio</Text>
-          <View style={styles.pickerContainer}>
-            <Picker style={styles.texto}
-              selectedValue={municipio}
-              onValueChange={(itemValue) => setMunicipio(itemValue)} // Esto actualiza el estado con el ID del municipio
-            >
-              {municipiosList.map((muni) => (
-                <Picker.Item
-                  key={muni.id_municipio}
-                  label={muni.nombre_mpio}
-                  value={muni.id_municipio} // Asegúrate de que el valor sea el ID del municipio
-                />
-              ))}
-            </Picker>
-          </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.updateButton}

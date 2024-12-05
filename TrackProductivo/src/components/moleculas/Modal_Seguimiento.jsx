@@ -12,6 +12,7 @@ import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import { PermissionsAndroid, Platform } from 'react-native';
 
+
 const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) => {
   const { getSeguimiento } = useContext(SeguimientosContext);
   const [idSeguimiento, setIdSeguimiento] = useState(null);
@@ -152,42 +153,36 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     }
   };
 
-
   const downloadFile = async (id_bitacora) => {
     try {
-      const granted = await requestStoragePermission();
-      if (!granted) return;
-
       const { config, fs } = RNFetchBlob;
-      let DownloadDir = fs.dirs.DownloadDir;
-
-      // Realizamos la solicitud de descarga con axiosClient
-      const response = await axiosClient.get(`/bitacoras/download/${id_bitacora}`, {
-        responseType: 'blob', // Asegúrate de que la respuesta sea un blob para descargar archivos
-      });
-
-      // Procesamos el archivo recibido y lo guardamos en el dispositivo
-      config({
+      const DownloadDir = fs.dirs.DownloadDir;
+      const fullUrl = `http://192.168.0.105:3000/bitacoras/download/${id_bitacora}`;
+      const filePath = `${DownloadDir}/bitacora_${id_bitacora}.pdf`;
+  
+      // Verifica si el archivo está accesible
+      const response = await config({
+        fileCache: true,
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
-          path: `${DownloadDir}/bitacora_${id_bitacora}.pdf`,
+          path: filePath,
           description: 'Descargando archivo...',
-        }
-      })
-        .fetch('GET', response.config.url)
-        .then((res) => {
-          Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
-        })
-        .catch((error) => {
-          Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
-        });
-
+        },
+      }).fetch('GET', fullUrl);
+  
+      if (response.status === 200) {
+        console.log("Descarga completa:", response.path());
+        Alert.alert('Descarga completa', `Archivo descargado en: ${response.path()}`);
+      } else {
+        throw new Error('Si se pudo completar la descarga');
+      }
     } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
+      console.error('Error en la descarga:', error);
+      Alert.alert('Error de descarga', `No se pudo descargar el archivo: ${error.message}`);
     }
   };
+
   return (
     <Modal
       transparent={true}
@@ -243,6 +238,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                         <Download size={24} color="#0d324c" />
                       </TouchableOpacity>
                     </View>
+                    
 
                     <Text style={styles.labelB}>{bitacora.instructor}</Text>
                     <Text style={styles.labelf}>{new Date(bitacora.fecha).toLocaleDateString()}</Text>

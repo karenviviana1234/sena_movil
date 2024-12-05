@@ -13,12 +13,15 @@ const Novedades = ({ route }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [bodyContent, setBodyContent] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [identificacion, setIdentificacion] = useState(null);
     const [seguimientoId, setSeguimientoId] = useState(''); // Estado para el seguimiento seleccionado
-    const [productiva, setProductiva] = useState(null);
     const [seguimientos, setSeguimientos] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [identificacion, setIdentificacion] = useState(''); // Nuevo estado para la identificacion
+    const [productiva, setProductiva] = useState(''); // Nuevo estado para la productiva
+    const { identificacion: routeIdentificacion, productiva: routeProductiva } = route.params;
+    const [loadingSeguimiento, setLoadingSeguimiento] = useState(false);
+
 
 
     const handleAbrirModalFormNovedades = () => {
@@ -32,88 +35,89 @@ const Novedades = ({ route }) => {
 
     useEffect(() => {
         const loadInitialData = async () => {
-            const { identificacion, productiva } = route.params;
-
-            if (identificacion) {
-                setIdentificacion(identificacion);
-                setProductiva(productiva);
-                listarNovedades(identificacion, '', productiva);
+            if (routeIdentificacion && routeProductiva) {
+                // Llamar a las funciones con los valores de los parámetros de la ruta
+                await listarSeguimientos(routeProductiva);  // Llamada solo cuando los parámetros estén disponibles
+                listarNovedades(routeIdentificacion, seguimientoId);  // Solo después de que los valores estén establecidos
             } else {
-                Alert.alert('Error', 'No se encontró la identificación del usuario.');
+                Alert.alert('Error', 'No se encontró la identificación o productiva.');
             }
-
-
         };
         loadInitialData();
-    }, [route.params]);
+    }, [routeIdentificacion, routeProductiva]); // Dependencias de los parámetros
 
     const listarNovedades = async (identificacion, seguimientoId = '') => {
-        setIsLoading(true);
+        if (loadingSeguimiento) return; // Evita nuevas solicitudes si aún se está cargando
+        setLoadingSeguimiento(true);
         try {
             const response = await axiosClient.get(`/novedad/listar/${identificacion}`, { params: { seguimientoId } });
             if (Array.isArray(response.data)) {
                 setNovedades(response.data);
             } else {
                 setNovedades([]);
-                Alert.alert('No hay novedades', 'No hay novedades registradas.');
             }
         } catch (error) {
             console.error('Error al obtener novedades:', error.message);
-            Alert.alert('Error', 'No se encontraron novedades para este seguimiento. Inténtelo nuevamente.');
             setNovedades([]);
         } finally {
-            setIsLoading(false);
+            setLoadingSeguimiento(false);
         }
     };
 
 
     const listar = async (id_seguimiento = '') => {
+        if (!id_seguimiento) return;  // Evita la llamada si el seguimiento no está definido
+
         setIsLoading(true);
         try {
             const response = await axiosClient.get(`/novedades/listarN/${id_seguimiento}`, { params: { seguimientoId } });
             if (Array.isArray(response.data)) {
                 setNovedades(response.data);
             } else {
-                setNovedades([]);
-                Alert.alert('No hay novedades', 'No hay novedades registradas.');
+                setNovedades([]); // Limpia las novedades si no hay datos
             }
         } catch (error) {
             console.error('Error al obtener novedades:', error.message);
-            Alert.alert('Error', 'No se pudieron cargar las novedades. Inténtelo nuevamente.');
-            setNovedades([]);
+            setNovedades([]); // Limpia las novedades en caso de error
+        } finally {
+            setIsLoading(false);
+            if (!isLoading && novedades.length === 0) {
+                Alert.alert('No hay novedades', 'No hay novedades registradas.');
+            }
+        }
+    };
+
+    const listarSeguimientos = async (productiva) => {
+        if (!productiva) return;  // Evita la llamada si productiva no está definida
+
+        setIsLoading(true);
+        console.log('Productiva enviada al endpoint:', productiva); // Log para depurar
+        try {
+            const response = await axiosClient.get(`/seguimientos/listarSeguimientoP/${productiva}`);
+            if (response.status === 200 && response.data) {
+                const parsedSeguimientos = Object.entries(response.data[productiva] || {}).map(([label, id]) => ({
+                    label, // Ejemplo: "seguimiento 1"
+                    value: id, // El ID correspondiente
+                }));
+                setSeguimientos(parsedSeguimientos);
+            } else {
+                console.log('No se encontraron seguimientos para la productiva:', productiva);
+                setSeguimientos([]);
+            }
+        } catch (error) {
+            console.error('Error al listar seguimientos:', error.message, error.response?.data);
+            Alert.alert('Error', 'No se pudieron cargar los seguimientos. Verifica los datos e intenta nuevamente.');
         } finally {
             setIsLoading(false);
         }
     };
 
-
-    const listarSeguimientos = async (productiva) => {
-        try {
-            const response = await axiosClient.get(`/seguimientos/listarSeguimientoP/${productiva}`);
-            if (response.status === 200) {
-                const data = response.data;
-
-                // Transforma el objeto agrupado en un array plano
-                const parsedSeguimientos = Object.entries(data[productiva]).map(([label, id]) => ({
-                    label,   // "seguimiento 1", "seguimiento 2", etc.
-                    value: id, // El id correspondiente
-                }));
-
-                setSeguimientos(parsedSeguimientos);
-            } else {
-                Alert.alert('Sin seguimientos', 'No hay seguimientos para la productiva seleccionada.');
-                setSeguimientos([]);
-            }
-        } catch (error) {
-            console.error('Error al listar seguimientos:', error.message);
-            Alert.alert('Error', 'No se pudieron cargar los seguimientos. Inténtelo nuevamente.');
-        }
-    };
     useEffect(() => {
-        if (productiva) {
-            listarSeguimientos(productiva);
+        if (routeProductiva) {
+            listarSeguimientos(routeProductiva);
         }
-    }, [productiva]);
+    }, [routeProductiva]);
+
 
     useEffect(() => {
         if (seguimientoId) {
@@ -121,23 +125,12 @@ const Novedades = ({ route }) => {
         }
     }, [seguimientoId]);
 
-
-    const handleOpenModal = (formType, novedad = null) => {
-        if (formType === 'formNovedades') {
-            setBodyContent(
-                <FormNovedades
-                    initialData={novedad}
-                    onClose={() => handleCloseModal()}
-                    onSubmit={(data) => handleSubmit(data)}
-                    mode={novedad ? 'edit' : 'create'}
-                    actionLabel={novedad ? 'Actualizar Novedad' : 'Registrar Novedad'}
-                    productiva={productiva}
-                    route={{ params: { productiva } }}
-                />
-            );
+    useEffect(() => {
+        if (seguimientoId) {
+            listarNovedades(identificacion, seguimientoId); // Solo llama si el seguimientoId no está vacío
         }
-        setIsModalOpen(true);
-    };
+    }, [seguimientoId]);
+
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -169,7 +162,6 @@ const Novedades = ({ route }) => {
             listarNovedades(identificacion, seguimientoId); // Vuelve a cargar las novedades
             handleCloseModal();
         } catch (error) {
-            Alert.alert('Error', `Error al guardar la novedad: ${error.message}`);
         }
     };
 
@@ -199,30 +191,37 @@ const Novedades = ({ route }) => {
         <Layout title={"Novedades"}>
             <View style={styles.container}>
                 <View style={styles.containerpicker}>
-                    <Picker
-                        selectedValue={seguimientoId}
-                        style={styles.picker}
-                        onValueChange={(itemValue) => {
-                            setSeguimientoId(itemValue);
-                            listar(seguimientoId, itemValue);
-                        }}
-                    >
-                        <Picker.Item label="Selecciona un Seguimiento" value="" />
-                        {seguimientos.map((seguimiento) => (
-                            <Picker.Item
-                                key={seguimiento.value}
-                                label={seguimiento.value}  // Label, como "seguimiento 1"
-                                value={seguimiento.value}  // ID, por ejemplo 1
-                            />
-                        ))}
-                    </Picker>
+                    {isLoading ? (
+                        <Text>Cargando seguimientos...</Text>
+                    ) : (
+                        <Picker
+                            selectedValue={seguimientoId}
+                            style={styles.picker}
+                            onValueChange={(itemValue) => {
+                                setSeguimientoId(itemValue);  // Actualiza el seguimientoId
+
+                                // Llamar a listarNovedades directamente después de que el estado haya cambiado
+                                listarNovedades(identificacion, itemValue);
+                            }}
+                        >
+                            <Picker.Item label="Selecciona un Seguimiento" value="" />
+                            {seguimientos.map((seguimiento) => (
+                                <Picker.Item
+                                    key={seguimiento.value}
+                                    label={seguimiento.label} // Corregido: muestra el texto "seguimiento X"
+                                    value={seguimiento.value}
+                                />
+                            ))}
+                        </Picker>
+                    )}
                 </View>
 
                 <NovedadFormulario
                     visible={modalVisible}
                     onClose={handleCloseModalFormNovedades}
-                    productiva={productiva}
-                    route={{ params: { productiva } }}
+                    onSubmit={(data) => handleSubmit(data)}
+                    productiva={routeProductiva}
+                    route={{ params: { productiva: routeProductiva } }}
                 />
 
                 <TouchableOpacity style={styles.formButton} onPress={handleAbrirModalFormNovedades}>
@@ -318,3 +317,4 @@ const styles = StyleSheet.create({
 });
 
 export default Novedades;
+

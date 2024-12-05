@@ -14,8 +14,8 @@ import axiosClient from '../../axiosClient';
 import Layout from '../Template/Layout';
 import { Download } from 'lucide-react-native';
 import { usePersonas } from "../../Context/ContextPersonas";
+import { Buffer } from 'buffer';
 
-// Solicitar permisos de almacenamiento (Android)
 const requestStoragePermission = async () => {
   if (Platform.OS === 'android') {
     try {
@@ -37,7 +37,6 @@ const requestStoragePermission = async () => {
   return true;
 };
 
-// Función para descargar archivos
 const descargarPdf = async (fileName) => {
   try {
     const hasPermission = await requestStoragePermission();
@@ -49,13 +48,11 @@ const descargarPdf = async (fileName) => {
       return;
     }
 
-    const url = `/principal/descargar?nombre=${fileName}`; // Ruta relativa
+    const url = `/principal/descargar?nombre=${fileName}`; 
     const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
-    // Descarga el archivo usando Axios
     const response = await axiosClient.get(url, { responseType: 'arraybuffer' });
 
-    // Escribe el archivo descargado en el sistema de archivos local
     await RNFS.writeFile(downloadPath, Buffer.from(response.data).toString('base64'), 'base64');
 
     Alert.alert(
@@ -67,6 +64,10 @@ const descargarPdf = async (fileName) => {
           onPress: () => {
             RNFetchBlob.android.actionViewIntent(downloadPath, 'application/zip');
           },
+        },
+        {
+          text: 'No abrir',
+          style: 'cancel', 
         },
       ]
     );
@@ -80,7 +81,7 @@ const descargarPdf = async (fileName) => {
 };
 
 const Principal = () => {
-  const { rol } = usePersonas(); // Uso de contexto
+  const { rol } = usePersonas(); 
   const downloadOptions = [
     {
       title: 'Contrato de Aprendizaje',
