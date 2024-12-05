@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Modal, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Modal, Alert, Image, RefreshControl } from 'react-native';
 import { Bell, Trash, BellPlus } from 'lucide-react-native';
 import FormNovedades from './FormNovedad';
 import axiosClient from '../../axiosClient';
@@ -18,11 +18,13 @@ const Novedades = ({ route }) => {
     const [productiva, setProductiva] = useState(null);
     const [seguimientos, setSeguimientos] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
 
     const handleAbrirModalFormNovedades = () => {
         setModalVisible(true);
     };
-    
+
     const handleCloseModalFormNovedades = () => {
         setModalVisible(false);
     };
@@ -48,7 +50,7 @@ const Novedades = ({ route }) => {
     const listarNovedades = async (identificacion, seguimientoId = '') => {
         setIsLoading(true);
         try {
-            const response = await axiosClient.get(`/novedad/listar/${identificacion}`, { params: { seguimientoId } }); // Pasar el ID de seguimiento si existe
+            const response = await axiosClient.get(`/novedad/listar/${identificacion}`, { params: { seguimientoId } });
             if (Array.isArray(response.data)) {
                 setNovedades(response.data);
             } else {
@@ -63,6 +65,7 @@ const Novedades = ({ route }) => {
             setIsLoading(false);
         }
     };
+
 
     const listar = async (id_seguimiento = '') => {
         setIsLoading(true);
@@ -140,6 +143,19 @@ const Novedades = ({ route }) => {
         setIsModalOpen(false);
         listarNovedades(identificacion, seguimientoId); // Vuelve a listar las novedades con el filtro de seguimiento
     };
+
+
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        listarNovedades(identificacion, seguimientoId)
+            .then(() => {
+                setIsRefreshing(false);
+            })
+            .catch(() => {
+                setIsRefreshing(false);
+            });
+    };
+
 
     const handleSubmit = async (novedadData) => {
         try {
@@ -233,8 +249,13 @@ const Novedades = ({ route }) => {
                         </View>
                     )}
                     keyExtractor={item => item.id_novedad.toString()}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            onRefresh={handleRefresh}
+                        />
+                    }
                 />
-
                 <Modal visible={isModalOpen} onRequestClose={handleCloseModal}>
                     {bodyContent}
                 </Modal>
