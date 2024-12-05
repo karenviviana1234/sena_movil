@@ -40,18 +40,25 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       setNombres(userData.nombres || "");
       setCorreo(userData.correo || "");
       setTelefono(userData.telefono || "");
-      // setMunicipio(userData.id_municipio || "");
-      const municipioSeleccionado = municipiosList.find((muni) => {
-        muni.nombre_mpio.trim() === userData.id_municipio.trim() ? muni : null;
-      } 
-        
-    );
-    if (municipioSeleccionado) {
-      setMunicipio(municipioSeleccionado.id_municipio);
+  
+      // Verificar que userData.id_municipio no sea null o vacío
+      if (userData.id_municipio) {
+        const municipioSeleccionado = municipiosList.find((muni) =>
+          muni.nombre_mpio.trim() === userData.id_municipio.trim()
+        );
+  
+        if (municipioSeleccionado) {
+          setMunicipio(municipioSeleccionado.id_municipio);
+        }
+      } else {
+        // Si no tiene municipio asignado (null o vacío)
+        setMunicipio(null);  // O cualquier valor predeterminado que quieras usar
+      }
+  
+      console.log("UserData:", userData.id_municipio);
     }
-    console.log("UserData ", userData.id_municipio)
-  }
-}, [userData, municipiosList]);
+  }, [userData, municipiosList]);
+  
 
 
   // Enviar el ID correcto del municipio al actualizar

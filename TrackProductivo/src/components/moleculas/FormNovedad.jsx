@@ -11,42 +11,36 @@ import { usePersonas } from '../../Context/ContextPersonas';
 import moment from 'moment';
 import axiosClient from '../../axiosClient';
 
-const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClose }) => {
+const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
     const [descripcion, setDescripcion] = useState('');
     const [fecha, setFecha] = useState(new Date());
     const [instructor, setInstructor] = useState('');
     const { nombres } = usePersonas();
-    console.log(nombres);
     const [fotos, setFotos] = useState([]);
-    const [seguimiento, setSeguimiento] = useState('');
     const [seguimientos, setSeguimientos] = useState([]);
-    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-    const [productiva, setProductiva] = useState(null);
-    console.log("Hola", productiva);
     const [seguimientoId, setSeguimientoId] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [productiva, setProductiva] = useState(null);
+    
 
     useEffect(() => {
         const loadInitialData = async () => {
             if (route?.params?.productiva) {
                 setProductiva(route.params.productiva);
             } else if (!productiva) {
-                // Solo muestra la alerta si no se ha asignado un valor a 'productiva'
                 Alert.alert('Error', 'No se recibió el parámetro productiva.');
             }
         };
 
         loadInitialData();
-    }, [route?.params?.productiva, productiva]);  // Solo ejecuta si productiva cambia
-
+    }, [route?.params?.productiva, productiva]);
 
     useEffect(() => {
-        if (visible && productiva) {  // Solo hacer la llamada si el modal está visible y productiva tiene valor
+        if (visible && productiva) {
             fetchSeguimientos(productiva);
         }
     }, [visible, productiva]);
-
-
 
     useEffect(() => {
         if (nombres) {
@@ -80,11 +74,7 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchSeguimientos(); // Llamada inicial para obtener los seguimientos
-    }, []);
-
+    
 
     const pickImages = async () => {
         try {
@@ -102,10 +92,6 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
     const removeImage = () => {
         setFotos([]);
     };
-    const selectSeguimiento = (value) => {
-        console.log('Valor seleccionado en el Picker:', value);
-        setSeguimiento(Number(value));
-    };
 
     const showDatePicker = () => {
         setIsDatePickerVisible(true);
@@ -116,17 +102,14 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         setIsDatePickerVisible(false);
     };
 
-    const navigation = useNavigation();
-
-    const TitleWithBackButton = ({ navigation }) => (
+    const TitleWithBackButton = () => (
         <View style={styles.titleContainer}>
-            <Text style={styles.title}>{mode === 'update' ? 'Actualizar Novedad' : 'Registrar Novedad'}</Text>
+            <Text style={styles.title}>Registrar Novedad</Text>
             <TouchableOpacity onPress={onClose} style={styles.backButton}>
                 <X size={24} color="#333" />
             </TouchableOpacity>
         </View>
     );
-
 
     const handleSubmit = async () => {
         if (!descripcion.trim() || !fecha || !seguimientoId) {
@@ -139,18 +122,11 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
             return;
         }
 
-        // Verifica si 'seguimientoId' es un valor válido
-        if (!seguimientoId || seguimientoId === '') {
-            Alert.alert('Error', 'Por favor selecciona un seguimiento.');
-            return;
-        }
-
         const formData = new FormData();
         formData.append("descripcion", descripcion);
         formData.append("fecha", moment(fecha).format('YYYY-MM-DD'));
         formData.append("instructor", instructor);
         formData.append("seguimiento", seguimientoId);
-
 
         fotos.forEach(foto => {
             formData.append('foto', {
@@ -161,7 +137,7 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         });
 
         try {
-            const response = await axios.post('/novedades/registrar', formData, {
+            const response = await axiosClient.post('/novedades/registrar', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`
@@ -170,8 +146,7 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
 
             if (response.data) {
                 Alert.alert('Éxito', 'Novedad registrada con éxito.');
-                console.log('Novedad registrada exitosamente');
-                onSubmit(); // Llamar a onSubmit solo si la respuesta es correcta
+                onSubmit();
             }
         } catch (error) {
             console.error('Error al registrar novedad:', error);
@@ -179,12 +154,11 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         }
     };
 
-
     return (
         <Modal visible={visible} animationType="slide" transparent={true}>
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <TitleWithBackButton navigation={navigation} />
+                  <TitleWithBackButton />
                     <ScrollView style={styles.scrollView}>
                         <View style={styles.sectionSeparator}>
                             <Text style={styles.instructor}>
@@ -252,7 +226,7 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
                     </ScrollView>
                     <View>
                         <TouchableOpacity onPress={handleSubmit} style={[styles.button, styles.submitButton]}>
-                            <Text style={[styles.TextButton]}>{mode === 'update' ? 'Actualizar Novedad' : 'Crear Novedad'}</Text>
+                            <Text style={styles.TextButton}>Crear Novedad</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -260,6 +234,7 @@ const NovedadFormulario = ({ mode, initialData, onSubmit, route, visible, onClos
         </Modal>
     );
 };
+
 const ImagePreview = ({ image, onDelete }) => (
     <View style={styles.imagePreview}>
         <Image source={{ uri: image.path }} style={styles.previewThumbnail} />
