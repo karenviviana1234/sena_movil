@@ -102,14 +102,12 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         type: [DocumentPicker.types.pdf],
       });
       setSeguimientoPdf(res[0]);
-      setPdfName(res[0].name); // Actualiza el estado con el nombre del archivo
     } catch (err) {
       if (!DocumentPicker.isCancel(err)) {
         console.error(err);
       }
     }
   };
-  
 
   const handleSubmitActa = useCallback(async () => {
     if (!seguimientoPdf) {
@@ -162,15 +160,14 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   }, [seguimientoPdf, id_seguimiento, handleSubmit]);
 
-  const downloadFile = async (id_seguimiento) => {
+  const downloadFile = async () => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
-      console.log("Hola", id_seguimiento)
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.108:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+      const baseUrl = "http://192.168.0.106:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
@@ -244,9 +241,9 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             </TouchableOpacity>
           )}
           {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
-            <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
-            <Download name="download" size={24} color="#0d324c" />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={downloadFile}>
+              <Download name="download" size={24} color="#0d324c" />
+            </TouchableOpacity>
           )}
 
         </View>

@@ -11,6 +11,7 @@ import {
 import axiosClient from "../../axiosClient";
 import { Picker } from "@react-native-picker/picker";
 import { usePersonas } from "../../Context/ContextPersonas";
+import { X } from "lucide-react-native";
 
 const PersonasModal = ({ visible, onClose, userData }) => {
   const [identificacion, setIdentificacion] = useState("");
@@ -40,18 +41,24 @@ const PersonasModal = ({ visible, onClose, userData }) => {
       setNombres(userData.nombres || "");
       setCorreo(userData.correo || "");
       setTelefono(userData.telefono || "");
-      // setMunicipio(userData.id_municipio || "");
-      const municipioSeleccionado = municipiosList.find((muni) => {
-        muni.nombre_mpio.trim() === userData.id_municipio.trim() ? muni : null;
-      } 
-        
-    );
-    if (municipioSeleccionado) {
-      setMunicipio(municipioSeleccionado.id_municipio);
+
+      // Verificar que userData.id_municipio no sea null o vacío
+      if (userData.id_municipio) {
+        const municipioSeleccionado = municipiosList.find((muni) =>
+          muni.nombre_mpio.trim() === userData.id_municipio.trim()
+        );
+
+        if (municipioSeleccionado) {
+          setMunicipio(municipioSeleccionado.id_municipio);
+        }
+      } else {
+        // Si no tiene municipio asignado (null o vacío)
+        setMunicipio(null);  // O cualquier valor predeterminado que quieras usar
+      }
+
+      console.log("UserData:", userData.id_municipio);
     }
-    console.log("UserData ", userData.id_municipio)
-  }
-}, [userData, municipiosList]);
+  }, [userData, municipiosList]);
 
 
   // Enviar el ID correcto del municipio al actualizar
@@ -98,7 +105,14 @@ const PersonasModal = ({ visible, onClose, userData }) => {
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Editar Perfil</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <X size={24} color="black" />
+          </TouchableOpacity>
+
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Editar Perfil</Text>
+          </View>
+         
           <Text style={styles.texto}>Identificación</Text>
           <TextInput
             style={styles.input}
@@ -147,7 +161,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
                     <Picker.Item
                       key={muni.id_municipio}
                       label={muni.nombre_mpio}
-                      value={muni.id_municipio} 
+                      value={muni.id_municipio}
                     />
                   ))}
                 </Picker>
@@ -162,9 +176,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             >
               <Text style={styles.updateButtonText}>Actualizar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
+
           </View>
         </View>
       </View>
@@ -187,12 +199,20 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative", // Permite posicionar la 'X' de forma absoluta
+  },
+  modalHeader: {
+    alignItems: "center", // Centra el título horizontalmente
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 26,
     color: "green",
     fontWeight: "bold",
     marginBottom: 15,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   texto: {
     color: "black",
@@ -232,11 +252,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
   },
-  buttonClose: {
+  closeButton: {
     position: "absolute",
     top: 10,
-    right: 10,
-  }
+    right: 10, // Posiciona la 'X' en la esquina superior derecha
+    zIndex: 1, // Asegura que esté por encima del resto del contenido
+  },
 });
 
 export default PersonasModal;
