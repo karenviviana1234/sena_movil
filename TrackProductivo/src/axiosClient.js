@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Ip = '192.168.42.190'
+const Ip = '192.168.2.145'
 
 /* Ip de mi casa 192.168.100.155  */
 
