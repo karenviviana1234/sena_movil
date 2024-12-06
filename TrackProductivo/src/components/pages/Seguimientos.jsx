@@ -6,8 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalSeguimiento from '../moleculas/Modal_Seguimiento.jsx';
 import ComponentSeguimiento from '../moleculas/ComponetSeguimiento.jsx';
 import Layout from '../Template/Layout';
-import { Bell } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
 
 const Seguimientos = () => {
     const { rol, cargo } = usePersonas();
@@ -19,23 +17,6 @@ const Seguimientos = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [error, setError] = useState(null);
     const [seguimientoData, setSeguimientoData] = useState(null);
-
-
-    const navigation = useNavigation();
-
-    const handleOpenNovedad = (identificacion, productiva) => {
-        if (!productiva) {
-            Alert.alert('Error', 'El campo productiva no está disponible.');
-            return;
-        }
-
-        console.log("Datos a enviar:", { identificacion, productiva });
-        navigation.navigate('Novedad', { identificacion, productiva });
-    };
-
-
-
-
 
     useEffect(() => {
         const fetchSeguimientos = async () => {
@@ -53,7 +34,6 @@ const Seguimientos = () => {
     const filteredItems = useMemo(() => {
         return seguimientos.filter(seg =>
             seg.identificacion ||
-            seg.productiva ||
             seg.id_seguimiento.toString().includes(filterValue)
         );
     }, [seguimientos, filterValue]);
@@ -130,8 +110,6 @@ const Seguimientos = () => {
                         </Text>
                     </TouchableOpacity>
                 ))}
-
-
             </View>
         );
     };
@@ -166,38 +144,31 @@ const Seguimientos = () => {
 
         if (checkBitacorasApproved(item.bitacoras)) {
             if (rol === "Instructor") {
-                return (
-                    <View key={item.id_seguimiento} style={styles.item}>
-                        <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-                        <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
-                        <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
-                        <Text style={styles.itemText}>Programa: {item.sigla}</Text>
-                        <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
-                        <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
-                        <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
-                        <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
-                            <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
-                        </TouchableOpacity>
-                    </View>
-                );
-            }
-        }
-
-        return (
-            <View key={item.id_seguimiento} style={styles.item}>
-                <View style={styles.row}>
-                    <Text style={styles.Text}>{item.nombres}</Text>
-                    <Bell
-                        size={30}
-                        color="green"
-                        onPress={() => handleOpenNovedad(item.identificacion, item.productiva)}
-                    />
-
-                </View>
+            return (
+                <View key={item.id_seguimiento} style={styles.item}>
+                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
+                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
                 <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
                 <Text style={styles.itemText}>Programa: {item.sigla}</Text>
                 <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+                <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
+                    <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
+                    <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
+                        <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+    }
+        
+        // Si no todas las bitácoras están aprobadas, mostramos la información original
+        return (
+            <View key={item.id_seguimiento} style={styles.item}>
+                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
                 <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
+                <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
+                <Text style={styles.itemText}>Programa: {item.sigla}</Text>
+                <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
                 <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
                 {renderSeguimientoButtons(item)}
             </View>
@@ -220,7 +191,6 @@ const Seguimientos = () => {
         );
     }
 
-
     return (
         <Layout title="Seguimientos">
             <View style={styles.container}>
@@ -235,8 +205,8 @@ const Seguimientos = () => {
                 <FlatList
                     data={filteredItems}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id_seguimiento?.toString()}
-                />
+                    keyExtractor={(item, index) => item.id_seguimiento?.toString() || index.toString()}
+                    />
 
                 {seguimientoData && (
                     <View style={styles.seguimientoDetails}>
@@ -270,9 +240,9 @@ const Seguimientos = () => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        padding: 16,
         backgroundColor: "#ecffe1",
-        height: "113%",
+        height: "110%"
     },
     searchInput: {
         height: 40,
@@ -287,12 +257,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center', // Alinea verticalmente
-        justifyContent: 'space-between', // Alinea el ícono al lado derecho
-        marginBottom: 8, // Espaciado opcional entre filas
-    },
     emailText: {
         color: 'blue',
         textDecorationLine: 'underline',
@@ -305,13 +269,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 4,
         color: "black"
-    },
-    Text: {
-        fontSize: 20,
-        marginBottom: 4,
-        color: "black",
-        fontWeight: "bold",
-        flex: 1, // El texto ocupa el espacio restante
     },
     subtitle: {
         fontSize: 20,
@@ -358,24 +315,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        width: '90%',
-        padding: 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-    },
-    closeButton: {
-        marginTop: 10,
-        color: '#6200ee',
-        textAlign: 'center',
-    },
 });
 
-
 export default Seguimientos;
+
