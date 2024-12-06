@@ -34,13 +34,14 @@ const PersonasModal = ({ visible, onClose, userData }) => {
     };
     fetchMunicipios();
   }, []);
-  // Prellenar el formulario con los datos del usuario
+    // Prellenar el formulario con los datos del usuario
   useEffect(() => {
     if (userData) {
       setIdentificacion(userData.identificacion || "");
       setNombres(userData.nombres || "");
       setCorreo(userData.correo || "");
       setTelefono(userData.telefono || "");
+
 
       // Verificar que userData.id_municipio no sea null o vacío
       if (userData.id_municipio) {
@@ -56,6 +57,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
         setMunicipio(null);  // O cualquier valor predeterminado que quieras usar
       }
 
+  
       console.log("UserData:", userData.id_municipio);
     }
   }, [userData, municipiosList]);
