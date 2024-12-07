@@ -196,8 +196,9 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 50,
-        width: '100%',
+        width: '95%',
         backgroundColor: 'transparent',
+        color: "black"
     },
     novedadItem: {
         backgroundColor: '#ecffe1',

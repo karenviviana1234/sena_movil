@@ -229,6 +229,7 @@ const Seguimientos = () => {
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Buscar seguimiento..."
+                        placeholderTextColor="black"
                         value={filterValue}
                         onChangeText={setFilterValue}
                     />
@@ -277,11 +278,12 @@ const styles = StyleSheet.create({
         height: "113%",
     },
     searchInput: {
-        height: 40,
+        height: 50,
         backgroundColor: "#EDEDED",
         paddingHorizontal: 10,
         marginBottom: 10,
-        borderRadius: 5,
+        borderRadius: 15,
+        fontSize: 16,
     },
     item: {
         padding: 16,

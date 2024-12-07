@@ -204,9 +204,9 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
               Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
             </Text>
             <View style={styles.containerEstado}>
-            <Text style={[styles.estadoText, styles.getEstadoStyle(estado)]}>
-              {estado}
-            </Text>
+              <Text style={[styles.estadoText, styles.getEstadoStyle(estado)]}>
+                {estado}
+              </Text>
             </View>
           </View>
         )}
@@ -218,7 +218,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         <View style={styles.buttonContainer}>
           {estado !== 'aprobado' && userRole && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
             <TouchableOpacity style={styles.buttonFile} onPress={handleActaPdfSubmit}>
-              <FileUp name="download" size={20} color="gray" />
+              <FileUp name="download" size={20} color="black" />
               <Text style={styles.buttonText}>Cargar Pdf</Text>
             </TouchableOpacity>
           )}
@@ -230,7 +230,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           )}
           {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
             <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
-              <Download name="download" size={24} color="#0d324c" />
+              <Download name="download" size={24} color="black" />
             </TouchableOpacity>
           )}
 
@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+    color: "black"
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -263,14 +264,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+    color: "black"
   },
   pdfName: {
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: 8,
+    color: "black"
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 8,
   },
   button: {
@@ -284,12 +286,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     backgroundColor: "#dfdfdf",
-    gap: 10
+    gap: 10,
   },
   buttonText: {
-    color: "gray",
+    color: "black",
     fontSize: 14,
-
   },
   Container: {
     flexDirection: "row",

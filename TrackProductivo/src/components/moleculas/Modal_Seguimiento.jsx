@@ -5,9 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import ActaSeguimiento from '../organismos/ActaSeguimiento.jsx';
 import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
 import axiosClient from '../../axiosClient.js';
-import ModalBitacoras from './Modal_Bitacoras.jsx';
-import { Download, X, FileUp, SendHorizontal, CheckCircle, AlertCircle } from "lucide-react-native";
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Download, X, FileUp, SendHorizontal } from "lucide-react-native";
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import { PermissionsAndroid, Platform } from 'react-native';
@@ -222,7 +220,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
                       {bitacora.estado !== "aprobado" && (
                         <View style={styles.buttonsContainer}>
                           <TouchableOpacity style={styles.buttonFile} onPress={() => handlePdfSubmit(bitacora.id_bitacora)}>
-                            <FileUp size={20} color="gray" />
+                            <FileUp size={20} color="black" />
                             <Text style={styles.buttonText}>Cargar Pdf</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={handleSubmitBitacora}>
@@ -246,11 +244,6 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
             </View>
           </ScrollView>
         </View>
-      {/*   <ModalBitacoras
-          visible={modalVisible}
-          onClose={handleCloseModal}
-          id_seguimiento={id_seguimiento}
-        /> */}
       </View>
     </Modal>
   );
@@ -272,11 +265,10 @@ const styles = StyleSheet.create({
   },
   fileName: {
     position: 'absolute',
-    bottom: 55,
+    bottom: 5,
     fontSize: 17,
-    color: 'gray',
+    color: "black",
     padding: 5,
-
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -329,7 +321,8 @@ const styles = StyleSheet.create({
   containerPdf: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: 10,
+    color: "black"
   },
   buttonFile: {
     flexDirection: "row",
@@ -342,7 +335,7 @@ const styles = StyleSheet.create({
     gap: 10
   },
   buttonText: {
-    color: "gray",
+    color: "black",
     fontSize: 14,
   },
   title: {
@@ -350,6 +343,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
     textAlign: 'center',
+    color: "#0d324c"
   },
   sectionContainer: {
     marginBottom: 32,
@@ -358,7 +352,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-    marginLeft: 20
+    marginLeft: 20,
+    color: "black"
   },
   bitacoraItem: {
     marginBottom: 16,
@@ -382,12 +377,13 @@ const styles = StyleSheet.create({
   },
   labelB: {
     fontSize: 16,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    color: "black"
   },
   labelf: {
     fontSize: 14,
     marginLeft: 150,
-    color: "gray",
+    color: "black",
     marginVertical: 5
   },
   buttonContainer: {
@@ -406,11 +402,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-  },
-  buttonText: {
-    color: "gray",
-    fontSize: 14,
-
   },
   icon: {
     marginRight: 5,

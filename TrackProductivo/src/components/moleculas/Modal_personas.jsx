@@ -115,7 +115,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             <Text style={styles.modalTitle}>Editar Perfil</Text>
           </View>
          
-          <Text style={styles.texto}>Identificación</Text>
+          <Text style={styles.texto}>Identificación:</Text>
           <TextInput
             style={styles.input}
             value={identificacion.toString()}
@@ -124,7 +124,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="numeric"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Nombre</Text>
+          <Text style={styles.texto}>Nombres:</Text>
           <TextInput
             style={styles.input}
             value={nombres}
@@ -132,7 +132,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             placeholder="Nombre"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Correo</Text>
+          <Text style={styles.texto}>Correo Electronico:</Text>
           <TextInput
             style={styles.input}
             value={correo}
@@ -141,7 +141,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
             keyboardType="email-address"
             placeholderTextColor="black"
           />
-          <Text style={styles.texto}>Teléfono</Text>
+          <Text style={styles.texto}>Teléfono:</Text>
           <TextInput
             style={styles.input}
             value={telefono}
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "left",
     position: "relative", // Permite posicionar la 'X' de forma absoluta
   },
   modalHeader: {
@@ -242,13 +242,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   updateButton: {
-    marginTop: 30,
+    marginTop: 20,
     backgroundColor: "#74cd62",
     width: 250,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 50,
+    marginLeft: 10
   },
   updateButtonText: {
     color: "white",

@@ -22,7 +22,7 @@ const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [productiva, setProductiva] = useState(null);
-    
+
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -74,7 +74,7 @@ const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
             setIsLoading(false);
         }
     };
-    
+
 
     const pickImages = async () => {
         try {
@@ -158,7 +158,7 @@ const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
         <Modal visible={visible} animationType="slide" transparent={true}>
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                  <TitleWithBackButton />
+                    <TitleWithBackButton />
                     <ScrollView style={styles.scrollView}>
                         <View style={styles.sectionSeparator}>
                             <Text style={styles.instructor}>
@@ -166,6 +166,7 @@ const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
                             </Text>
                             <TextInput
                                 placeholder="Descripción de la Novedad"
+                                placeholderTextColor="black"
                                 value={descripcion}
                                 onChangeText={setDescripcion}
                                 multiline
@@ -204,7 +205,7 @@ const NovedadFormulario = ({ visible, onClose, onSubmit, route }) => {
                             </TouchableOpacity>
                         </View>
                         <TouchableOpacity onPress={showDatePicker} style={styles.fecha}>
-                            <Text>{moment(fecha).format('YYYY-MM-DD')}</Text>
+                            <Text style={styles.fecha}>{moment(fecha).format('YYYY-MM-DD')}</Text>
                         </TouchableOpacity>
                         <DateTimePickerModal
                             isVisible={isDatePickerVisible}
@@ -264,39 +265,34 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     backButton: {
-        marginLeft: 100,
+        marginLeft: 120,
         marginBottom: 20,
 
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: "black"
     },
     scrollView: {
         flexGrow: 1,
-    },
-    sectionSeparator: {
-        paddingBottom: 10,
-    },
-    seguimientoContainer: {
-        marginBottom: 20,
-    },
-    instructorContainer: {
-        marginBottom: 15,
     },
     instructor: {
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 10,
+        color: "black"
     },
     input: {
         marginBottom: 10,
         borderRadius: 16,
         padding: 10,
-        backgroundColor: "#EDEDED"
+        backgroundColor: "#EDEDED",
+        color: "black"
     },
     descriptionInput: {
-        fontSize: 18
+        fontSize: 18,
+        color: "black"
     },
     containerpicker: {
         borderRadius: 15,
@@ -325,7 +321,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-around',
-        marginBottom: 20,
     },
     imagePreview: {
         position: 'relative',
@@ -359,8 +354,9 @@ const styles = StyleSheet.create({
     fecha: {
         borderRadius: 8,
         alignItems: "flex-end",
-        marginBottom: 20,
-        marginLeft: 4
+        marginRight: 8,
+        color: "black",
+        marginBottom: 10
     },
     imagePreview: {
         width: 100,
