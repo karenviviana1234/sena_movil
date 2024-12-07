@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 26,
-    color: "green",
+    color: "#0d324c",
     fontWeight: "bold",
     marginBottom: 15,
     flexDirection: "row",

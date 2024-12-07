@@ -107,7 +107,7 @@ const Principal = () => {
       <View style={styles.container}>
         <Text style={styles.subtitle}>
           A continuación se muestran los tipos de Modalidades de Etapa Productiva,
-          seguidamente se podrá descargar los formatos correspondientes
+          seguidamente podrá descargar los formatos necesarios para Certificar cada Modalidad
         </Text>
 
         {downloadOptions.map((option, index) => (
@@ -120,7 +120,7 @@ const Principal = () => {
           >
             <Text style={styles.optionTitle}>{option.title}:</Text>
             <View style={styles.downloadContainer}>
-              <Text style={styles.downloadText}>archivo.zip</Text>
+              <Text style={styles.downloadText}>{option.fileName}</Text>
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => descargarPdf(option.fileName)}
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     marginBottom: 16,
     textAlign: "center",
+    marginHorizontal: 18
   },
   optionContainer: {
     backgroundColor: "#ecffe1",
@@ -177,10 +178,10 @@ const styles = StyleSheet.create({
   downloadText: {
     fontSize: 18,
     color: "gray",
-    marginRight: 180,
+    flex: 1
   },
   iconButton: {
-    marginHorizontal: 5,
+    marginLeft: 105,
   },
   lastOption: {
     marginBottom: 0,

@@ -6,7 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   ImageBackground,
-  ActivityIndicator
+  ActivityIndicator,
+  Linking
 } from "react-native";
 import Layout from "../Template/Layout";
 import axiosClient from "../../axiosClient";
@@ -35,22 +36,29 @@ const Aprendices = () => {
     fetchAprendices();
   }, [id_persona]);
 
+  const handleOpenGmail = (email) => {
+    const mailToUrl = `mailto:${email}`;
+    Linking.openURL(mailToUrl).catch((err) =>
+      console.error("Error al abrir el correo:", err)
+    );
+  };
+
   const tieneColorAmarillo = (seguimientos) => {
     if (!seguimientos || !Array.isArray(seguimientos)) return false;
 
     const seguimiento3ConPdf = seguimientos.some(seguimiento => seguimiento.seguimiento === "3" && seguimiento.pdf_seguimiento);
-  
+
     // Verificar que cada seguimiento tenga un PDF
     const todosLosSeguimientosConPdf = seguimientos.every(seguimiento => seguimiento.pdf_seguimiento);
-  
+
     // Filtrar bitácoras aprobadas con PDF
     const bitacorasConPdfAprobadas = seguimientos.flatMap(seguimiento => seguimiento.bitacoras || [])
       .filter(bitacora => bitacora.pdf && bitacora.estado_bitacora === "aprobado");
-  
+
     // Retorna true solo si se cumplen ambas condiciones
-    return  seguimiento3ConPdf || todosLosSeguimientosConPdf && bitacorasConPdfAprobadas.length >= 4;
+    return seguimiento3ConPdf || todosLosSeguimientosConPdf && bitacorasConPdfAprobadas.length >= 4;
   };
-  
+
 
   // Función para verificar si todas las bitácoras tienen PDF
   const tienePdf = (seguimientos) => {
@@ -76,92 +84,97 @@ const Aprendices = () => {
       bitacora.estado_bitacora === "solicitud" && bitacora.pdf
     );
   };
-  
+
   // Renderiza cada aprendiz
   const renderPersona = ({ item }) => {
 
     const fondoColorEstado =
-    tienePdf(item.seguimientos) ||
-    todasBitacorasAprobadas(item.seguimientos) ||
-    tieneSolicitudConPdf(item.seguimientos) ||
-    tieneColorAmarillo(item.seguimientos);
-    
-    return(
-    <TouchableOpacity style={[
-      styles.itemContainer,
-      tienePdf(item.seguimientos) && styles.errorBackground,
-      todasBitacorasAprobadas(item.seguimientos) && styles.aprobadoBackground,
-      tieneSolicitudConPdf(item.seguimientos) && styles.solicitudConPdfBackground,
-      tieneColorAmarillo(item.seguimientos) && styles.amarilloBackground,
-    ]}>
-      <View style={styles.cardHeader}>
-        <CircleUserRound size={40} color="green" style={styles.icon} />
-        <Text  style={[
+      tienePdf(item.seguimientos) ||
+      todasBitacorasAprobadas(item.seguimientos) ||
+      tieneSolicitudConPdf(item.seguimientos) ||
+      tieneColorAmarillo(item.seguimientos);
+
+    return (
+      <TouchableOpacity style={[
+        styles.itemContainer,
+        tienePdf(item.seguimientos) && styles.errorBackground,
+        todasBitacorasAprobadas(item.seguimientos) && styles.aprobadoBackground,
+        tieneSolicitudConPdf(item.seguimientos) && styles.solicitudConPdfBackground,
+        tieneColorAmarillo(item.seguimientos) && styles.amarilloBackground,
+      ]}>
+        <View style={styles.cardHeader}>
+          <CircleUserRound size={40} color="green" style={styles.icon} />
+          <Text style={[
             styles.nombreText,
             fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
           ]}>{item.nombres}</Text>
-      </View>
-
-      <View style={styles.separator} />
-
-      <View style={styles.infoSection}>
-        <View style={styles.infoContainer}>
-          <Mail size={20} color="#3498DB" style={styles.icon} />
-          <Text style={[
-            styles.infoText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>
-            <Text style={[
-            styles.labelText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>Correo: </Text>
-            {item.correo}
-          </Text>
         </View>
 
-        <View style={styles.infoContainer}>
-          <IdCard size={20} color="#E74C3C" style={styles.icon} />
-          <Text style={[
-            styles.infoText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>
-            <Text style={[
-            styles.labelText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>Identificación: </Text>
-            {item.identificacion}
-          </Text>
-        </View>
+        <View style={styles.separator} />
 
-        <View style={styles.infoContainer}>
-          <Building2 size={20} color="#27AE60" style={styles.icon} />
-          <Text style={[
-            styles.infoText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>
+        <View style={styles.infoSection}>
+          <View style={styles.infoContainer}>
+            <Mail size={20} color="#3498DB" style={styles.icon} />
             <Text style={[
-            styles.labelText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>Empresa: </Text>
-            {item.razon_social}
-          </Text>
-        </View>
+              styles.infoText,
+              fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+            ]} >
+              <Text style={[
+                styles.labelText,
+                fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+              ]}>Correo: </Text>
+              <TouchableOpacity onPress={() => handleOpenGmail(item.correo)}>
+                <Text  style={[
+                styles.labelTextCorreo,
+                fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+              ]}>{item.correo}</Text>
+              </TouchableOpacity>
+            </Text>
+          </View>
 
-        <View style={styles.infoContainer}>
-          <GraduationCap size={20} color="#8E44AD" style={styles.icon} />
-          <Text style={[
-            styles.infoText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>
+          <View style={styles.infoContainer}>
+            <IdCard size={20} color="#E74C3C" style={styles.icon} />
             <Text style={[
-            styles.labelText,
-            fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
-          ]}>Programa: </Text>
-            {item.sigla}
-          </Text>
+              styles.infoText,
+              fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+            ]}>
+              <Text style={[
+                styles.labelText,
+                fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+              ]}>Identificación: </Text>
+              {item.identificacion}
+            </Text>
+          </View>
+
+          <View style={styles.infoContainer}>
+            <Building2 size={20} color="#27AE60" style={styles.icon} />
+            <Text style={[
+              styles.infoText,
+              fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+            ]}>
+              <Text style={[
+                styles.labelText,
+                fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+              ]}>Empresa: </Text>
+              {item.razon_social}
+            </Text>
+          </View>
+
+          <View style={styles.infoContainer}>
+            <GraduationCap size={20} color="#8E44AD" style={styles.icon} />
+            <Text style={[
+              styles.infoText,
+              fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+            ]}>
+              <Text style={[
+                styles.labelText,
+                fondoColorEstado && styles.textoBlanco, // Aplica texto blanco si el fondo es distinto de blanco
+              ]}>Programa: </Text>
+              {item.sigla}
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
     )
   };
 
@@ -280,6 +293,14 @@ const styles = StyleSheet.create({
   labelText: {
     fontWeight: '600',
     color: '#7F8C8D',
+    fontSize: 15
+  },
+  labelTextCorreo: {
+    fontWeight: '600',
+    color: '#7F8C8D',
+    fontSize: 15,
+    textDecorationLine: 'underline',
+    alignItems: "center",
   },
   textoBlanco: {
     color: '#FFFFFF', // Texto blanco para fondos no blancos

@@ -52,13 +52,11 @@ const Seguimientos = () => {
 
     const filteredItems = useMemo(() => {
         return seguimientos.filter(seg =>
-            seg.identificacion.toString().includes(filterValue) ||
-            seg.productiva.toLowerCase().includes(filterValue.toLowerCase()) ||
-            seg.id_seguimiento.toString().includes(filterValue)
+            seg.nombres.toLowerCase().includes(filterValue.toLowerCase()) || // Filtra por el campo 'nombres'
+            seg.identificacion.toString().includes(filterValue) // Filtra por el campo 'identificacion'
         );
-    }, [seguimientos, filterValue]); // Asegúrate de que 'seguimientos' se actualiza correctamente.
-
-
+    }, [seguimientos, filterValue]);
+    
     const handleOpenModal = async (id_seguimiento, componentName) => {
         try {
             await AsyncStorage.setItem('idSeguimiento', id_seguimiento.toString());
@@ -227,12 +225,12 @@ const Seguimientos = () => {
             <View style={styles.container}>
                 {rol !== 'Aprendiz' && (
                     <TextInput
-                        style={styles.searchInput}
-                        placeholder="Buscar seguimiento..."
-                        placeholderTextColor="black"
-                        value={filterValue}
-                        onChangeText={setFilterValue}
-                    />
+                    style={styles.searchInput}
+                    placeholder="Buscar Seguimiento..."
+                    placeholderTextColor="black"
+                    value={filterValue}
+                    onChangeText={setFilterValue}
+                />                
                 )}
                 <FlatList
                     data={filteredItems}
