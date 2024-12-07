@@ -8,26 +8,25 @@ export const SeguimientosProvider = ({ children }) => {
   const [seguimiento, setSeguimiento] = useState(null);
   const [idSeguimiento, setSeguimientoId] = useState(null);
 
-  const getSeguimientos = useCallback(async () => {
+  const getSeguimientos = async () => {
     try {
       const response = await axiosClient.get('/seguimientos/listarA');
-      console.log(response.data);
+      
       setSeguimientos(response.data);
     } catch (error) {
       console.error('Error del servidor: ' + error);
     }
-  }, []);
-
+  };
   const getSeguimiento = async (id_seguimiento) => {
     try {
       const response = await axiosClient.get(`/bitacoras/bitacorasSeguimiento/${id_seguimiento}`);
+      setSeguimiento(response.data);  // Actualiza el estado con los datos
       return response.data;
     } catch (error) {
       console.error("Error fetching seguimiento:", error);
-     
     }
   };
-
+  
   return (
     <SeguimientosContext.Provider
       value={{

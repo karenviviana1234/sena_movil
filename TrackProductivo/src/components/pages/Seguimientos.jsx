@@ -52,11 +52,12 @@ const Seguimientos = () => {
 
     const filteredItems = useMemo(() => {
         return seguimientos.filter(seg =>
-            seg.identificacion ||
-            seg.productiva ||
+            seg.identificacion.toString().includes(filterValue) ||
+            seg.productiva.toLowerCase().includes(filterValue.toLowerCase()) ||
             seg.id_seguimiento.toString().includes(filterValue)
         );
-    }, [seguimientos, filterValue]);
+    }, [seguimientos, filterValue]); // Asegúrate de que 'seguimientos' se actualiza correctamente.
+
 
     const handleOpenModal = async (id_seguimiento, componentName) => {
         try {
@@ -64,12 +65,12 @@ const Seguimientos = () => {
             setSelectedSeguimientoId(id_seguimiento);
             const data = await getSeguimiento(id_seguimiento);
             setSelectedComponent(componentName);
-            setSeguimientoData(data);
             setModalVisible(true);
         } catch (error) {
             setError(`Error al obtener el seguimiento: ${error.message}`);
         }
     };
+
 
     const handleCloseModal = async () => {
         setModalVisible(false);
@@ -84,13 +85,11 @@ const Seguimientos = () => {
         if (!Array.isArray(bitacoras)) {
             return false;
         }
-
         return bitacoras.every(seguimiento =>
             Array.isArray(seguimiento) &&
             seguimiento.every(bitacora => bitacora.estado_bitacora === "aprobado")
         );
     };
-
 
     const renderSeguimientoButtons = (item) => {
         const seguimientoFechas = [item.seguimiento1, item.seguimiento2, item.seguimiento3];
@@ -101,6 +100,7 @@ const Seguimientos = () => {
             const formattedDate = new Date(date);
             return `${formattedDate.getDate().toString().padStart(2, '0')}-${(formattedDate.getMonth() + 1).toString().padStart(2, '0')}-${formattedDate.getFullYear()}`;
         };
+
 
         const getButtonBackgroundColor = (estado) => {
             switch (estado) {
@@ -141,6 +141,7 @@ const Seguimientos = () => {
     };
 
     const renderItem = ({ item }) => {
+        if (!item) return null;
 
         // Verificamos si todas las bitácoras están aprobadas
         if (checkBitacorasApproved(item.bitacoras)) {
@@ -235,7 +236,7 @@ const Seguimientos = () => {
                 <FlatList
                     data={filteredItems}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id_seguimiento?.toString()}
+                    keyExtractor={(item, index) => item.id_seguimiento?.toString() || index.toString()}
                 />
 
                 {seguimientoData && (
@@ -255,13 +256,14 @@ const Seguimientos = () => {
                     onClose={handleCloseModal}
                     id_seguimiento={selectedSeguimientoId}
                 >
-                    {selectedComponent?.startsWith("ComponentSeguimiento") && (
+                    {selectedComponent && selectedComponent.startsWith("ComponentSeguimiento") && (
                         <ComponentSeguimiento
                             id_seguimiento={selectedSeguimientoId}
                             numero={selectedComponent.slice(-1)}
                         />
                     )}
                 </ModalSeguimiento>
+
             </View>
         </Layout>
     );

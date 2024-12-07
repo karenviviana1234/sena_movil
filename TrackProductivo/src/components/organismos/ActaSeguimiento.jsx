@@ -109,7 +109,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
       }
     }
   };
-  
+
 
   const handleSubmitActa = useCallback(async () => {
     if (!seguimientoPdf) {
@@ -170,7 +170,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.108:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+      const baseUrl = "http://192.168.0.104:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
@@ -192,22 +192,6 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   };
 
-  const estadoConfig = {
-    solicitud: {
-      color: "orange",
-      icon: "alert-circle",
-    },
-    aprobado: {
-      color: "green",
-      icon: "check-circle",
-    },
-    rechazado: {
-      color: "red",
-      icon: "alert-circle",
-    },
-  };
-
-  const { color, icon } = estadoConfig[estado] || { color: "black", icon: "alert-circle" };
 
   return (
     <View style={styles.container}>
@@ -219,9 +203,10 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             <Text style={styles.subtitle}>
               Acta N° {seguimientoNumeros[id_seguimiento] || 1}:
             </Text>
-            <View style={styles.estadoC}>
-              <Icon name={icon} size={20} color={color} />
-              <Text style={[styles.estadoText, { color }]}>{estado}</Text>
+            <View style={styles.containerEstado}>
+            <Text style={[styles.estadoText, styles.getEstadoStyle(estado)]}>
+              {estado}
+            </Text>
             </View>
           </View>
         )}
@@ -245,8 +230,8 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           )}
           {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
             <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
-            <Download name="download" size={24} color="#0d324c" />
-          </TouchableOpacity>
+              <Download name="download" size={24} color="#0d324c" />
+            </TouchableOpacity>
           )}
 
         </View>
@@ -304,7 +289,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "gray",
     fontSize: 14,
-    
+
   },
   Container: {
     flexDirection: "row",
@@ -316,9 +301,29 @@ const styles = StyleSheet.create({
     marginLeft: 78,
     marginBottom: 12
   },
+  containerEstado: {
+    flexDirection: "row",
+    marginLeft: 70,
+    alignItems: 'center',
+  },
   estadoText: {
-    marginLeft: 2,
     fontSize: 14,
+    color: '#fff', // Color de texto blanco para que sea legible
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12, // Bordes redondeados para el contenedor pequeño
+  },
+  getEstadoStyle: (estado) => {
+    switch (estado) {
+      case 'aprobado':
+        return { backgroundColor: 'rgba(0, 128, 0, 0.7)' }; // verde con 50% de opacidad
+      case 'solicitud':
+        return { backgroundColor: 'rgba(255, 165, 0, 0.7)' }; // naranja con 50% de opacidad
+      case 'noaprobado':
+        return { backgroundColor: 'rgba(255, 0, 0, 0.7)' }; // rojo con 50% de opacidad
+      default:
+        return { backgroundColor: 'rgba(128, 128, 128, 0.7)' }; // gris con 50% de opacidad
+    }
   },
 });
 

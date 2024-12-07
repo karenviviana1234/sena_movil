@@ -152,21 +152,16 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
     }
   };
 
-
   const downloadFile = async (id_bitacora) => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
+      console.log("Hola", id_bitacora)
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
+      const baseUrl = "http://192.168.0.104:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
-      // Realizamos la solicitud de descarga con axiosClient
-      const response = await axiosClient.get(`/bitacoras/download/${id_bitacora}`, {
-        responseType: 'blob', // Asegúrate de que la respuesta sea un blob para descargar archivos
-      });
-
-      // Procesamos el archivo recibido y lo guardamos en el dispositivo
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
@@ -175,17 +170,15 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
           description: 'Descargando archivo...',
         }
       })
-        .fetch('GET', response.config.url)
+        .fetch('GET', `${baseUrl}/bitacoras/download/${id_bitacora}`)
         .then((res) => {
           Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
         })
         .catch((error) => {
           Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
         });
-
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
     }
   };
   return (
@@ -253,11 +246,11 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
             </View>
           </ScrollView>
         </View>
-        <ModalBitacoras
+      {/*   <ModalBitacoras
           visible={modalVisible}
           onClose={handleCloseModal}
           id_seguimiento={id_seguimiento}
-        />
+        /> */}
       </View>
     </Modal>
   );
