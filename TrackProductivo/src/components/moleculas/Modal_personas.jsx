@@ -92,7 +92,7 @@ const PersonasModal = ({ visible, onClose, userData }) => {
         `/personas/perfilActualizar/${id_persona}`,
         updatedData
       );
-      Alert.alert('Perfil Actualizado con éxito');
+      Alert.alert('Éxito', 'Perfil Actualizado Exitosamente');
       onClose();
     } catch (error) {
       console.error(
@@ -222,11 +222,12 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "#EDEDED",
+    color: "black",
     height: 50,
     width: "100%",
     borderRadius: 15,
     marginBottom: 15,
-    fontSize: 18,
+    fontSize: 15,
     paddingHorizontal: 10,
   },
   pickerContainer: {
@@ -249,7 +250,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 50,
-    marginLeft: 10
   },
   updateButtonText: {
     color: "white",

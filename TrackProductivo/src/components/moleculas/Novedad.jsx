@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Modal, Alert, Image } from 'react-native';
 import { Bell, Trash, BellPlus } from 'lucide-react-native';
-import FormNovedades from './FormNovedad';
 import axiosClient from '../../axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from "@react-native-picker/picker";
@@ -119,7 +118,7 @@ const Novedades = ({ route }) => {
             <View style={styles.container}>
                 <View style={styles.containerpicker}>
                     {isLoading ? (
-                        <Text>Cargando seguimientos...</Text>
+                        <Text style={styles.carga}>Cargando seguimientos...</Text>
                     ) : (
                         <Picker
                             selectedValue={seguimientoId}
@@ -147,7 +146,7 @@ const Novedades = ({ route }) => {
                         <BellPlus size={30} color="green" style={styles.icon} />
                     </TouchableOpacity>
                 )}
-                {isLoading && <Text>Cargando novedades...</Text>}
+                {isLoading && <Text style={styles.carga}>Cargando novedades...</Text>}
 
                 <FlatList
                     data={novedades}
@@ -221,11 +220,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     icon: {
-        width: 24,
-        height: 24,
-        color: '#fff'
+        width: 20,
+        height: 20,
+        color: '#fff',
+        marginTop: 13
     },
     deleteButton: { position: 'absolute', top: 6, right: 4, padding: 4, borderRadius: 4 },
+    carga: {
+        color: "black"
+    }
 });
 
 export default Novedades;
