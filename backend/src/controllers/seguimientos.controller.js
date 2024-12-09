@@ -83,38 +83,39 @@ export const listarSeguimientoAprendices = async (req, res) => {
         } else if (cargo === 'Instructor') {
             // Si es instructor, filtrar los seguimientos donde es el instructor asignado
             sql = `
-               SELECT
-            p.identificacion AS identificacion,
-            p.nombres AS nombres,
-            p.correo AS correo,
-            f.codigo AS codigo,
-            prg.sigla AS sigla,
-            e.razon_social AS razon_social,
-            s.id_seguimiento AS id_seguimiento,
-            s.seguimiento AS seguimiento,
-            s.fecha AS fecha,
-            s.estado AS estado,
-            b.id_bitacora AS id_bitacora,
-            b.estado AS estado_bitacora,
-            instr.identificacion AS instructor_identificacion,
-            instr.nombres AS nombre_instructor
-        FROM
-            seguimientos s
-            LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
-            LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
-            LEFT JOIN personas p ON m.aprendiz = p.id_persona
-            LEFT JOIN empresas e ON pr.empresa = e.id_empresa
-            LEFT JOIN fichas f ON m.ficha = f.codigo
-            LEFT JOIN programas prg ON f.programa = prg.id_programa
-            LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
-            LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
-            LEFT JOIN actividades a ON asg.actividad = a.id_actividad
-            LEFT JOIN personas instr ON a.instructor = instr.id_persona
-        WHERE
-            instr.identificacion = ?  -- Filtrar por la identificación del instructor
-        ORDER BY
-            p.identificacion, s.seguimiento, b.id_bitacora;
-    `;
+                SELECT
+                    p.identificacion AS identificacion,
+                    p.nombres AS nombres,
+                    p.correo AS correo,
+                    f.codigo AS codigo,
+                    prg.sigla AS sigla,
+                    e.razon_social AS razon_social,
+                    s.id_seguimiento AS id_seguimiento,
+                    s.seguimiento AS seguimiento,
+                    s.fecha AS fecha,
+                    s.estado AS estado,
+                    pr.id_productiva AS productiva, -- Campo productiva
+                    b.id_bitacora AS id_bitacora,
+                    b.estado AS estado_bitacora,
+                    instr.identificacion AS instructor_identificacion,
+                    instr.nombres AS nombre_instructor
+                FROM
+                    seguimientos s
+                    LEFT JOIN productivas pr ON s.productiva = pr.id_productiva
+                    LEFT JOIN matriculas m ON pr.matricula = m.id_matricula
+                    LEFT JOIN personas p ON m.aprendiz = p.id_persona
+                    LEFT JOIN empresas e ON pr.empresa = e.id_empresa
+                    LEFT JOIN fichas f ON m.ficha = f.codigo
+                    LEFT JOIN programas prg ON f.programa = prg.id_programa
+                    LEFT JOIN bitacoras b ON b.seguimiento = s.id_seguimiento
+                    LEFT JOIN asignaciones asg ON asg.productiva = pr.id_productiva
+                    LEFT JOIN actividades a ON asg.actividad = a.id_actividad
+                    LEFT JOIN personas instr ON a.instructor = instr.id_persona
+                WHERE
+                    instr.identificacion = ?
+                ORDER BY
+                    p.identificacion, s.seguimiento, b.id_bitacora;
+            `;
             params.push(identificacion);  // Asignar la identificación del instructor
         } else if (rol === 'Aprendiz') {
             // Si es aprendiz, filtrar los seguimientos por la identificación del aprendiz
@@ -130,6 +131,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
                     s.seguimiento AS seguimiento,
                     s.fecha AS fecha,
                     s.estado AS estado,
+                    pr.id_productiva AS productiva,
                     b.id_bitacora AS id_bitacora,
                     b.estado AS estado_bitacora,
                     instr.identificacion AS instructor_identificacion,
@@ -174,6 +176,7 @@ export const listarSeguimientoAprendices = async (req, res) => {
                         seguimiento1: null,
                         seguimiento2: null,
                         seguimiento3: null,
+                        productiva: row.productiva,
                         estado1: null,
                         estado2: null,
                         estado3: null,
@@ -394,29 +397,30 @@ export const rechazarSeguimiento = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor: ' + error.message });
     }
 };
-
 export const descargarPdf = async (req, res) => {
     try {
-        const id_seguimiento = decodeURIComponent(req.params.id_seguimiento);
-        const [result] = await pool.query('SELECT pdf FROM seguimientos WHERE id_seguimiento = ?', [id_seguimiento]);
-
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'Bitácora no encontrada' });
-        }
-
-        const pdfFileName = result[0].pdf;
-        const filePath = path.resolve(__dirname, '../../public/seguimientos', pdfFileName);
-
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
-        }
-
-        res.sendFile(filePath, { headers: { 'Content-Disposition': `attachment; filename="${pdfFileName}"` } });
+      const id_seguimiento = decodeURIComponent(req.params.id_seguimiento);
+      const [result] = await pool.query('SELECT pdf FROM seguimientos WHERE id_seguimiento = ?', [id_seguimiento]);
+  
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Bitácora no encontrada' });
+      }
+  
+      const pdfFileName = result[0].pdf;
+      const filePath = path.resolve(__dirname, '../../public/seguimientos', pdfFileName);
+  
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: `Archivo no encontrado en la ruta: ${filePath}` });
+      }
+  
+      res.setHeader('Content-Disposition', `attachment; filename="${pdfFileName}"`);
+      res.sendFile(filePath);
     } catch (error) {
-        console.error('Error en el servidor:', error);
-        res.status(500).json({ message: 'Error en el servidor: ' + error.message });
+      console.error('Error en el servidor:', error);
+      res.status(500).json({ message: `Error en el servidor: ${error.message}` });
     }
-};
+  };
+  
 
 export const listarEstadoSeguimiento = async (req, res) => {
     const { id_seguimiento } = req.params;
@@ -522,4 +526,44 @@ export const listarEstadosBitacorasSeguimientos = async (req, res) => {
     }
 };
 
+export const listarSeguimientoPorProductiva = async (req, res) => {
+    try {
+        // Obtiene el id_productiva desde los parámetros de la URL
+        const { id_productiva } = req.params;
 
+        // Verifica si el parámetro fue proporcionado
+        if (!id_productiva) {
+            return res.status(400).json({ error: 'El id_productiva es requerido' });
+        }
+
+        // Consulta SQL para obtener los seguimientos filtrados por id_productiva
+        const sql = `
+            SELECT productiva, id_seguimiento
+            FROM seguimientos
+            WHERE productiva = ?
+            ORDER BY productiva, id_seguimiento;
+        `;
+        const [result] = await pool.query(sql, [id_productiva]);
+
+        // Verifica si hay resultados
+        if (result.length > 0) {
+            // Agrupa los seguimientos por 'productiva'
+            const response = result.reduce((acc, item) => {
+                // Si no existe la clave para 'productiva', la inicializa
+                if (!acc[item.productiva]) {
+                    acc[item.productiva] = {};
+                }
+                // Asigna el seguimiento al grupo correspondiente
+                const seguimientoKey = `seguimiento ${Object.keys(acc[item.productiva]).length + 1}`;
+                acc[item.productiva][seguimientoKey] = item.id_seguimiento;
+                return acc;
+            }, {});
+
+            res.status(200).json(response);
+        } else {
+            res.status(404).json({ error: 'No hay seguimientos registrados para esta productiva' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error del servidor: ' + error.message });
+    }
+};

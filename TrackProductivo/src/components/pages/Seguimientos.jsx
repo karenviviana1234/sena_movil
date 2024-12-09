@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ModalSeguimiento from '../moleculas/Modal_Seguimiento.jsx';
 import ComponentSeguimiento from '../moleculas/ComponetSeguimiento.jsx';
 import Layout from '../Template/Layout';
+import { Bell } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const Seguimientos = () => {
     const { rol, cargo } = usePersonas();
@@ -17,6 +19,23 @@ const Seguimientos = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [error, setError] = useState(null);
     const [seguimientoData, setSeguimientoData] = useState(null);
+
+
+    const navigation = useNavigation();
+
+    const handleOpenNovedad = (identificacion, productiva) => {
+        if (!productiva) {
+            Alert.alert('Error', 'El campo productiva no está disponible.');
+            return;
+        }
+
+        console.log("Datos a enviar:", { identificacion, productiva });
+        navigation.navigate('Novedad', { identificacion, productiva });
+    };
+
+
+
+
 
     useEffect(() => {
         const fetchSeguimientos = async () => {
@@ -33,23 +52,23 @@ const Seguimientos = () => {
 
     const filteredItems = useMemo(() => {
         return seguimientos.filter(seg =>
-            seg.identificacion ||
-            seg.id_seguimiento.toString().includes(filterValue)
+            seg.nombres.toLowerCase().includes(filterValue.toLowerCase()) || // Filtra por el campo 'nombres'
+            seg.identificacion.toString().includes(filterValue) // Filtra por el campo 'identificacion'
         );
     }, [seguimientos, filterValue]);
-
+    
     const handleOpenModal = async (id_seguimiento, componentName) => {
         try {
             await AsyncStorage.setItem('idSeguimiento', id_seguimiento.toString());
             setSelectedSeguimientoId(id_seguimiento);
             const data = await getSeguimiento(id_seguimiento);
             setSelectedComponent(componentName);
-            setSeguimientoData(data);
             setModalVisible(true);
         } catch (error) {
             setError(`Error al obtener el seguimiento: ${error.message}`);
         }
     };
+
 
     const handleCloseModal = async () => {
         setModalVisible(false);
@@ -64,13 +83,11 @@ const Seguimientos = () => {
         if (!Array.isArray(bitacoras)) {
             return false;
         }
-
         return bitacoras.every(seguimiento =>
             Array.isArray(seguimiento) &&
             seguimiento.every(bitacora => bitacora.estado_bitacora === "aprobado")
         );
     };
-
 
     const renderSeguimientoButtons = (item) => {
         const seguimientoFechas = [item.seguimiento1, item.seguimiento2, item.seguimiento3];
@@ -81,6 +98,7 @@ const Seguimientos = () => {
             const formattedDate = new Date(date);
             return `${formattedDate.getDate().toString().padStart(2, '0')}-${(formattedDate.getMonth() + 1).toString().padStart(2, '0')}-${formattedDate.getFullYear()}`;
         };
+
 
         const getButtonBackgroundColor = (estado) => {
             switch (estado) {
@@ -110,6 +128,8 @@ const Seguimientos = () => {
                         </Text>
                     </TouchableOpacity>
                 ))}
+
+
             </View>
         );
     };
@@ -119,6 +139,7 @@ const Seguimientos = () => {
     };
 
     const renderItem = ({ item }) => {
+        if (!item) return null;
 
         // Verificamos si todas las bitácoras están aprobadas
         if (checkBitacorasApproved(item.bitacoras)) {
@@ -144,31 +165,38 @@ const Seguimientos = () => {
 
         if (checkBitacorasApproved(item.bitacoras)) {
             if (rol === "Instructor") {
-            return (
-                <View key={item.id_seguimiento} style={styles.item}>
-                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
-                <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
-                <Text style={styles.itemText}>Programa: {item.sigla}</Text>
-                <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
-                <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
-                    <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
-                    <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
-                        <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
-                    </TouchableOpacity>
-                </View>
-            );
+                return (
+                    <View key={item.id_seguimiento} style={styles.item}>
+                        <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
+                        <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
+                        <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
+                        <Text style={styles.itemText}>Programa: {item.sigla}</Text>
+                        <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+                        <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
+                        <Text style={styles.itemText}>Carga el reporte de calificacion de la etapa practica accediendo al siguiente enlace:</Text>
+                        <TouchableOpacity onPress={() => Linking.openURL('http://senasofiaplus.edu.co/sofia-public/')}>
+                            <Text style={styles.emailText}>http://senasofiaplus.edu.co/sofia-public/</Text>
+                        </TouchableOpacity>
+                    </View>
+                );
+            }
         }
-    }
-        
-        // Si no todas las bitácoras están aprobadas, mostramos la información original
+
         return (
             <View key={item.id_seguimiento} style={styles.item}>
-                <Text style={styles.itemText}>Nombre: {item.nombres}</Text>
-                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
+                <View style={styles.row}>
+                    <Text style={styles.Text}>{item.nombres}</Text>
+                    <Bell
+                        size={30}
+                        color="green"
+                        onPress={() => handleOpenNovedad(item.identificacion, item.productiva)}
+                    />
+
+                </View>
                 <Text style={styles.itemText}>Identificación: {item.identificacion}</Text>
                 <Text style={styles.itemText}>Programa: {item.sigla}</Text>
                 <Text style={styles.itemText}>Ficha: {item.codigo}</Text>
+                <Text style={styles.itemText}>Empresa: {item.razon_social}</Text>
                 <Text style={styles.itemText}>Porcentaje: {item.porcentaje}%</Text>
                 {renderSeguimientoButtons(item)}
             </View>
@@ -191,21 +219,23 @@ const Seguimientos = () => {
         );
     }
 
+
     return (
         <Layout title="Seguimientos">
             <View style={styles.container}>
                 {rol !== 'Aprendiz' && (
                     <TextInput
-                        style={styles.searchInput}
-                        placeholder="Buscar seguimiento..."
-                        value={filterValue}
-                        onChangeText={setFilterValue}
-                    />
+                    style={styles.searchInput}
+                    placeholder="Buscar Seguimiento..."
+                    placeholderTextColor="black"
+                    value={filterValue}
+                    onChangeText={setFilterValue}
+                />                
                 )}
                 <FlatList
                     data={filteredItems}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id_seguimiento?.toString()}
+                    keyExtractor={(item, index) => item.id_seguimiento?.toString() || index.toString()}
                 />
 
                 {seguimientoData && (
@@ -225,13 +255,14 @@ const Seguimientos = () => {
                     onClose={handleCloseModal}
                     id_seguimiento={selectedSeguimientoId}
                 >
-                    {selectedComponent?.startsWith("ComponentSeguimiento") && (
+                    {selectedComponent && selectedComponent.startsWith("ComponentSeguimiento") && (
                         <ComponentSeguimiento
                             id_seguimiento={selectedSeguimientoId}
                             numero={selectedComponent.slice(-1)}
                         />
                     )}
                 </ModalSeguimiento>
+
             </View>
         </Layout>
     );
@@ -240,22 +271,29 @@ const Seguimientos = () => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
+        padding: 20,
         backgroundColor: "#ecffe1",
-        height: "110%"
+        height: "113%",
     },
     searchInput: {
-        height: 40,
+        height: 50,
         backgroundColor: "#EDEDED",
         paddingHorizontal: 10,
         marginBottom: 10,
-        borderRadius: 5,
+        borderRadius: 15,
+        fontSize: 16,
     },
     item: {
         padding: 16,
         marginVertical: 8,
         backgroundColor: 'white',
         borderRadius: 8,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center', // Alinea verticalmente
+        justifyContent: 'space-between', // Alinea el ícono al lado derecho
+        marginBottom: 8, // Espaciado opcional entre filas
     },
     emailText: {
         color: 'blue',
@@ -269,6 +307,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 4,
         color: "black"
+    },
+    Text: {
+        fontSize: 20,
+        marginBottom: 4,
+        color: "black",
+        fontWeight: "bold",
+        flex: 1, // El texto ocupa el espacio restante
     },
     subtitle: {
         fontSize: 20,
@@ -315,6 +360,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%',
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+    },
+    closeButton: {
+        marginTop: 10,
+        color: '#6200ee',
+        textAlign: 'center',
+    },
 });
+
 
 export default Seguimientos;

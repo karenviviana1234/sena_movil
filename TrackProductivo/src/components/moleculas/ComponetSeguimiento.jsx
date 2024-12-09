@@ -1,15 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
-import { useContext } from "react";
-import SeguimientosContext from "../../Context/ContextSeguimiento.jsx";
+import { useContext } from 'react';
+import SeguimientosContext from '../../Context/ContextSeguimiento.jsx';
 
 const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
   const { seguimientos, getSeguimiento } = useContext(SeguimientosContext);
@@ -23,8 +16,8 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
         const response = await getSeguimiento(id_seguimiento);
         setSeguimientoData(response);
       } catch (err) {
-        console.error("Error al cargar seguimiento:", err);
-        Alert.alert("Error", "Ocurrió un error al cargar el seguimiento");
+        console.error('Error al cargar seguimiento:', err);
+        Alert.alert('Error', 'Ocurrió un error al cargar el seguimiento');
       } finally {
         setLoading(false);
       }
@@ -48,7 +41,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Seguimiento {numero}</Text>
-
+      
       <View style={styles.section}>
         <Text>Bitácoras</Text>
         {seguimientoData.bitacoras.map((bitacora) => (
@@ -57,9 +50,7 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
             <Text>Estado: {bitacora.estado}</Text>
             <Text>Fecha: {bitacora.fecha}</Text>
             <View style={styles.actionContainer}>
-              <TouchableOpacity
-                onPress={() => handleDocumentAction(bitacora, "descargar")}
-              >
+              <TouchableOpacity onPress={() => handleDocumentAction(bitacora, 'descargar')}>
                 <Icon name="download" size={20} color="#2196F3" />
               </TouchableOpacity>
             </View>
@@ -68,19 +59,13 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
       </View>
 
       <View style={styles.section}>
-        <Text>Acta</Text>
+        <Text >Acta</Text>
         <View style={styles.documentItem}>
-          <Text style={styles.documentTitle}>
-            {seguimientoData.acta.titulo}
-          </Text>
+          <Text style={styles.documentTitle}>{seguimientoData.acta.titulo}</Text>
           <Text>Estado: {seguimientoData.acta.estado}</Text>
           <Text>Fecha: {seguimientoData.acta.fecha}</Text>
           <View style={styles.actionContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                handleDocumentAction(seguimientoData.acta, "descargar")
-              }
-            >
+            <TouchableOpacity onPress={() => handleDocumentAction(seguimientoData.acta, 'descargar')}>
               <Icon name="download" size={20} color="#2196F3" />
             </TouchableOpacity>
           </View>
@@ -92,38 +77,33 @@ const ComponentSeguimiento = ({ id_seguimiento, numero }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 16,
+      flex: 1,
+      padding: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "black",
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 16,
   },
   section: {
-    marginBottom: 24,
-    color: "black",
+      marginBottom: 24,
   },
 
   documentItem: {
-    backgroundColor: "#f0f0f0",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    color: "black",
+      backgroundColor: '#f0f0f0',
+      padding: 16,
+      borderRadius: 8,
+      marginBottom: 12,
   },
   documentTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "black",
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 8,
   },
   actionContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 8,
-    color: "black",
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginTop: 8,
   },
 });
 

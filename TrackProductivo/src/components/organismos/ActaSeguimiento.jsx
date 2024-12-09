@@ -102,12 +102,14 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         type: [DocumentPicker.types.pdf],
       });
       setSeguimientoPdf(res[0]);
+      setPdfName(res[0].name); // Actualiza el estado con el nombre del archivo
     } catch (err) {
       if (!DocumentPicker.isCancel(err)) {
         console.error(err);
       }
     }
   };
+
 
   const handleSubmitActa = useCallback(async () => {
     if (!seguimientoPdf) {
@@ -160,21 +162,16 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
     }
   }, [seguimientoPdf, id_seguimiento, handleSubmit]);
 
-
   const downloadFile = async (id_seguimiento) => {
     try {
       const granted = await requestStoragePermission();
       if (!granted) return;
+      console.log("Hola", id_seguimiento)
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
+      const baseUrl = "http://192.168.0.104:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
-      // Realizamos la solicitud de descarga con axiosClient
-      const response = await axiosClient.get(`/seguimientos/descargarPdf/${id_seguimiento}`, {
-        responseType: 'blob', // Especificamos que la respuesta debe ser de tipo 'blob' para descargar el archivo
-      });
-
-      // Procesamos el archivo recibido y lo guardamos en el dispositivo
       config({
         addAndroidDownloads: {
           useDownloadManager: true,
@@ -183,17 +180,15 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
           description: 'Descargando archivo...',
         }
       })
-        .fetch('GET', response.config.url)
+        .fetch('GET', `${baseUrl}/seguimientos/descargarPdf/${id_seguimiento}`)
         .then((res) => {
           Alert.alert("Descarga completa", "El archivo se ha descargado correctamente.");
         })
         .catch((error) => {
           Alert.alert("Error de descarga", "No se pudo descargar el archivo: " + error.message);
         });
-
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Ha ocurrido un error durante la descarga.");
     }
   };
 
@@ -223,7 +218,7 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
         <View style={styles.buttonContainer}>
           {estado !== 'aprobado' && userRole && (userRole !== 'Administrativo' && userRole !== 'Aprendiz' && userRole !== 'Coordinador') && (
             <TouchableOpacity style={styles.buttonFile} onPress={handleActaPdfSubmit}>
-              <FileUp name="download" size={20} color="gray" />
+              <FileUp name="download" size={20} color="black" />
               <Text style={styles.buttonText}>Cargar Pdf</Text>
             </TouchableOpacity>
           )}
@@ -234,8 +229,8 @@ const ActaSeguimiento = ({ handleSubmit, id_seguimiento, onIdSend }) => {
             </TouchableOpacity>
           )}
           {(userRole === 'Aprendiz' || userRole === 'Instructor') && (
-            <TouchableOpacity style={styles.button} onPress={downloadFile}>
-              <Download name="download" size={24} color="#0d324c" />
+            <TouchableOpacity style={styles.button} onPress={() => downloadFile(id_seguimiento)}>
+              <Download name="download" size={24} color="black" />
             </TouchableOpacity>
           )}
 
@@ -255,6 +250,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+    color: "black"
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -268,14 +264,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+    color: "black"
   },
   pdfName: {
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: 8,
+    color: "black"
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 8,
   },
   button: {
@@ -289,17 +286,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     backgroundColor: "#dfdfdf",
-    gap: 10
+    gap: 10,
   },
   buttonText: {
-    color: "gray",
+    color: "black",
     fontSize: 14,
-
   },
   Container: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 3,
+  },
+  estadoC: {
+    flexDirection: "row",
+    marginLeft: 78,
+    marginBottom: 12
   },
   containerEstado: {
     flexDirection: "row",

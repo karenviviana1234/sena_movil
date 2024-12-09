@@ -2,6 +2,7 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Ip = '192.168.100.155'
+
 /* Ip de mi casa 192.168.100.155  */
 
 const axiosClient = axios.create({

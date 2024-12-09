@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  Linking
 } from "react-native";
 import Layout from "../Template/Layout";
 import PersonasModal from "../moleculas/Modal_personas";
@@ -60,6 +61,13 @@ const Perfil = () => {
     handleRefresh();
   };
 
+  const handleOpenGmail = (email) => {
+    const mailToUrl = `mailto:${email}`;
+    Linking.openURL(mailToUrl).catch((err) =>
+      console.error("Error al abrir el correo:", err)
+    );
+  };
+
   return (
     <Layout title={"Perfil"}>
       <ImageBackground
@@ -91,7 +99,9 @@ const Perfil = () => {
                 <View style={styles.infoContainer}>
                   <Mail size={24} color="green" />
                   <Text style={styles.subtext}>Correo: </Text>
-                  <Text style={styles.text}>{userData.correo}</Text>
+                  <TouchableOpacity onPress={() => handleOpenGmail(userData.correo)}>
+                    <Text style={styles.textC}>{userData.correo}</Text>
+                  </TouchableOpacity>
                 </View>
                 <View style={styles.infoContainer}>
                   <CircleUserRound size={24} color="green" />
@@ -105,27 +115,20 @@ const Perfil = () => {
                     <Text style={styles.text}>{userData.id_municipio}</Text>
                   </View>
                 )}
+                <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
+                  <Text style={styles.buttonText}>Editar Perfil</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <Text>Cargando datos del usuario...</Text>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
-              <Text style={styles.buttonText}>Editar Perfil</Text>
-            </TouchableOpacity>
+
 
             <PersonasModal
               visible={modalVisible}
               onClose={handleCloseModal}
               userData={userData}
-            />
-          </View>
-
-          {/* Imagen en la parte inferior */}
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../public/def_AGROSIS_LOGOTIC.png")}
-              style={styles.logo}
             />
           </View>
         </ScrollView>
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
-    height: "105%",
+    height: "115%",
   },
   scrollContainer: {
     paddingVertical: 20,
@@ -148,29 +151,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   containerDos: {
-    marginTop: 50,
+    marginTop: 80,
     backgroundColor: "white",
-    width: 330,
+    width: 370,
     borderRadius: 15,
     alignItems: "center",
     paddingVertical: 20, // Espaciado vertical en el contenedor para el nombre centrado
   },
   textName: {
-    color: "black",
+    color: "#0d324c",
     fontWeight: "bold",
-    textAlign: "center", // Centra el texto dentro de la vista
+    textAlign: "center",
     fontSize: 24,
-    marginBottom: 20, // Espacio entre el nombre y el resto de la información
+    marginBottom: 20,
   },
   infoContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap", 
+    alignItems: "flex-start",
     justifyContent: "flex-start",
     marginBottom: 15,
-    width: "90%", // Alinea los elementos a la izquierda
+    width: "90%",
   },
   subtext: {
     color: "black",
@@ -180,12 +184,19 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "black",
-    fontSize: 20,
+    fontSize: 18,
     marginLeft: 2,
-    flexShrink: 1, // Permite que el texto se ajuste si es largo
+    flexShrink: 1, 
+  },
+  textC: {
+    color: "black",
+    textDecorationLine: "underline",
+    fontSize: 18,
+    marginLeft: 2,
+    flex: 1, // Permite que el texto ocupe todo el ancho disponible
   },
   button: {
-    marginTop: 20,
+    marginTop: 30,
     backgroundColor: "#74cd62",
     width: 200,
     height: 50,
@@ -198,16 +209,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   logoContainer: {
-    marginTop: 20,
+    marginTop: 40,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 30,
-  },
-  logo: {
-    width: 220,
-    height: 180,
-    borderRadius: 40,
-  },
+  }
 });
 
 export default Perfil;

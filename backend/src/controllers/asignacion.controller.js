@@ -317,4 +317,4 @@ export const eliminarAsignacion = async (req, res) => {
         connection.release(); // Liberar la conexión al final
     }
 };
-
+//qw

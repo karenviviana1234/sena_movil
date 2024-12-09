@@ -13,6 +13,7 @@ import Matriculas from './src/components/pages/Matriculas';
 import Empresas from './src/components/pages/Empresas';
 import Aprendices from './src/components/pages/Aprendices';
 import PrimeraScreen from './src/components/pages/Splahs';
+import Novedad from './src/components/moleculas/Novedad';
 import RestablecerContrasena from './src/components/pages/ForgotPassword';
 import ForgotPassword from './src/components/pages/ForgotPassword';
 import ResetPassword from './src/components/pages/ResetPassword';
@@ -56,6 +57,7 @@ const App = () => {
                 component={Principal} 
                 options={{ headerShown: false }} 
               />
+              <Stack.Screen name="Novedad" component={Novedad} />
               <Stack.Screen 
                 name="matriculas" 
                 component={Matriculas} 

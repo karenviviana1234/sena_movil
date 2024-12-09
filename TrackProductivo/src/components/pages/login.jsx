@@ -22,7 +22,7 @@ const Login = () => {
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
   const navigation = useNavigation();
 
-  const { SetRol, SetId_persona } = usePersonas();
+  const { SetRol, SetId_persona, setNombres } = usePersonas();
   useFocusEffect(
     React.useCallback(() => {
       // Limpiar campos cuando se enfoque la pantalla de login
@@ -37,34 +37,45 @@ const Login = () => {
   }
 
   const handleLogin = async () => {
+    if (!correo.trim() || !password.trim()) {
+      if (!correo.trim()) {
+        Alert.alert("Error", "Por favor ingrese un correo electrónico.");
+      } else if (!password.trim()) {
+        Alert.alert("Error", "Por favor ingrese su contraseña.");
+      }
+      return;
+    }
+  
     if (!isValidEmail(correo)) {
       Alert.alert("Error", "Por favor ingrese un correo electrónico válido.");
       return;
     }
+  
     try {
       console.log("Iniciando login...");
       console.log({ correo: correo, password: password });
-
+  
       const response = await axiosClient.post("/validacion", {
         correo: correo,
         password: password,
       });
-
+  
       if (response.status === 200) {
         console.log("Datos de respuesta:", response.data);
         const { user, token } = response.data;
-
+  
         await AsyncStorage.setItem("token", token);
         const storedToken = await AsyncStorage.getItem("token");
         console.log("Token almacenado:", storedToken);
         if (user) {
           SetRol(user.cargo);
           SetId_persona(user.id_persona);
-
+          setNombres(user.nombres);
+  
           await AsyncStorage.setItem("token", token);
           await AsyncStorage.setItem("user", JSON.stringify(user));
-
-          const allowedRoles = [ "Instructor", "Aprendiz"];
+  
+          const allowedRoles = ["Instructor", "Aprendiz"];
           if (allowedRoles.includes(user.cargo)) {
             console.log("rol", user.cargo, "id", user.id_persona);
             navigation.navigate("principal");
@@ -77,10 +88,9 @@ const Login = () => {
         }
       }
     } catch (error) {
-      
       console.log("Error en login:", error);
       console.log("Detalles del error:", error.response?.data);
-
+  
       if (error.response) {
         if (error.response.status === 404) {
           Alert.alert(
@@ -148,9 +158,9 @@ const Login = () => {
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
           >
             {isPasswordVisible ? (
-              <EyeOff size={24} color="green" />
-            ) : (
               <Eye size={24} color="green" />
+            ) : (
+              <EyeOff size={24} color="green" />
             )}
           </TouchableOpacity>
         </View>
