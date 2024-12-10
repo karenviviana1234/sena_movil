@@ -8,6 +8,8 @@ import {
   Modal,
   Alert,
   Image,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import { Bell, Trash, BellPlus } from "lucide-react-native";
 import FormNovedades from "./FormNovedad";
@@ -24,12 +26,21 @@ const Novedades = ({ route }) => {
   const [seguimientos, setSeguimientos] = useState([]);
   const [seguimientoId, setSeguimientoId] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const {
     identificacion: routeIdentificacion,
     productiva: routeProductiva,
   } = route.params;
 
   const { rol } = usePersonas();
+
+  useEffect(() => {
+    if (seguimientoId) {
+      listar(seguimientoId);
+    } else if (routeIdentificacion) {
+      listarNovedades(routeIdentificacion);
+    }
+  }, [seguimientoId, routeIdentificacion]);
 
   // Controlador para listar seguimientos por productiva
   const listarSeguimientos = async (productiva) => {
@@ -102,30 +113,38 @@ const Novedades = ({ route }) => {
       );
       setNovedades(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-/*       console.error("Error al obtener novedades:", error.message); */
-      console.error("Error", "No se pudieron cargar las novedades.");
+      console.error("Error al obtener novedades:", error.message);
+      setNovedades([]); // Limpiar estado en caso de error
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Controlador para listar novedades por seguimiento
   const listar = async (id_seguimiento) => {
-    if (!id_seguimiento) return;
     setIsLoading(true);
     try {
-        const response = await axiosClient.get(`/novedades/listarN/${id_seguimiento}`);
-        const data = Array.isArray(response.data) ? response.data : [];
-        setNovedades(data);
+      const url = id_seguimiento
+        ? `/novedades/listarN/${id_seguimiento}` // Usar el ID del seguimiento seleccionado
+        : `/novedades/listar/${routeIdentificacion}`; // Usar el ID general de la identificación
+      
+      const response = await axiosClient.get(url);
+      setNovedades(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-        console.log
-        ('Error perrro al obtener novedades:', error.message);
-        setNovedades([]); // Asegurarse de limpiar el estado en caso de error
+      console.error("Error al obtener novedades:", error.message);
+      setNovedades([]); // Limpiar estado en caso de error
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
-
+  };
+  
+  useEffect(() => {
+    if (seguimientoId) {
+      listar(seguimientoId); // Listar según el seguimiento seleccionado
+    } else if (routeIdentificacion) {
+      listar(""); // Listar con identificación general cuando no hay filtro
+    }
+  }, [seguimientoId, routeIdentificacion]);
+  
 
   // Efectos para cargar datos iniciales y dependientes
   useEffect(() => {
@@ -141,85 +160,121 @@ const Novedades = ({ route }) => {
   const handleAbrirModalFormNovedades = () => setModalVisible(true);
   const handleCloseModalFormNovedades = () => setModalVisible(false);
 
-  const handleSubmitNovedad = () => {
-    console.log("Novedad registrada correctamente");
-    // Aquí puedes hacer cualquier acción después de que la novedad se registre
-    // como actualizar la lista, cerrar el modal, etc.
-    setModalVisible(false); // Si quieres cerrar el modal después de registrar la novedad
+  const handleSubmitNovedad = async () => {
+    try {
+      // Actualizar la lista de novedades
+      if (seguimientoId) {
+        await listar(seguimientoId);
+      } else if (routeIdentificacion) {
+        await listarNovedades(routeIdentificacion);
+      }
+      console.log("Novedad registrada correctamente");
+      setModalVisible(false); // Cierra el modal tras registrar
+    } catch (error) {
+      console.error("Error al refrescar novedades:", error.message);
+    }
   };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (seguimientoId) {
+        await listar(seguimientoId);
+      } else if (routeIdentificacion) {
+        await listarNovedades(routeIdentificacion);
+      }
+    } catch (error) {
+      console.error("Error al refrescar novedades:", error.message);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Cambiar el onSubmit en el componente del formulario
+
   return (
     <Layout title="Novedades">
       <View style={styles.container}>
-        <View style={styles.containerpicker}>
-          {isLoading ? (
-            <Text>Cargando seguimientos...</Text>
-          ) : (
-            <Picker
-              selectedValue={seguimientoId}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSeguimientoId(itemValue)}
-            >
-              <Picker.Item label="Selecciona un Seguimiento" value="" />
-              {seguimientos.map((seguimiento) => (
-                <Picker.Item
-                  key={seguimiento.value}
-                  label={seguimiento.label}
-                  value={seguimiento.value}
-                />
-              ))}
-            </Picker>
-          )}
-        </View>
-
-        <NovedadFormulario
-          visible={modalVisible}
-          onClose={handleCloseModalFormNovedades}
-          productiva={routeProductiva}
-          onSubmit={handleSubmitNovedad}
-          route={{ params: { productiva: routeProductiva } }}
-        />
-
-        {rol !== "Aprendiz" && (
-          <TouchableOpacity
-            style={styles.formButton}
-            onPress={handleAbrirModalFormNovedades}
-          >
-            <BellPlus size={30} color="green" style={styles.icon} />
-          </TouchableOpacity>
-        )}
-        {isLoading && <Text>Cargando novedades...</Text>}
-
-        {novedades.length === 0 && !isLoading ? (
-    <Text style={styles.emptyMessage}>No hay novedades para este seguimiento.</Text>
-) : (
-    <FlatList
-        data={novedades}
-        renderItem={({ item }) => (
-            <View style={styles.novedadItem}>
-                <Text style={styles.instructor}>{item.instructor}</Text>
-                <Text style={styles.descripcion}>Descripción: {item.descripcion}</Text>
-                <Text style={styles.seguimiento}>Seguimiento: {item.seguimiento}</Text>
-                {item.foto && (
-                    <Image 
-                        source={{ uri: `${axiosClient.defaults.baseURL}/novedad/${item.foto}` }} 
-                        style={styles.image} 
-                    />
-                )}
-                <Text style={styles.fecha}>{new Date(item.fecha).toLocaleDateString('es-CO')}</Text>
-                {rol !== "Aprendiz" && (
-                    <TouchableOpacity 
-                        style={styles.deleteButton} 
-                        onPress={() => desactivarNovedad(item.id_novedad)}
-                    >
-                        <Trash size={25} color="black" />
-                    </TouchableOpacity>
-                )}
-            </View>
-        )}
-        keyExtractor={(item) => item.id_novedad.toString()}
+          <View style={styles.containerpicker}>
+            {isLoading ? (
+              <Text>Cargando seguimientos...</Text>
+            ) : (
+<Picker
+  selectedValue={seguimientoId}
+  style={styles.picker}
+  onValueChange={(itemValue) => setSeguimientoId(itemValue)}
+>
+  <Picker.Item label="Selecciona un Seguimiento" value="" />
+  {seguimientos.map((seguimiento) => (
+    <Picker.Item
+      key={seguimiento.value}
+      label={seguimiento.label}
+      value={seguimiento.value}
     />
-)}
+  ))}
+</Picker>
 
+            )}
+          </View>
+
+          <NovedadFormulario
+            visible={modalVisible}
+            onClose={handleCloseModalFormNovedades}
+            productiva={routeProductiva}
+            onSubmit={handleSubmitNovedad} // Usar esta función
+            route={{ params: { productiva: routeProductiva } }}
+          />
+
+          {rol !== "Aprendiz" && (
+            <TouchableOpacity
+              style={styles.formButton}
+              onPress={handleAbrirModalFormNovedades}
+            >
+              <BellPlus size={30} color="green" style={styles.icon} />
+            </TouchableOpacity>
+          )}
+          {isLoading && <Text>Cargando novedades...</Text>}
+
+          {novedades.length === 0 && !isLoading ? (
+            <Text style={styles.emptyMessage}>
+              No hay novedades para este seguimiento.
+            </Text>
+          ) : (
+<FlatList
+  data={novedades}
+  renderItem={({ item }) => (
+    <View style={styles.novedadItem}>
+      <Text style={styles.instructor}>{item.instructor}</Text>
+      <Text style={styles.descripcion}>Descripción: {item.descripcion}</Text>
+      <Text style={styles.seguimiento}>Seguimiento: {item.seguimiento}</Text>
+      {item.foto && (
+        <Image
+          source={{
+            uri: `${axiosClient.defaults.baseURL}/novedad/${item.foto}`,
+          }}
+          style={styles.image}
+        />
+      )}
+      <Text style={styles.fecha}>
+        {new Date(item.fecha).toLocaleDateString("es-CO")}
+      </Text>
+      {rol !== "Aprendiz" && (
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => desactivarNovedad(item.id_novedad)}
+        >
+          <Trash size={25} color="black" />
+        </TouchableOpacity>
+      )}
+    </View>
+  )}
+  keyExtractor={(item) => item.id_novedad.toString()}
+  refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+  }
+/>
+
+          )}
       </View>
     </Layout>
   );
@@ -232,11 +287,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   emptyMessage: {
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 20,
     fontSize: 16,
-    color: '#888',
-},
+    color: "#888",
+  },
 
   title: {
     fontSize: 24,

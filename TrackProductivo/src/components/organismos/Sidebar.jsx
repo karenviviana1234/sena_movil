@@ -55,7 +55,6 @@ const Sidebar = ({ menuVisible, toggleMenu }) => {
     setSubMenuVisible(!subMenuVisible); // Alterna la visibilidad del submenú
   };
 
-  console.log("El rol actual es:", rol);
 
   return (
     <View style={StyleSheet.absoluteFillObject}>

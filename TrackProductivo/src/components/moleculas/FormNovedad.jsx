@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     backButton: {
-        marginLeft: 120,
+        marginLeft: 100,
         marginBottom: 20,
 
     },
@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
     picker: {
         fontSize: 14,
         backgroundColor: 'transparent',
+        color: "black"
     },
     buttonImage: {
         backgroundColor: '#E89551',

@@ -7,6 +7,7 @@ import {
   Alert,
   PermissionsAndroid,
   Platform,
+  ScrollView
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -48,7 +49,7 @@ const descargarPdf = async (fileName) => {
       return;
     }
 
-    const url = `/principal/descargar?nombre=${fileName}`; 
+    const url = `/principal/descargar?nombre=${fileName}`;
     const downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
     const response = await axiosClient.get(url, { responseType: 'arraybuffer' });
@@ -67,7 +68,7 @@ const descargarPdf = async (fileName) => {
         },
         {
           text: 'No abrir',
-          style: 'cancel', 
+          style: 'cancel',
         },
       ]
     );
@@ -81,7 +82,7 @@ const descargarPdf = async (fileName) => {
 };
 
 const Principal = () => {
-  const { rol } = usePersonas(); 
+  const { rol } = usePersonas();
   const downloadOptions = [
     {
       title: 'Contrato de Aprendizaje',
@@ -103,42 +104,44 @@ const Principal = () => {
 
 
   return (
-    <Layout title={"Inicio"}>
+    <Layout title={"Inicio"} contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
-        <Text style={styles.subtitle}>
-          A continuación se muestran los tipos de Modalidades de Etapa Productiva,
-          seguidamente podrá descargar los formatos necesarios para Certificar cada Modalidad
-        </Text>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <Text style={styles.subtitle}>
+            A continuación se muestran los tipos de Modalidades de Etapa Productiva,
+            seguidamente podrá descargar los formatos necesarios para Certificar cada Modalidad
+          </Text>
 
-        {downloadOptions.map((option, index) => (
-          <View
-            key={index}
-            style={[
-              styles.optionContainer,
-              index === downloadOptions.length - 1 ? styles.lastOption : {},
-            ]}
-          >
-            <Text style={styles.optionTitle}>{option.title}:</Text>
-            <View style={styles.downloadContainer}>
-              <Text style={styles.downloadText}>{option.fileName}</Text>
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={() => descargarPdf(option.fileName)}
-              >
-                <Download size={24} color="green" />
-              </TouchableOpacity>
-
-              {rol === "Seguimiento" && (
+          {downloadOptions.map((option, index) => (
+            <View
+              key={index}
+              style={[
+                styles.optionContainer,
+                index === downloadOptions.length - 1 ? styles.lastOption : {},
+              ]}
+            >
+              <Text style={styles.optionTitle}>{option.title}:</Text>
+              <View style={styles.downloadContainer}>
+                <Text style={styles.downloadText}>{option.fileName}</Text>
                 <TouchableOpacity
                   style={styles.iconButton}
-                  onPress={() => handleUpload(option.title)}
+                  onPress={() => descargarPdf(option.fileName)}
                 >
-                  <Icon name="upload" size={24} color="green" />
+                  <Download size={24} color="green" />
                 </TouchableOpacity>
-              )}
+
+                {rol === "Seguimiento" && (
+                  <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => handleUpload(option.title)}
+                  >
+                    <Icon name="upload" size={24} color="green" />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </ScrollView>
       </View>
     </Layout>
   );
@@ -147,9 +150,9 @@ const Principal = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: "115%",
     padding: 16,
     backgroundColor: "white",
+    height: "112%"
   },
   subtitle: {
     fontSize: 18,

@@ -205,3 +205,44 @@ export const eliminarNovedad = async (req, res) => {
         })
     }
 }
+
+
+/* web */
+export const listarWeb = async (req, res) => {
+    try {
+        let sql = "SELECT * FROM novedades"
+
+        const [results] = await pool.query(sql)
+        if(results.length>0){
+            res.status(200).json(results)
+        }else{
+            res.status(404).json({
+                message: 'No hay novedades registradas'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error del servidor' + error
+        })
+    }
+};
+
+export const listarnovedadesWeb = async (req, res) => {
+    try {
+        const { id_seguimiento } = req.params; // Obtén el ID del seguimiento desde los parámetros de la solicitud
+        let sql = `SELECT id_novedad, seguimiento, fecha, instructor, descripcion, foto FROM novedades WHERE seguimiento = ?`; // Asegúrate de incluir la columna de imagen
+
+        const [results] = await pool.query(sql, [id_seguimiento]);
+        if (results.length > 0) {
+            res.status(200).json(results);
+        } else {
+            res.status(404).json({
+                message: 'No hay novedades registradas para este seguimiento'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error del servidor: ' + error
+        });
+    }
+};

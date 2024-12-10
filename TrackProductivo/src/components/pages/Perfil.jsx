@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20, // Espaciado vertical en el contenedor para el nombre centrado
   },
   textName: {
+    
     color: "#0d324c",
     fontWeight: "bold",
     textAlign: "center",
@@ -170,9 +171,8 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: "row",
-    flexWrap: "wrap", 
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
+    alignItems: "center",
+    justifyContent: "flex-start", // Alinea el texto y los íconos a la derecha
     marginBottom: 15,
     width: "90%",
   },
@@ -186,14 +186,14 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 18,
     marginLeft: 2,
-    flexShrink: 1, 
+    flexShrink: 1, // Permite que el texto se ajuste si es largo
   },
   textC: {
-    color: "black",
-    textDecorationLine: "underline",
+    color: 'black',
+    textDecorationLine: 'underline',
     fontSize: 18,
     marginLeft: 2,
-    flex: 1, // Permite que el texto ocupe todo el ancho disponible
+    flexShrink: 1, // Permite que el texto se ajuste si es largo
   },
   button: {
     marginTop: 30,

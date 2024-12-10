@@ -158,7 +158,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.104:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+      const baseUrl = "http://192.168.0.228:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
