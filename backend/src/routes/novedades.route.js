@@ -15,10 +15,10 @@ import { validarToken } from '../controllers/seguridad.controller.js';
 const rutaNovedades = Router();
 
 /* ....................WEB........................................... */
-rutaNovedades.get('/listarN', validarToken, listarWeb);
-rutaNovedades.get('/listar/:id_seguimiento', validarToken, listarnovedadesWeb);
+rutaNovedades.get('/listarN', /* validarToken, */ listarWeb);
+rutaNovedades.get('/listar/:id_seguimiento', /* validarToken,  */listarnovedadesWeb);
 
-/* ................................................................. */
+/* ..............................Movil................................... */
 rutaNovedades.get('/listarN/:id_seguimiento', validarToken, listar);
 rutaNovedades.get('/listar/:identificacion', validarToken, listarnovedades);
 

@@ -294,7 +294,9 @@ CREATE TABLE `personas` (
   `tipo` enum('contratista','planta') DEFAULT NULL,
   `sede` enum('centro','yamboro') DEFAULT NULL,
   `area` int DEFAULT NULL,
-  `estado` enum('Activo','Inactivo') DEFAULT NULL
+  `estado` enum('Activo','Inactivo') DEFAULT NULL,
+  `resetPasswordToken` varchar(250) DEFAULT NULL,
+  `resetPasswordExpires` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --

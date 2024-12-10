@@ -35,12 +35,17 @@ const Novedades = ({ route }) => {
   const { rol } = usePersonas();
 
   useEffect(() => {
-    if (seguimientoId) {
-      listar(seguimientoId);
-    } else if (routeIdentificacion) {
-      listarNovedades(routeIdentificacion);
-    }
+    const fetchData = async () => {
+      if (seguimientoId) {
+        await listar(seguimientoId); // Filtrar por seguimiento seleccionado
+      } else {
+        await listar(""); // Listar todas las novedades usando `/novedades/listarN`
+      }
+    };
+  
+    fetchData();
   }, [seguimientoId, routeIdentificacion]);
+  
 
   // Controlador para listar seguimientos por productiva
   const listarSeguimientos = async (productiva) => {
@@ -113,7 +118,8 @@ const Novedades = ({ route }) => {
       );
       setNovedades(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error("Error al obtener novedades:", error.message);
+      console.log
+      ("Error al obtener novedades :", error.message);
       setNovedades([]); // Limpiar estado en caso de error
     } finally {
       setIsLoading(false);
@@ -124,9 +130,8 @@ const Novedades = ({ route }) => {
     setIsLoading(true);
     try {
       const url = id_seguimiento
-        ? `/novedades/listarN/${id_seguimiento}` // Usar el ID del seguimiento seleccionado
-        : `/novedades/listar/${routeIdentificacion}`; // Usar el ID general de la identificación
-      
+        ? `/novedades/listarN/${id_seguimiento}` // Filtrar por ID de seguimiento
+        : `/novedades/listarN`; // Obtener todas las novedades
       const response = await axiosClient.get(url);
       setNovedades(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -136,6 +141,7 @@ const Novedades = ({ route }) => {
       setIsLoading(false);
     }
   };
+  
   
   useEffect(() => {
     if (seguimientoId) {

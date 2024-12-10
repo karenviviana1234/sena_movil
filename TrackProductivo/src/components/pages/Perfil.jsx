@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: "row",
+    flexWrap: 'wrap',
     alignItems: "center",
     justifyContent: "flex-start", // Alinea el texto y los íconos a la derecha
     marginBottom: 15,

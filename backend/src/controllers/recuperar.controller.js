@@ -31,6 +31,7 @@ export const verifyToken = async (req, res) => {
             WHERE resetPasswordToken = ? 
             AND resetPasswordExpires > NOW()
             AND estado = 'Activo'
+            AND resetPasswordToken IS NOT NULL  
         `;
         const [user] = await pool.query(sql, [token]);
 
@@ -42,7 +43,7 @@ export const verifyToken = async (req, res) => {
 
         res.status(200).json({ 
             message: "Token válido",
-            email: user[0].correo // Enviar email para mostrar al usuario
+            email: user[0].correo
         });
 
     } catch (error) {
@@ -151,12 +152,14 @@ export const resetPassword = async (req, res) => {
     try {
         const { token, password } = req.body;
 
+        // Validaciones previas de contraseña
         if (!isValidPassword(password)) {
             return res.status(400).json({ 
                 message: "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales como *" 
             });
         }
 
+        // Buscar usuario con el token
         const sql = `
             SELECT * FROM personas 
             WHERE resetPasswordToken = ? 
@@ -171,6 +174,7 @@ export const resetPassword = async (req, res) => {
             });
         }
 
+        // Verificar si la nueva contraseña es diferente
         const isSamePassword = await bcrypt.compare(password, user[0].password);
         if (isSamePassword) {
             return res.status(400).json({ 
@@ -178,19 +182,22 @@ export const resetPassword = async (req, res) => {
             });
         }
 
+        // Hashear nueva contraseña
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+        // Actualizar contraseña Y LIMPIAR TOKENS
         const sqlUpdate = `
             UPDATE personas 
             SET password = ?,
-                resetPasswordToken = NULL,
+                resetPasswordToken = NULL, 
                 resetPasswordExpires = NULL 
             WHERE id_persona = ?
         `;
         const [result] = await pool.query(sqlUpdate, [hashedPassword, user[0].id_persona]);
 
         if (result.affectedRows > 0) {
+            // Enviar email de confirmación
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: user[0].correo,
