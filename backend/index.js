@@ -63,6 +63,6 @@ servidor.get('/document', (req,res) => {
     res.render('document.ejs')
 })
 
-servidor.listen(3000, '0.0.0.0', () => {
+servidor.listen(3000, '192.168.0.102', () => {
     console.log('Servidor funcionando en el puerto 3000');
 });
