@@ -145,7 +145,7 @@ useEffect(() => {
     try {
       const url = id_seguimiento
         ? `/novedades/listarN/${id_seguimiento}` // Filtrar por ID de seguimiento
-        : `/novedades/listarr/${identificacion}`; // Obtener todas las novedades
+        : `/novedades/listarr/${identificacion}`; // Obtener todas las novedades mediante la identificacion del usuario
       const response = await axiosClient.get(url);
       setNovedades(Array.isArray(response.data) ? response.data : []);
       console.log("identificacion de la persona", identificacion);
