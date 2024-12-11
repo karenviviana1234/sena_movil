@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
     paddingVertical: 20, // Espaciado vertical en el contenedor para el nombre centrado
   },
   textName: {
-    
     color: "#0d324c",
     fontWeight: "bold",
     textAlign: "center",
