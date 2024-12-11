@@ -82,49 +82,82 @@ export const listar = async (req, res) => {
     }
 };
 
+// export const listarnovedades = async (req, res) => {
+//     try {
+//         const { identificacion } = req.params; // Obtén la identificación del aprendiz desde los parámetros de la solicitud
+
+//         // Verifica si la identificacion es válida (debe ser un número)
+//         if (!identificacion || isNaN(identificacion)) {
+//             return res.status(400).json({
+//                 message: 'Identificación del aprendiz no válida.'
+//             });
+//         }
+
+//         // Consulta SQL para obtener las novedades filtradas por la identificación del aprendiz
+//         let sql = `
+//             SELECT 
+//                 n.id_novedad, 
+//                 n.seguimiento, 
+//                 n.fecha, 
+//                 n.instructor, 
+//                 n.descripcion, 
+//                 n.foto 
+//             FROM novedades n
+//             JOIN seguimientos s ON n.seguimiento = s.id_seguimiento
+//             JOIN productivas p ON s.productiva = p.id_productiva
+//             WHERE p.aprendiz = (SELECT id_persona FROM personas WHERE identificacion = ?)`; // Filtra por la identificación del aprendiz
+
+//         // Ejecuta la consulta y obtiene los resultados
+//         const [results] = await pool.query(sql, [identificacion]);
+
+//         // Si hay resultados, responde con ellos
+//         if (results.length > 0) {
+//             return res.status(200).json(results);
+//         } else {
+//             return res.status(404).json({
+//                 message: 'No hay novedades registradas para este aprendiz.'
+//             });
+//         }
+//     } catch (error) {
+//         console.error('Error en listarnovedades:', error); // Loguea el error para depuración
+//         return res.status(500).json({
+//             message: 'Error del servidor: ' + (error.message || error)
+//         });
+//     }
+// };
 export const listarnovedades = async (req, res) => {
-    try {
-        const { identificacion } = req.params; // Obtén la identificación del aprendiz desde los parámetros de la solicitud
-
-        // Verifica si la identificacion es válida (debe ser un número)
-        if (!identificacion || isNaN(identificacion)) {
-            return res.status(400).json({
-                message: 'Identificación del aprendiz no válida.'
+        try {
+            const { identificacion } = req.params; // Obtén la identificación del aprendiz desde los parámetros de la solicitud
+    
+            // Verifica si la identificacion es válida (debe ser un número)
+            if (!identificacion || isNaN(identificacion)) {
+                return res.status(400).json({
+                    message: 'Identificación del aprendiz no válida.'
+                });
+            }
+    
+            // Consulta SQL para obtener las novedades filtradas por la identificación del aprendiz
+            let sql = `
+                SELECT n.id_novedad, n.seguimiento, n.fecha, n.instructor, n.descripcion, n.foto FROM novedades n JOIN seguimientos s ON n.seguimiento = s.id_seguimiento JOIN productivas p ON s.productiva = p.id_productiva WHERE p.aprendiz = (SELECT id_persona FROM personas WHERE identificacion = ?);`; // Filtra por la identificación del aprendiz
+    
+            // Ejecuta la consulta y obtiene los resultados
+            const [results] = await pool.query(sql, [identificacion]);
+    
+            // Si hay resultados, responde con ellos
+            if (results.length > 0) {
+                return res.status(200).json(results);
+            } else {
+                return res.status(404).json({
+                    message: 'No hay novedades registradas para este aprendiz.'
+                });
+            }
+        } catch (error) {
+            console.error('Error en listarnovedades:', error); // Loguea el error para depuración
+            return res.status(500).json({
+                message: 'Error del servidor: ' + (error.message || error)
             });
         }
-
-        // Consulta SQL para obtener las novedades filtradas por la identificación del aprendiz
-        let sql = `
-            SELECT 
-                n.id_novedad, 
-                n.seguimiento, 
-                n.fecha, 
-                n.instructor, 
-                n.descripcion, 
-                n.foto 
-            FROM novedades n
-            JOIN seguimientos s ON n.seguimiento = s.id_seguimiento
-            JOIN productivas p ON s.productiva = p.id_productiva
-            WHERE p.aprendiz = (SELECT id_persona FROM personas WHERE identificacion = ?)`; // Filtra por la identificación del aprendiz
-
-        // Ejecuta la consulta y obtiene los resultados
-        const [results] = await pool.query(sql, [identificacion]);
-
-        // Si hay resultados, responde con ellos
-        if (results.length > 0) {
-            return res.status(200).json(results);
-        } else {
-            return res.status(404).json({
-                message: 'No hay novedades registradas para este aprendiz.'
-            });
-        }
-    } catch (error) {
-        console.error('Error en listarnovedades:', error); // Loguea el error para depuración
-        return res.status(500).json({
-            message: 'Error del servidor: ' + (error.message || error)
-        });
-    }
-};
+    };
 
 
 export const actualizarNovedades = async (req, res) => {

@@ -31,20 +31,34 @@ const Novedades = ({ route }) => {
     identificacion: routeIdentificacion,
     productiva: routeProductiva,
   } = route.params;
+  const { rol} = usePersonas();
 
-  const { rol } = usePersonas();
+  // Efectos para cargar datos iniciales y dependientes
+useEffect(() => {
+  const fetchData = async () => {
+    // Cargar novedades si existe routeIdentificacion
+    if (routeIdentificacion) {
+      await listarNovedades(routeIdentificacion); // Cargar novedades por identificación
+    }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (seguimientoId) {
-        await listar(seguimientoId); // Filtrar por seguimiento seleccionado
-      } else {
-        await listar(""); // Listar todas las novedades usando `/novedades/listarN`
-      }
-    };
-  
-    fetchData();
-  }, [seguimientoId, routeIdentificacion]);
+    // Cargar seguimientos si existe routeProductiva
+    if (routeProductiva) {
+      await listarSeguimientos(routeProductiva); // Cargar seguimientos por productiva
+    }
+
+    // Listar datos con o sin filtro de seguimiento
+    if (!seguimientoId) {
+      await listar(""); // Listar sin filtro
+    } else {
+      await listar(seguimientoId); // Listar con filtro de seguimiento
+    }
+  };
+
+  // Ejecutar la función para obtener los datos
+  fetchData();
+}, [routeIdentificacion, routeProductiva, seguimientoId]);  // Dependencias correctas
+
+
   
 
   // Controlador para listar seguimientos por productiva
@@ -118,8 +132,7 @@ const Novedades = ({ route }) => {
       );
       setNovedades(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.log
-      ("Error al obtener novedades :", error.message);
+      console.log("Error al obtener novedades :", error.message);
       setNovedades([]); // Limpiar estado en caso de error
     } finally {
       setIsLoading(false);
@@ -127,41 +140,48 @@ const Novedades = ({ route }) => {
   };
 
   const listar = async (id_seguimiento) => {
-    setIsLoading(true);
+    setIsLoading(true); 
+    const identificacion = routeIdentificacion
     try {
       const url = id_seguimiento
         ? `/novedades/listarN/${id_seguimiento}` // Filtrar por ID de seguimiento
-        : `/novedades/listarN`; // Obtener todas las novedades
+        : `/novedades/listarr/${identificacion}`; // Obtener todas las novedades
       const response = await axiosClient.get(url);
       setNovedades(Array.isArray(response.data) ? response.data : []);
+      console.log("identificacion de la persona", identificacion);
+      
     } catch (error) {
-      console.error("Error al obtener novedades:", error.message);
+      console.log("Error al obtener novedades:", error.message);
       setNovedades([]); // Limpiar estado en caso de error
     } finally {
       setIsLoading(false);
     }
   };
-  
-  
-  useEffect(() => {
-    if (seguimientoId) {
-      listar(seguimientoId); // Listar según el seguimiento seleccionado
-    } else if (routeIdentificacion) {
-      listar(""); // Listar con identificación general cuando no hay filtro
-    }
-  }, [seguimientoId, routeIdentificacion]);
-  
 
-  // Efectos para cargar datos iniciales y dependientes
-  useEffect(() => {
-    if (routeProductiva) listarSeguimientos(routeProductiva);
-    if (routeIdentificacion) listarNovedades(routeIdentificacion);
-  }, [routeProductiva, routeIdentificacion]);
+  
+  
 
   useEffect(() => {
     if (seguimientoId) listar(seguimientoId);
   }, [seguimientoId]);
 
+  
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (seguimientoId) {
+        await listar(seguimientoId); // Filtra por seguimiento
+      } else if (routeIdentificacion) {
+        await listarNovedades(routeIdentificacion); // Filtra por identificación
+      }
+    } catch (error) {
+      console.error("Error al refrescar novedades:", error.message);
+    } finally {
+      setRefreshing(false); // Restablece el estado de refresco
+    }
+  };
+  
+  
   // Manejo del modal
   const handleAbrirModalFormNovedades = () => setModalVisible(true);
   const handleCloseModalFormNovedades = () => setModalVisible(false);
@@ -180,107 +200,96 @@ const Novedades = ({ route }) => {
       console.error("Error al refrescar novedades:", error.message);
     }
   };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      if (seguimientoId) {
-        await listar(seguimientoId);
-      } else if (routeIdentificacion) {
-        await listarNovedades(routeIdentificacion);
-      }
-    } catch (error) {
-      console.error("Error al refrescar novedades:", error.message);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   // Cambiar el onSubmit en el componente del formulario
-
+  
   return (
     <Layout title="Novedades">
       <View style={styles.container}>
-          <View style={styles.containerpicker}>
-            {isLoading ? (
-              <Text>Cargando seguimientos...</Text>
-            ) : (
-<Picker
-  selectedValue={seguimientoId}
-  style={styles.picker}
-  onValueChange={(itemValue) => setSeguimientoId(itemValue)}
->
-  <Picker.Item label="Selecciona un Seguimiento" value="" />
-  {seguimientos.map((seguimiento) => (
-    <Picker.Item
-      key={seguimiento.value}
-      label={seguimiento.label}
-      value={seguimiento.value}
-    />
-  ))}
-</Picker>
-
-            )}
-          </View>
-
-          <NovedadFormulario
-            visible={modalVisible}
-            onClose={handleCloseModalFormNovedades}
-            productiva={routeProductiva}
-            onSubmit={handleSubmitNovedad} // Usar esta función
-            route={{ params: { productiva: routeProductiva } }}
-          />
-
-          {rol !== "Aprendiz" && (
-            <TouchableOpacity
-              style={styles.formButton}
-              onPress={handleAbrirModalFormNovedades}
-            >
-              <BellPlus size={30} color="green" style={styles.icon} />
-            </TouchableOpacity>
-          )}
-          {isLoading && <Text>Cargando novedades...</Text>}
-
-          {novedades.length === 0 && !isLoading ? (
-            <Text style={styles.emptyMessage}>
-              No hay novedades para este seguimiento.
-            </Text>
+        <View style={styles.containerpicker}>
+          {isLoading ? (
+            <Text>Cargando seguimientos...</Text>
           ) : (
-<FlatList
-  data={novedades}
-  renderItem={({ item }) => (
-    <View style={styles.novedadItem}>
-      <Text style={styles.instructor}>{item.instructor}</Text>
-      <Text style={styles.descripcion}>Descripción: {item.descripcion}</Text>
-      <Text style={styles.seguimiento}>Seguimiento: {item.seguimiento}</Text>
-      {item.foto && (
-        <Image
-          source={{
-            uri: `${axiosClient.defaults.baseURL}/novedad/${item.foto}`,
-          }}
-          style={styles.image}
-        />
-      )}
-      <Text style={styles.fecha}>
-        {new Date(item.fecha).toLocaleDateString("es-CO")}
-      </Text>
-      {rol !== "Aprendiz" && (
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => desactivarNovedad(item.id_novedad)}
-        >
-          <Trash size={25} color="black" />
-        </TouchableOpacity>
-      )}
-    </View>
-  )}
-  keyExtractor={(item) => item.id_novedad.toString()}
-  refreshControl={
-    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-  }
-/>
-
+            <Picker
+              selectedValue={seguimientoId}
+              style={styles.picker}
+              onValueChange={(itemValue) => setSeguimientoId(itemValue)}
+            >
+              <Picker.Item label="Selecciona un Seguimiento" value="" />
+              {seguimientos.map((seguimiento) => (
+                <Picker.Item
+                  key={seguimiento.value}
+                  label={seguimiento.label}
+                  value={seguimiento.value}
+                />
+              ))}
+            </Picker>
           )}
+        </View>
+
+        <NovedadFormulario
+          visible={modalVisible}
+          onClose={handleCloseModalFormNovedades}
+          productiva={routeProductiva}
+          onSubmit={handleSubmitNovedad} // Usar esta función
+          route={{ params: { productiva: routeProductiva } }}
+        />
+
+        {rol !== "Aprendiz" && (
+          <TouchableOpacity
+            style={styles.formButton}
+            onPress={handleAbrirModalFormNovedades}
+          >
+            <BellPlus size={30} color="green" style={styles.icon} />
+          </TouchableOpacity>
+        )}
+        {isLoading && <Text>Cargando novedades...</Text>}
+
+        {novedades.length === 0 && !isLoading ? (
+          <Text style={styles.emptyMessage}>
+            No hay novedades para este seguimiento.
+          </Text>
+        ) : (
+          <FlatList
+            data={novedades}
+            renderItem={({ item }) => (
+              <View style={styles.novedadItem}>
+                <Text style={styles.instructor}>{item.instructor}</Text>
+                <Text style={styles.descripcion}>
+                  Descripción: {item.descripcion}
+                </Text>
+                <Text style={styles.seguimiento}>
+                  Seguimiento: {item.seguimiento}
+                </Text>
+                {item.foto && (
+                  <Image
+                    source={{
+                      uri: `${axiosClient.defaults.baseURL}/novedad/${item.foto}`,
+                    }}
+                    style={styles.image}
+                  />
+                )}
+                <Text style={styles.fecha}>
+                  {new Date(item.fecha).toLocaleDateString("es-CO")}
+                </Text>
+                {rol !== "Aprendiz" && (
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => desactivarNovedad(item.id_novedad)}
+                  >
+                    <Trash size={25} color="black" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+            keyExtractor={(item) => item.id_novedad.toString()}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+              />
+            }
+          />
+        )}
       </View>
     </Layout>
   );

@@ -20,7 +20,7 @@ rutaNovedades.get('/listar/:id_seguimiento', /* validarToken,  */listarnovedades
 
 /* ..............................Movil................................... */
 rutaNovedades.get('/listarN/:id_seguimiento', validarToken, listar);
-rutaNovedades.get('/listar/:identificacion', validarToken, listarnovedades);
+rutaNovedades.get('/listarr/:identificacion', listarnovedades);
 
 rutaNovedades.post('/registrar', validarToken, cargarImage, registrarNovedad);
 rutaNovedades.put('/actualizar/:id', validarToken, cargarImage, actualizarNovedades);
