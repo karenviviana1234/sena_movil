@@ -158,7 +158,7 @@ const ModalSeguimiento = ({ visible, onClose, id_seguimiento, handleSubmit }) =>
 
       const { config, fs } = RNFetchBlob;
       let DownloadDir = fs.dirs.DownloadDir;
-      const baseUrl = "http://192.168.0.228:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
+      const baseUrl = "http://192.168.0.102:3000"; // Asegúrate de reemplazar esto con el dominio adecuado
 
       config({
         addAndroidDownloads: {
@@ -255,6 +255,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    color: "black",
+
   },
   modalContainer: {
     width: '90%',
@@ -262,6 +264,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     maxHeight: '80%',
+    color: "black",
+
   },
   fileName: {
     position: 'absolute',
