@@ -27,9 +27,6 @@ export const listarPersonas = async (req, res) => {
   }
 };
 
-
-
-
 export const listarInstructores = async (req, res) => {
   try {
     const sql = 'SELECT * FROM personas WHERE cargo = ? AND estado = ?';

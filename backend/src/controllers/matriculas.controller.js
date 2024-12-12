@@ -238,7 +238,6 @@ export const actualizarMatriculas = async (req, res) => {
     }
 };
 
-
 export const formacionMatricula = async (req, res) => {
     try {
         const { id } = req.params
@@ -337,8 +336,6 @@ export const canceladaMatricula = async (req, res) => {
         });
     }
 };
-
-
 
 export const retiroMatricula = async (req, res) => {
     try {

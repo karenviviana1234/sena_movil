@@ -159,8 +159,6 @@ export const registrarasignacion = async (req, res) => {
 };
 
 
-
-
 export const actualizarasignacion = async (req, res) => {
     try {
         const { id_asignacion } = req.params;

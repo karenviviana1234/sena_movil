@@ -51,7 +51,6 @@ export const validar = async (req, res) => {
     }
 };
 
-
 //verificar
 export const validarToken = async (req, res, next) => {
     try {
